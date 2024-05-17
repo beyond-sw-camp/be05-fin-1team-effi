@@ -6,6 +6,9 @@ https://docs.google.com/document/d/1MJgmJed4s6z6OgQRg7SIL0T16ebNzhUBjuUCpWPdP78/
 ### 전체 요구사항 정의서
 https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit#gid=1482724675
 
+<iframe src="https://github.com/beyond-sw-camp/be05-fin-1team-effi/files/15344070/1team-fin.-.Google.Sheets-.pdf" width="600" height="400"></iframe>
+
+
 [1team-fin - Google Sheets-요구사항 정의서.pdf](https://github.com/beyond-sw-camp/be05-fin-1team-effi/files/15344070/1team-fin.-.Google.Sheets-.pdf)
 
 
