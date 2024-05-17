@@ -4,18 +4,12 @@
 https://docs.google.com/document/d/1MJgmJed4s6z6OgQRg7SIL0T16ebNzhUBjuUCpWPdP78/edit?usp=drive_link
 
 ### 전체 요구사항 정의서
-https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit#gid=1482724675
-
-<iframe src="https://github.com/beyond-sw-camp/be05-fin-1team-effi/files/15344070/1team-fin.-.Google.Sheets-.pdf" width="600" height="400"></iframe>
-
-
-[1team-fin - Google Sheets-요구사항 정의서.pdf](https://github.com/beyond-sw-camp/be05-fin-1team-effi/files/15344070/1team-fin.-.Google.Sheets-.pdf)
+![1team-fin - 전체 요구사항 정의서_pages-to-jpg-0001](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/61785329/a14301ed-dbe7-4ba1-b5ab-96759bd1d3ab)
 
 
 ### WBS
-https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit#gid=2041773769
+![1team-fin - WBS_pages-to-jpg-0001](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/61785329/3faaaceb-4d24-442a-8ca4-b0fc7996c397)
 
-[1team-fin - Google Sheets.pdf](https://github.com/beyond-sw-camp/be05-fin-1team-effi/files/15344064/1team-fin.-.Google.Sheets.pdf)
 
 ### ERD
 ![1team-erd](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/121791324/7da954d5-aafe-419d-a5e1-5e530a6993ab)
