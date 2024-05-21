@@ -2,10 +2,8 @@ package com.example.effi.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class GroupDTO {
     private Long groupId;
