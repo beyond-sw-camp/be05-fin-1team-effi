@@ -33,5 +33,10 @@ public class Group{
         this.deleteYn = deleteYn;
         this.category = category;
     }
+    
+    // 그룹의 카테고리를 설정하는 setter 메서드
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
 }

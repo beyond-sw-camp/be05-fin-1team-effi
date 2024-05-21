@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.effi.domain.DTO.EmployeeDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.GroupResponseDTO;
+import com.example.effi.domain.Entitiy.Category;
 import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.Group;
 import com.example.effi.domain.Entitiy.GroupEmp;
+import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.repository.GroupRepository;
@@ -23,24 +25,32 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final EmployeeRepository employeeRepository;
     private final GroupEmpRepository groupEmpRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
-    public GroupResponseDTO createGroup(GroupRequestDTO groupRequestDTO) {
-        Group group = Group.builder()
-                .groupName(groupRequestDTO.getGroupName())
-                .deleteYn(false)
-                .build();
-        Group savedGroup = groupRepository.save(group);
+public GroupResponseDTO createGroup(GroupRequestDTO groupRequestDTO) {
+    // 카테고리 테이블에서 category_id가 3인 카테고리를 가져옵니다.
+    Category category = categoryRepository.findByCategoryId(3)
+            .orElseThrow(() -> new IllegalArgumentException("category_id가 3인 카테고리를 찾을 수 없습니다."));
 
-        // 직원들을 그룹에 추가
-        addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
+    Group group = Group.builder()
+            .groupName(groupRequestDTO.getGroupName())
+            .category(category) // 가져온 카테고리를 설정합니다.
+            .deleteYn(false)
+            .build();
+    Group savedGroup = groupRepository.save(group);
 
-        return GroupResponseDTO.builder()
-                .code("200")
-                .message("그룹 생성 성공")
-                .groupName(savedGroup.getGroupName())
-                .build();
-    }
+    // 직원들을 그룹에 추가
+    addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
+
+    return GroupResponseDTO.builder()
+            .code("200")
+            .message("그룹 생성 성공")
+            .groupName(savedGroup.getGroupName())
+            .build();
+}
+
+    
 
     @Transactional
     public void addEmployeesToGroup(Long groupId, List<Long> employeeIds) {
