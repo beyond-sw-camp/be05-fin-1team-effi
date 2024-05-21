@@ -36,9 +36,9 @@ public class GroupService {
         addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
 
         return GroupResponseDTO.builder()
-                .groupId(savedGroup.getGroupId())
+                .code("200")
+                .message("그룹 생성 성공")
                 .groupName(savedGroup.getGroupName())
-                .msg("그룹 생성 성공")
                 .build();
     }
 
@@ -64,19 +64,18 @@ public class GroupService {
 
     public List<EmployeeDTO> searchEmployeesByName(String name) {
         return employeeRepository.findByNameContaining(name).stream()
-                .map((Employee employee) -> EmployeeDTO.builder()
-                        .id(employee.getId())
-                        .empNo(employee.getEmpNo())
-                        .company(employee.getCompany())
-                        .name(employee.getName())
-                        .email(employee.getEmail())
-                        .phoneNum(employee.getPhoneNum())
-                        .extensionNum(employee.getExtensionNum())
-                        .rank(employee.getRank())
-                        .password(employee.getPassword())
-                        .deptId(employee.getDept().getDeptId())
-                        .build())
-                .collect(Collectors.toList());
+            .map(employee -> EmployeeDTO.builder()
+                .id(employee.getId())
+                .empNo(employee.getEmpNo())
+                .company(employee.getCompany())
+                .name(employee.getName())
+                .email(employee.getEmail())
+                .phoneNum(employee.getPhoneNum())
+                .extensionNum(employee.getExtensionNum())
+                .rank(employee.getRank())
+                .password(employee.getPassword())
+                .deptId(employee.getDept().getDeptId())
+                .build())
+            .collect(Collectors.toList());
     }
-
 }
