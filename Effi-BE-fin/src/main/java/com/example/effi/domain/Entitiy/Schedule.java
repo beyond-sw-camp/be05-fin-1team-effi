@@ -64,4 +64,21 @@ public class Schedule {
         this.category = category;
         this.routine = routine;
     }
+
+    // ?
+    public void update(String title, String context, Date startTime, Date endTime, Integer status,
+                       Boolean notificationYn, Category category, Routine routine){
+        this.title = title;
+        this.context = context;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.notificationYn = notificationYn;
+        this.category = category;
+        this.routine = routine;
+    }
+
+    public void delete() {
+        this.deleteYn = true;
+    }
 }
