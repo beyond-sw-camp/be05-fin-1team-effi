@@ -1,5 +1,6 @@
 package com.example.effi.service;
 
+import com.example.effi.domain.Entitiy.Schedule;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
-    // long id가 들어갔을때 scheduleid를 리턴
-    public Long getScheduleId() {
-
+    //scheduleId로 schedule 생성
+    public Schedule getSchedule(Long scheduleId) {
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        if (sch == null) {
+            return null;
+        }
+        return sch;
     }
-
 }
