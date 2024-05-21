@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class EmployeeDTO {
+public class MyPageResponseDTO {
     private Long id;
     private Long empNo;
     private String company;
@@ -16,12 +16,13 @@ public class EmployeeDTO {
     private String phoneNum;
     private String extensionNum;
     private String rank;
-    private String password;
 
-    private Long deptId;
+    private String deptName;
 
-    public EmployeeDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
-                       String extensionNum, String rank, String password, Dept dept) {
+    private String msg;
+
+    public MyPageResponseDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
+                              String extensionNum, String rank, Dept dept, String msg) {
         this.id = id;
         this.empNo = empNo;
         this.company = company;
@@ -30,8 +31,10 @@ public class EmployeeDTO {
         this.phoneNum = phoneNum;
         this.extensionNum = extensionNum;
         this.rank = rank;
-        this.password = password;
-        this.deptId = dept.getDeptId();
+        this.deptName = dept.getDeptName();
+        this.msg = msg;
+
+
     }
 
     public Employee toEntity(Dept dept){
@@ -43,8 +46,8 @@ public class EmployeeDTO {
                 .phoneNum(phoneNum)
                 .extensionNum(extensionNum)
                 .rank(rank)
-                .password(password)
                 .dept(dept)
                 .build();
     }
+
 }
