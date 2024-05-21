@@ -16,7 +16,7 @@ public class Schedule {
     @Id
     @Column(name = "schedule_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long schedule_id;
+    private Long scheduleId;
 
     @Column(name = "title")
     private String title;

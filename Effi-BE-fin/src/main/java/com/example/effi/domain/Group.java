@@ -14,10 +14,10 @@ public class Group{
     @Id
     @Column(name = "group_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long deptId;
+    private Long groupId;
 
     @Column(name = "group_name")
-    private String deptName;
+    private String groupName;
 
     // category와 연결
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +29,7 @@ public class Group{
 
     @Builder
     public Group(String groupName, Boolean deleteYn, Category category) {
-        this.deptName = groupName;
+        this.groupName = groupName;
         this.deleteYn = deleteYn;
         this.category = category;
     }
