@@ -4,10 +4,10 @@ import com.example.effi.domain.Entitiy.Dept;
 import com.example.effi.domain.Entitiy.Employee;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 @Getter
 @NoArgsConstructor
-public class EmployeeDTO {
+public class MyPageRequestDTO {
+
     private Long id;
     private Long empNo;
     private String company;
@@ -16,12 +16,11 @@ public class EmployeeDTO {
     private String phoneNum;
     private String extensionNum;
     private String rank;
-    private String password;
 
     private Long deptId;
 
-    public EmployeeDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
-                       String extensionNum, String rank, String password, Dept dept) {
+    public MyPageRequestDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
+                       String extensionNum, String rank, Dept dept) {
         this.id = id;
         this.empNo = empNo;
         this.company = company;
@@ -30,7 +29,6 @@ public class EmployeeDTO {
         this.phoneNum = phoneNum;
         this.extensionNum = extensionNum;
         this.rank = rank;
-        this.password = password;
         this.deptId = dept.getDeptId();
     }
 
@@ -43,8 +41,8 @@ public class EmployeeDTO {
                 .phoneNum(phoneNum)
                 .extensionNum(extensionNum)
                 .rank(rank)
-                .password(password)
                 .dept(dept)
                 .build();
     }
+
 }
