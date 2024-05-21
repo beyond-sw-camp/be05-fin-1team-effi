@@ -2,12 +2,10 @@ package com.example.effi.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Date;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class ScheduleDTO {
     private Long scheduleId;
