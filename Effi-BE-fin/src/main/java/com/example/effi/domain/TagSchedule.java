@@ -17,20 +17,22 @@ public class TagSchedule {
     private Long tagScheduleId;
 
     // tag tbl
-    @Column(name = "tag_id")
-    private Long tagId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 
     // schedule tbl
-    @Column(name = "schedule_id")
-    private Long scheduleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
 
     @Column(name = "delete_yn")
     private Boolean deleteYn;
 
     @Builder
-    public TagSchedule(Long tagId, Long scheduleId, Boolean deleteYn) {
-        this.tagId = tagId; //
-        this.scheduleId = scheduleId; //
+    public TagSchedule(Tag tag, Schedule schedule, Boolean deleteYn) {
+        this.tag = tag;
+        this.schedule = schedule;
         this.deleteYn = deleteYn;
     }
 }

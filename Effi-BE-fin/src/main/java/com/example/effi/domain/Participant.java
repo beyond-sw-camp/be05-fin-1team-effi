@@ -17,16 +17,18 @@ public class Participant {
     private Long participantId;
 
     // emp
-    @Column(name = "emp_id")
-    private Long empId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "emp_id")
+    private Employee employee;
 
     // schedule
-    @Column(name = "schedule_id")
-    private Long scheduleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
 
     @Builder
-    public Participant(Long empId, Long scheduleId) {
-        this.empId = empId;
-        this.scheduleId = scheduleId;
+    public Participant(Employee employee, Schedule schedule) {
+        this.employee = employee;
+        this.schedule = schedule;
     }
 }

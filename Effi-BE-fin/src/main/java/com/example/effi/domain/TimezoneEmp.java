@@ -17,16 +17,18 @@ public class TimezoneEmp {
     private Long timezoneEmpId;
 
     //timezone
-    @Column(name = "timezone_id")
-    private Long timezoneId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "timezone_id")
+    private Timezone timezone;
 
-    //employee
-    @Column(name = "emp_id")
-    private Long empId;
+    // emp
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "emp_id")
+    private Employee employee;
 
     @Builder
-    public TimezoneEmp(Long timezoneId, Long empId) {
-        this.timezoneId = timezoneId;
-        this.empId = empId;
+    public TimezoneEmp(Timezone timezone, Employee employee) {
+        this.timezone = timezone;
+        this.employee = employee;
     }
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "group")
-public class Group {
+public class Group{
     @Id
     @Column(name = "group_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,17 +19,18 @@ public class Group {
     @Column(name = "group_name")
     private String deptName;
 
-    // category_id와 연결
-    @Column(name = "category_id")
-    private Long categoryId;
+    // category와 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(name = "delete_yn")
     private Boolean deleteYn;
 
     @Builder
-    public Group(String groupName, Boolean deleteYn, Long categoryId) {
+    public Group(String groupName, Boolean deleteYn, Category category) {
         this.deptName = groupName;
         this.deleteYn = deleteYn;
-        this.categoryId = categoryId; //
+        this.category = category;
     }
 }
