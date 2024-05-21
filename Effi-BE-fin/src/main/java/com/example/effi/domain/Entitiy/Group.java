@@ -1,6 +1,5 @@
 package com.example.effi.domain.Entitiy;
 
-import com.example.effi.domain.Entitiy.Category;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "group")
+@Table(name = "groups")
 public class Group{
     @Id
     @Column(name = "group_id")

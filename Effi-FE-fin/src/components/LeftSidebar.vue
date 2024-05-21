@@ -1,21 +1,22 @@
 <template>
-    <div>
-        <nav>
-        <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li><router-link to="/login">Login</router-link></li>
-            <li><router-link to="/todo">Todo</router-link></li>
-        </ul>
-        </nav>
-    </div>
+  <div>
+    <button @click="$emit('showModal')">그룹 생성</button>
+  </div>
 </template>
 
-<script>
-export default {
-
-}
+<script setup>
 </script>
 
-<style>
-
+<style scoped>
+button {
+  padding: 10px;
+  margin: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #0056b3;
+}
 </style>
