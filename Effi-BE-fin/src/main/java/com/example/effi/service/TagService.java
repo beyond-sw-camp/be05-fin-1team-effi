@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -23,6 +21,9 @@ public class TagService {
     // tag 조회 (이름으로 검색 id return)
     public Long getTagId(String tagName) {
         Tag lst =  tagRepository.findTagByTagName(tagName);
+        if (lst == null) {
+            return null; // 오류 처리용
+        }
         return lst.getTagId();
     }
 
