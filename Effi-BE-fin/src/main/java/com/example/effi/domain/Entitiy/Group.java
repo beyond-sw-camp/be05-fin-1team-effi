@@ -34,4 +34,5 @@ public class Group{
         this.deleteYn = deleteYn;
         this.category = category;
     }
+
 }
