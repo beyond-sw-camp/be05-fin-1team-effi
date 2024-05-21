@@ -39,17 +39,19 @@ public class Schedule {
     @Column(name = "delete_yn")
     private Boolean deleteYn;
 
-    //category
-    @Column(name = "category_id")
-    private Long categoryId;
+    // category와 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     //routine
-    @Column(name = "routine_id")
-    private Long routineId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "routine_id")
+    private Routine routine;
 
     @Builder
     public Schedule(String title, String context, Date startTime, Date endTime, Integer status,
-                    Boolean notificationYn, Boolean deleteYn, Long categoryId, Long routineId){
+                    Boolean notificationYn, Boolean deleteYn, Category category, Routine routine){
         this.title = title;
         this.context = context;
         this.startTime = startTime;
@@ -57,7 +59,7 @@ public class Schedule {
         this.status = status;
         this.notificationYn = notificationYn;
         this.deleteYn = deleteYn;
-        this.categoryId = categoryId; //
-        this.routineId = routineId; //
+        this.category = category;
+        this.routine = routine;
     }
 }

@@ -16,13 +16,15 @@ public class GroupEmp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupEmpId;
 
-    // group
-    @Column(name = "group_id")
-    private Long groupId;
+    // group 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     // emp
-    @Column(name = "emp_id")
-    private Long empId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "emp_id")
+    private Employee employee;
 
     @Column(name = "group_emp_rank")
     private String groupEmpRank;
@@ -31,12 +33,11 @@ public class GroupEmp {
     private Boolean deleteYn;
 
     @Builder
-    public GroupEmp(Long groupId, Long empId, String groupEmpRank, Boolean deleteYn) {
-        this.groupId = groupId; //
-        this.empId = empId; //
+    public GroupEmp(Group group, Employee employee, String groupEmpRank, Boolean deleteYn) {
+        this.group = group;
+        this.employee = employee;
         this.groupEmpRank = groupEmpRank;
         this.deleteYn = deleteYn;
     }
-
 
 }
