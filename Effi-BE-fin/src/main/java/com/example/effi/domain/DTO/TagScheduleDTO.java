@@ -31,9 +31,4 @@ public class TagScheduleDTO {
                 .build();
     }
 
-    // delete -> 삭제
-    public void delete(){
-        this.deleteYn = true;
-    }
-
 }

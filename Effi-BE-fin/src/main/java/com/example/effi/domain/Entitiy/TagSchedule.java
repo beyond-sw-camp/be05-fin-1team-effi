@@ -37,4 +37,8 @@ public class TagSchedule {
         this.schedule = schedule;
         this.deleteYn = deleteYn;
     }
+
+    public void delete(){
+        this.deleteYn = true;
+    }
 }

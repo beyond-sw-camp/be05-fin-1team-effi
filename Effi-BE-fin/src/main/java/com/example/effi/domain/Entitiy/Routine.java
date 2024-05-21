@@ -37,4 +37,14 @@ public class Routine {
         this.routineCycle = routineCycle;
         this.deleteYn = deleteYn;
     }
+
+    public void delete(){
+        this.deleteYn = true;
+    }
+
+    public void update(Date routineStart, Date routineEnd, String routineCycle){
+        this.routineStart = routineStart;
+        this.routineEnd = routineEnd;
+        this.routineCycle = routineCycle;
+    }
 }

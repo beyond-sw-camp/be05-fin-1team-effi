@@ -1,5 +1,6 @@
 package com.example.effi.service;
 
+import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.Entitiy.Tag;
 import com.example.effi.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,12 +40,12 @@ public class TagService {
     }
 
     // tag 조회 (tag 리턴)
-    public Tag getTag(String tagName) {
+    public TagResponseDTO getTag(String tagName) {
         Tag tag = tagRepository.findTagByTagName(tagName);
         if (tag == null) {
             return null;
         }
-        return tag;
+        return new TagResponseDTO(tag);
     }
 
 
