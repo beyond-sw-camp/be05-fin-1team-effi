@@ -1,4 +1,4 @@
-package com.example.effi.domain;
+package com.example.effi.domain.DTO;
 
 import lombok.Builder;
 import lombok.Getter;

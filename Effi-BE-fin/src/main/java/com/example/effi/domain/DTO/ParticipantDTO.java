@@ -1,5 +1,8 @@
-package com.example.effi.domain;
+package com.example.effi.domain.DTO;
 
+import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entitiy.Participant;
+import com.example.effi.domain.Entitiy.Schedule;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +20,7 @@ public class ParticipantDTO {
         this.scheduleId = schedule.getScheduleId();
     }
 
-    public Participant toEntity(Employee emp,Schedule schedule){
+    public Participant toEntity(Employee emp, Schedule schedule){
         return Participant.builder()
                 .employee(emp)
                 .schedule(schedule)
