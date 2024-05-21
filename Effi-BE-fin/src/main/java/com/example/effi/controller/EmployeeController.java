@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.effi.domain.SignInRequest;
-import com.example.effi.domain.SignInResponse;
+import com.example.effi.domain.DTO.SignInRequest;
+import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.service.EmployeeService;
 
 import lombok.RequiredArgsConstructor;

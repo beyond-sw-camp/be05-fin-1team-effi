@@ -1,5 +1,7 @@
-package com.example.effi.domain;
+package com.example.effi.domain.Entitiy;
 
+import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entitiy.Timezone;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
