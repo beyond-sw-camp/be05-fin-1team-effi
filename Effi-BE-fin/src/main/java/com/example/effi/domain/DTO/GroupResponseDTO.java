@@ -7,14 +7,24 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class GroupResponseDTO {
-    private Long groupId;
-    private String groupName;
-    private String msg;
+    private String code;
+    private String message;
+    private Data data;
 
     @Builder
-    public GroupResponseDTO(Long groupId, String groupName, String msg) {
-        this.groupId = groupId;
-        this.groupName = groupName;
-        this.msg = msg;
+    public GroupResponseDTO(String code, String message, String groupName) {
+        this.code = code;
+        this.message = message;
+        this.data = new Data(groupName);
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Data {
+        private String groupName;
+
+        public Data(String groupName) {
+            this.groupName = groupName;
+        }
     }
 }
