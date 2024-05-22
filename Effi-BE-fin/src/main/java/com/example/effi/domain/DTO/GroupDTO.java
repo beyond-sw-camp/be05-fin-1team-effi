@@ -28,4 +28,7 @@ public class GroupDTO {
                 .category(category)
                 .build();
     }
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 }
