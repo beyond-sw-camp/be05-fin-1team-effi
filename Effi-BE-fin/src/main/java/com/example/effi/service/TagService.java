@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @Transactional
@@ -46,6 +49,19 @@ public class TagService {
             return null;
         }
         return new TagResponseDTO(tag);
+    }
+
+    //  tag 전체 조회
+    public List<TagResponseDTO> getAllTag() {
+        List<Tag> tag = tagRepository.findAll();
+        if (tag == null) {
+            return null;
+        }
+        List<TagResponseDTO> tagResponseDTOS = new ArrayList<>();
+        for (Tag t : tag) {
+            tagResponseDTOS.add(new TagResponseDTO(t));
+        }
+        return tagResponseDTOS;
     }
 
 
