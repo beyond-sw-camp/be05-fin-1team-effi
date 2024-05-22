@@ -23,7 +23,6 @@ public class MyPageServiceImpl implements MyPageService{
     public MyPageResponseDTO getEmployee(Long empId) {
         String timezoneName = mypageRepository.findDefaultTimezoneName(empId);
 
-
         Optional<Employee> byempId = mypageRepository.findById(empId);
         Employee employee = byempId.get();
 
