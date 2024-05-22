@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "group_emp")
 public class GroupEmp {
     @Id
-    @Column(name = "group_emp_id")
+    @Column(name = "group_emp_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupEmpId;
 
@@ -28,10 +28,10 @@ public class GroupEmp {
     @JoinColumn(name = "emp_id")
     private Employee employee;
 
-    @Column(name = "group_emp_rank")
+    @Column(name = "group_emp_rank", nullable = false)
     private String groupEmpRank;
 
-    @Column(name = "delete_yn")
+    @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
     @Builder

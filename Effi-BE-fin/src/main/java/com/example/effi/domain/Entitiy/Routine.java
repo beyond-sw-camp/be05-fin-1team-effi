@@ -14,20 +14,20 @@ import java.util.Date;
 @Table(name = "routine")
 public class Routine {
     @Id
-    @Column(name = "routine_id")
+    @Column(name = "routine_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long routineId;
 
-    @Column(name = "routine_start")
+    @Column(name = "routine_start", nullable = false)
     private Date routineStart;
 
-    @Column(name = "routine_end")
+    @Column(name = "routine_end", nullable = false)
     private Date routineEnd;
 
-    @Column(name = "routine_cycle")
+    @Column(name = "routine_cycle", nullable = false)
     private String routineCycle;
 
-    @Column(name = "delete_yn")
+    @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
     @Builder

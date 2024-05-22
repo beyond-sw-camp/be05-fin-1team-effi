@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "groups")
 public class Group{
     @Id
-    @Column(name = "group_id")
+    @Column(name = "group_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupId;
 
-    @Column(name = "group_name")
+    @Column(name = "group_name", nullable = false)
     private String groupName;
 
     // category와 연결
@@ -24,7 +24,7 @@ public class Group{
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(name = "delete_yn")
+    @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
     @Builder

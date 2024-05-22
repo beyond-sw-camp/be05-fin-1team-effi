@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tag_schedule")
 public class TagSchedule {
     @Id
-    @Column(name = "tag_schedule_id")
+    @Column(name = "tag_schedule_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tagScheduleId;
 
@@ -28,7 +28,7 @@ public class TagSchedule {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
-    @Column(name = "delete_yn")
+    @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
     @Builder
