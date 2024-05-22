@@ -44,7 +44,7 @@ public class TagController {
     public ResponseEntity<TagResponseDTO> updateTag(@PathVariable("scheduleId") Long scheduleId,
                                                     @PathVariable("tagId") Long tagId,
                                                     @RequestParam String newTag) {
-
+        return new ResponseEntity<TagResponseDTO>(null);
     }
 
 
