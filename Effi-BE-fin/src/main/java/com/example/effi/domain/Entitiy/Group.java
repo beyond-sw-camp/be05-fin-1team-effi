@@ -1,5 +1,7 @@
 package com.example.effi.domain.Entitiy;
 
+import java.sql.Date;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,11 +29,19 @@ public class Group{
     @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
+    @Column(name = "created_at", nullable = false)
+    private Date createdAt;
+
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     @Builder
-    public Group(String groupName, Boolean deleteYn, Category category) {
+    public Group(String groupName, Boolean deleteYn, Category category, Date createdAt, Date updatedAt) {
         this.groupName = groupName;
         this.deleteYn = deleteYn;
         this.category = category;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
     
     // 그룹의 카테고리를 설정하는 setter 메서드
