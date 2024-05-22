@@ -19,6 +19,8 @@ public class ScheduleRequestDTO {
     private Integer status;
     private Boolean notificationYn;
     private Boolean deleteYn;
+    private Date createdAt;
+    private Date updatedAt;
 
     private Long categoryId;
     private Long routineId;
@@ -32,6 +34,8 @@ public class ScheduleRequestDTO {
         this.status = schedule.getStatus();
         this.notificationYn = schedule.getNotificationYn();
         this.deleteYn = schedule.getDeleteYn();
+        this.createdAt = schedule.getCreatedAt();
+        this.updatedAt = schedule.getUpdatedAt();
         this.categoryId = schedule.getCategory().getCategoryId();
         this.routineId = schedule.getRoutine().getRoutineId();
     }
@@ -47,6 +51,8 @@ public class ScheduleRequestDTO {
                 .deleteYn(deleteYn)
                 .category(category)
                 .routine(routine)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
     }
 }

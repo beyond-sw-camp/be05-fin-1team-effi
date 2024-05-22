@@ -30,7 +30,7 @@ public class ParticipantService {
         ));
     }
 
-    // select (schduleId로)
+    // select (scheduleId로)
     public List<ParticipantResponseDTO> findAllByScheduleId(Long scheduleId) {
         List<Participant> lst = participantRepository.findAllBySchedule_ScheduleId(scheduleId);
         List<ParticipantResponseDTO> lstDto = new ArrayList<>();
@@ -40,7 +40,7 @@ public class ParticipantService {
         return lstDto;
     }
 
-    // select (userId로)
+    // select (empId로)
     public List<ParticipantResponseDTO> findAllByEmpId(Long empId) {
         List<Participant> lst = participantRepository.findAllByEmployee_Id(empId);
         List<ParticipantResponseDTO> lstDto = new ArrayList<>();
@@ -48,6 +48,12 @@ public class ParticipantService {
             lstDto.add(new ParticipantResponseDTO(participant));
         }
         return lstDto;
+    }
+
+    //select by ( scheduleId & empId )
+    public ParticipantResponseDTO findByEmployeeIdAndScheduleId(Long employeeId, Long scheduleId) {
+        Participant dto = participantRepository.findByEmployeeIdAndScheduleId(employeeId, scheduleId);
+        return new ParticipantResponseDTO(dto);
     }
 
     // delete
