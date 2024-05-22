@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationEntryPoint entryPoint;
 
     private final String[] allowedUrls = {"/", "/api/auth/**", "api/groups/**", "api/groups"}; // 허용할 url 목록
 
@@ -35,6 +37,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )  // 세션을 사용하지 않으므로 STATELESS 설정
                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
                 .build();
     }
 
