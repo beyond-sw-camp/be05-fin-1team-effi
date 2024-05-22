@@ -1,14 +1,12 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Dept;
-import com.example.effi.domain.Entitiy.Employee;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 public class MyPageResponseDTO {
-    private Long id;
     private Long empNo;
     private String company;
     private String name;
@@ -19,11 +17,13 @@ public class MyPageResponseDTO {
 
     private String deptName;
 
+    private String timezoneName;
+
     private String msg;
 
-    public MyPageResponseDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
-                              String extensionNum, String rank, Dept dept, String msg) {
-        this.id = id;
+    @Builder
+    public MyPageResponseDTO( Long empNo, String company, String name, String email, String phoneNum,
+                              String extensionNum, String rank, String deptName,String timezoneName, String msg) {
         this.empNo = empNo;
         this.company = company;
         this.name = name;
@@ -31,23 +31,9 @@ public class MyPageResponseDTO {
         this.phoneNum = phoneNum;
         this.extensionNum = extensionNum;
         this.rank = rank;
-        this.deptName = dept.getDeptName();
+        this.deptName = deptName;
+        this.timezoneName = timezoneName;
         this.msg = msg;
-
-
-    }
-
-    public Employee toEntity(Dept dept){
-        return Employee.builder()
-                .empNo(empNo)
-                .company(company)
-                .name(name)
-                .email(email)
-                .phoneNum(phoneNum)
-                .extensionNum(extensionNum)
-                .rank(rank)
-                .dept(dept)
-                .build();
     }
 
 }

@@ -22,7 +22,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPoint entryPoint;
 
-    private final String[] allowedUrls = {"/", "/api/auth/**", "api/groups/**", "api/groups"}; // 허용할 url 목록
+    private final String[] allowedUrls = {"/", "/api/auth/**", "api/groups/**", "api/groups", "api/mypage/**"}; // 허용할 url 목록
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

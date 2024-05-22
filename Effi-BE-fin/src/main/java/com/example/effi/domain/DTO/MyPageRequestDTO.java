@@ -20,7 +20,7 @@ public class MyPageRequestDTO {
     private Long deptId;
 
     public MyPageRequestDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
-                       String extensionNum, String rank, Dept dept) {
+                       String extensionNum, String rank, Long deptId) {
         this.id = id;
         this.empNo = empNo;
         this.company = company;
@@ -29,7 +29,7 @@ public class MyPageRequestDTO {
         this.phoneNum = phoneNum;
         this.extensionNum = extensionNum;
         this.rank = rank;
-        this.deptId = dept.getDeptId();
+        this.deptId = deptId;
     }
 
     public Employee toEntity(Dept dept){
