@@ -41,4 +41,9 @@ public class EmployeeService {
                 .token(token)
                 .build();
     }
+
+    //empno -> empId 찾기
+    public Long findEmpIdByEmpNo(Long empNo) {
+        return employeeRepository.findByEmpNo(empNo).getId();
+    }
 }

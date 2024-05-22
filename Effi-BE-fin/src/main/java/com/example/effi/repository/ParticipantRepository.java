@@ -10,4 +10,5 @@ import java.util.List;
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
     List<Participant> findAllBySchedule_ScheduleId(Long scheduleId);
     List<Participant> findAllByEmployee_Id(Long userId);
+    Participant findByEmployeeIdAndScheduleId(Long employeeId, Long scheduleId);
 }

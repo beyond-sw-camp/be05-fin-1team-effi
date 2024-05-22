@@ -1,6 +1,8 @@
 package com.example.effi.domain.Entitiy;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,18 +37,28 @@ public class Group{
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Group(String groupName, Boolean deleteYn, Category category, Date createdAt, Date updatedAt) {
         this.groupName = groupName;
-        this.deleteYn = deleteYn;
+        this.deleteYn = false;
         this.category = category;
-        this.createdAt = createdAt;
+        this.createdAt = Date.valueOf(LocalDate.now()); // 현재 날짜로 초기화
         this.updatedAt = updatedAt;
     }
     
     // 그룹의 카테고리를 설정하는 setter 메서드
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    // 그룹 이름을 설정하는 setter 메서드
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    // 그룹 업데이트 시간을 설정하는 setter 메서드
+    public void setUpdatedAt(Date timestamp) {
+        this.updatedAt = timestamp;
     }
 
 }
