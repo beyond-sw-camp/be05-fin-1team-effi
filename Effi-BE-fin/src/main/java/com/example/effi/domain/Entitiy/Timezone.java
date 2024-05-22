@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 @Table(name = "timezone")
 public class Timezone {
     @Id
-    @Column(name = "timezone_id")
+    @Column(name = "timezone_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long timezoneId;
 
-    @Column(name = "timezone_name")
+    @Column(name = "timezone_name", nullable = false)
     private String timezoneName;
 
-    @Column(name = "timezone_num")
+    @Column(name = "timezone_num", nullable = false)
     private Integer timezoneNum;
 
     @Builder

@@ -18,11 +18,11 @@ import lombok.NoArgsConstructor;
 public class Dept {
     
     @Id
-    @Column(name = "dept_id")
+    @Column(name = "dept_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long deptId;
 
-    @Column(name = "dept_name")
+    @Column(name = "dept_name", nullable = false)
     private String deptName;
 
     @Builder

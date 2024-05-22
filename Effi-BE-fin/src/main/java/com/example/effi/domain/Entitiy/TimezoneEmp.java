@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "timezone_emp")
 public class TimezoneEmp {
     @Id
-    @Column(name = "timezone_emp_id")
+    @Column(name = "timezone_emp_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long timezoneEmpId;
 

@@ -16,29 +16,29 @@ import java.util.Date;
 @Table(name = "schedule")
 public class Schedule {
     @Id
-    @Column(name = "schedule_id")
+    @Column(name = "schedule_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "context")
+    @Column(name = "context", nullable = false)
     private String context;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time", nullable = false)
     private Date startTime;
 
-    @Column(name = "end_time")
+    @Column(name = "end_time", nullable = false)
     private Date endTime;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private Integer status;
 
-    @Column(name = "notification_yn")
+    @Column(name = "notification_yn", nullable = false)
     private Boolean notificationYn;
 
-    @Column(name = "delete_yn")
+    @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
     // category와 연결

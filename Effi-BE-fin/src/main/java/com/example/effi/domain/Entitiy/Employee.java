@@ -21,32 +21,32 @@ import lombok.NoArgsConstructor;
 public class Employee {
     
     @Id
-    @Column(name = "emp_id")
+    @Column(name = "emp_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "emp_no")
+    @Column(name = "emp_no", nullable = false)
     private Long empNo;
 
-    @Column(name = "company")
+    @Column(name = "company", nullable = false)
     private String company;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_num")
+    @Column(name = "phone_num", nullable = false)
     private String phoneNum;
 
-    @Column(name = "extension_num")
+    @Column(name = "extension_num", nullable = false)
     private String extensionNum;
 
-    @Column(name = "rank")
+    @Column(name = "rank", nullable = false)
     private String rank;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @ManyToOne
