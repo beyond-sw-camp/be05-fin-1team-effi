@@ -14,17 +14,20 @@ public class TimezoneEmpDTO {
 
     private Long timezoneId;
     private Long empId;
+    private Boolean defaultTimezone;
 
-    public TimezoneEmpDTO(Long timezoneEmpId, Timezone timezone, Employee emp) {
+    public TimezoneEmpDTO(Long timezoneEmpId, Timezone timezone, Employee emp, Boolean defaultTimezone) {
         this.timezoneEmpId = timezoneEmpId;
         this.timezoneId = timezone.getTimezoneId();
         this.empId = emp.getId();
+        this.defaultTimezone = defaultTimezone;
     }
 
-    public TimezoneEmp toEntity(Timezone timezone, Employee emp) {
+    public TimezoneEmp toEntity(Timezone timezone, Employee emp,Boolean defaultTimezone ) {
         return TimezoneEmp.builder()
                 .timezone(timezone)
                 .employee(emp)
+                .defaultTimezone(defaultTimezone)
                 .build();
     }
 }

@@ -17,11 +17,13 @@ public class MyPageResponseDTO {
 
     private String deptName;
 
+    private String timezoneName;
+
     private String msg;
 
     @Builder
     public MyPageResponseDTO( Long empNo, String company, String name, String email, String phoneNum,
-                              String extensionNum, String rank, String deptName, String msg) {
+                              String extensionNum, String rank, String deptName,String timezoneName, String msg) {
         this.empNo = empNo;
         this.company = company;
         this.name = name;
@@ -30,6 +32,7 @@ public class MyPageResponseDTO {
         this.extensionNum = extensionNum;
         this.rank = rank;
         this.deptName = deptName;
+        this.timezoneName = timezoneName;
         this.msg = msg;
     }
 

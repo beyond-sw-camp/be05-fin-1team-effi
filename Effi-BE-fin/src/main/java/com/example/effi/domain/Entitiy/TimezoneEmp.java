@@ -28,9 +28,15 @@ public class TimezoneEmp {
     @JoinColumn(name = "emp_id")
     private Employee employee;
 
+    @Column(name = "default_timezone")
+    private Boolean defaultTimezone;
+
+
+
     @Builder
-    public TimezoneEmp(Timezone timezone, Employee employee) {
+    public TimezoneEmp(Timezone timezone, Employee employee, Boolean defaultTimezone) {
         this.timezone = timezone;
         this.employee = employee;
+        this.defaultTimezone = defaultTimezone;
     }
 }
