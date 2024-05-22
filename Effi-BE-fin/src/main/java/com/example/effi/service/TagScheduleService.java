@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +22,16 @@ public class TagScheduleService {
     private final TagService tagService;
     private final TagRepository tagRepository;
     private final ScheduleRepository scheduleRepository;
+
+    // tagId & scheduleId로 tagSchedule return
+    public TagScheduleResponseDTO findByScheduleIdAndTagId(Long scheduleId, Long tagId) {
+        List<TagSchedule> lst = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
+        for (TagSchedule tagSchedule : lst) {
+            if (tagSchedule.getTag().getTagId() == tagId)
+                return new TagScheduleResponseDTO(tagSchedule);
+        }
+        return null;
+    }
 
     //t-sId로 tag 리턴
     public TagResponseDTO findTag(Long tagScheduleId){
