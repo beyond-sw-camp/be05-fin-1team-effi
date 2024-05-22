@@ -5,6 +5,8 @@ import com.example.effi.service.TagService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/tag")
 @AllArgsConstructor
@@ -24,6 +26,12 @@ public class TagController {
     public TagResponseDTO findTag(@RequestParam String inputString) {
         return tagService.getTag(inputString);
     }
+
+    @GetMapping("/findAll")
+    public List<TagResponseDTO> findAllTag() {
+        return tagService.getAllTag();
+    }
+
 
     // update
 
