@@ -34,7 +34,7 @@ public class GroupEmp {
     @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
-    @Builder
+    @Builder(toBuilder = true)
     public GroupEmp(Group group, Employee employee, String groupEmpRank, Boolean deleteYn) {
         this.group = group;
         this.employee = employee;
