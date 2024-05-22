@@ -2,14 +2,19 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entitiy.Category;
+import com.example.effi.domain.Entitiy.Participant;
 import com.example.effi.domain.Entitiy.Routine;
 import com.example.effi.domain.Entitiy.Schedule;
 import com.example.effi.repository.CategoryRepository;
+import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -18,6 +23,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final CategoryRepository categoryRepository;
     private final RoutineRepository routineRepository;
+    private final ParticipantRepository participantRepository;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -26,6 +32,30 @@ public class ScheduleService {
             return null;
         }
         return new ScheduleResponseDTO(sch);
+    }
+
+    //empId로 내 schedule만 조회
+    public List<ScheduleResponseDTO> getAllSchedules(Long empId) {
+       //empID로 participant에서 list 받아와서 scheduleId List로 받기
+        List<Participant> partiDTO = participantRepository.findAllByEmployee_Id(empId);
+        List<ScheduleResponseDTO> schedules = new ArrayList<>();
+        for (Participant p : partiDTO) {
+            schedules.add(new ScheduleResponseDTO(p.getSchedule()));
+        }
+        return schedules;
+    }
+
+    // empId & categoryId로 조회
+    public List<ScheduleResponseDTO> getSchedulesByCategory(Long categoryId, Long empId) {
+        List<Schedule> lst = scheduleRepository.findAllByCategory_CategoryId(categoryId);
+        List<ScheduleResponseDTO> res = new ArrayList<>();
+        for (Schedule sch : lst) {
+            Participant dto = participantRepository.findByEmployeeIdAndScheduleId(empId, sch.getScheduleId());
+            if (dto == null) {
+                res.add(new ScheduleResponseDTO(sch));
+            }
+        }
+        return res;
     }
 
     // add schedule

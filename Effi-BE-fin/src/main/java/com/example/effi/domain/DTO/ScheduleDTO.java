@@ -19,6 +19,8 @@ public class ScheduleDTO {
     private Integer status;
     private Boolean notificationYn;
     private Boolean deleteYn;
+    private Date createdAt;
+    private Date updatedAt;
 
     private Long categoryId;
     private Long routineId;
@@ -33,6 +35,7 @@ public class ScheduleDTO {
                 .endTime(endTime)
                 .notificationYn(notificationYn)
                 .deleteYn(deleteYn)
+                .createdAt(new Date())
                 .build();
     }
 
@@ -47,6 +50,8 @@ public class ScheduleDTO {
         this.deleteYn = schedule.getDeleteYn();
         this.categoryId = category.getCategoryId();
         this.routineId = routine.getRoutineId();
+        this.createdAt = schedule.getCreatedAt();
+        this.updatedAt = schedule.getUpdatedAt();
     }
 
 

@@ -84,9 +84,11 @@ public class Schedule {
         this.notificationYn = notificationYn;
         this.category = category;
         this.routine = routine;
+        this.updatedAt = new Date();
     }
 
     public void delete() {
+        this.updatedAt = new Date();
         this.deleteYn = true;
     }
 }
