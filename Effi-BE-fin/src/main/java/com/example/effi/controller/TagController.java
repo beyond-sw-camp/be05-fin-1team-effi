@@ -34,6 +34,10 @@ public class TagController {
 
 
     // update
+    // t-s에서 tag id & scheduleid로 t-s 찾아서 지우고 (deleteYn)
+    // 새로운 태그 찾아서 t-s에 저장
+
 
     // delete
+    // t-s에서 tagid & scheduleId 찾아서 deleteYn
 }
