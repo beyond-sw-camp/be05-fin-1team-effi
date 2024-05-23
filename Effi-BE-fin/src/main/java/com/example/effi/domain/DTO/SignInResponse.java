@@ -9,14 +9,16 @@ public class SignInResponse {
     private String name;
     private String rank;
     private String msg;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
     @Builder
-    public SignInResponse(Long empNo, String name, String rank, String msg, String token) {
+    public SignInResponse(Long empNo, String name, String rank, String msg, String accessToken, String refreshToken) {
         this.empNo = empNo;
         this.name = name;
         this.rank = rank;
         this.msg = msg;
-        this.token = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 }

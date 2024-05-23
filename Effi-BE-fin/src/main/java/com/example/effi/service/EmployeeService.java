@@ -1,14 +1,18 @@
 package com.example.effi.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.effi.config.TokenProvider;
 import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entitiy.RefreshToken;
 import com.example.effi.domain.DTO.SignInRequest;
 import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.repository.EmployeeRepository;
+import com.example.effi.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,10 +20,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public SignInResponse signIn(SignInRequest request) {
         Employee employee = employeeRepository.findByEmpNo(request.getEmpNo());
         if (employee == null) {
@@ -32,13 +37,31 @@ public class EmployeeService {
                     .msg("비밀번호가 일치하지 않습니다.")
                     .build();
         }
-        String token = tokenProvider.createToken(String.format("%s:%s", employee.getEmpNo(), employee.getRank()));
+        String accessToken = tokenProvider.createToken(String.format("%s:%s", employee.getEmpNo(), employee.getRank()));
+        String refreshToken = tokenProvider.createRefreshToken();
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findById(employee.getId());
+        if (oldRefreshToken.isEmpty()) {
+            RefreshToken newRefreshToken = RefreshToken.builder()
+                    .tokenId(employee.getId())
+                    .refreshToken(refreshToken)
+                    .employee(employee)
+                    .build();
+            System.out.println("empty " + newRefreshToken.toString());
+            refreshTokenRepository.save(newRefreshToken);
+        } else {
+            RefreshToken newRefreshToken = oldRefreshToken.get().toBuilder()
+                    .refreshToken(refreshToken)
+                    .build();
+            System.out.println("present " + newRefreshToken.toString());
+            refreshTokenRepository.save(newRefreshToken);
+        }
         return SignInResponse.builder()
                 .empNo(employee.getEmpNo())
                 .name(employee.getName())
                 .rank(employee.getRank())
                 .msg("로그인 성공")
-                .token(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

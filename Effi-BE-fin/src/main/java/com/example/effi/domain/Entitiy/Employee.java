@@ -53,8 +53,9 @@ public class Employee {
     @JoinColumn(name = "dept_id")
     private Dept dept;
 
-    @Builder
-    public Employee(Long empNo, String company, String name, String email, String phoneNum, String extensionNum, String rank, String password, Dept dept) {
+    @Builder(toBuilder = true)
+    public Employee(Long id, Long empNo, String company, String name, String email, String phoneNum, String extensionNum, String rank, String password, Dept dept) {
+        this.id = id;
         this.empNo = empNo;
         this.company = company;
         this.name = name;

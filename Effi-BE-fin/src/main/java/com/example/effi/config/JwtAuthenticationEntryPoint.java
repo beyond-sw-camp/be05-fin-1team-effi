@@ -17,10 +17,22 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint{
         this.resolver = resolver;
     }
  
+    // @Override
+    // public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
+
+    //     resolver.resolveException(request, response, null, (Exception) request.getAttribute("exception"));
+
+    // }
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
+        // Get the exception from the request attribute
+        Exception exception = (Exception) request.getAttribute("exception");
+        // If the exception is null, set a default exception
+        if (exception == null) {
+            exception = authException != null ? authException : new Exception("Unknown error occurred");
+        }
+        // Resolve the exception
+        resolver.resolveException(request, response, null, exception);
+}
 
-        resolver.resolveException(request, response, null, (Exception) request.getAttribute("exception"));
-
-    }
 }
