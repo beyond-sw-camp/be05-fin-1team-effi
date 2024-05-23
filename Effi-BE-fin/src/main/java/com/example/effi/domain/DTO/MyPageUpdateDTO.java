@@ -7,15 +7,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class MyPageUpdateDTO {
-    private Long id;
     private Long empNo;
-    private String timezoneName;
+    private Long timezoneId;
 
     @Builder
-    public MyPageUpdateDTO(Long id, Long empNo, String timezoneName){
-        this.id = id;
+    public MyPageUpdateDTO( Long empNo, Long timezoneId){
         this.empNo = empNo;
-        this.timezoneName = timezoneName;
+        this.timezoneId = timezoneId;
     }
 
 }

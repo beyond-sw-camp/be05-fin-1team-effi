@@ -52,7 +52,7 @@ public class ParticipantService {
 
     //select by ( scheduleId & empId )
     public ParticipantResponseDTO findByEmployeeIdAndScheduleId(Long employeeId, Long scheduleId) {
-        Participant dto = participantRepository.findByEmployeeIdAndScheduleId(employeeId, scheduleId);
+        Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(employeeId, scheduleId);
         return new ParticipantResponseDTO(dto);
     }
 

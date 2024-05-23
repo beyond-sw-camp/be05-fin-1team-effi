@@ -1,7 +1,10 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.MyPageResponseDTO;
+import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entitiy.TimezoneEmp;
+import com.example.effi.domain.Entitiy.Timezone;
 import com.example.effi.repository.MyPageRepository;
 import com.example.effi.repository.TimezoneEmpRepository;
 import com.example.effi.repository.TimezoneRepository;
@@ -39,4 +42,31 @@ public class MyPageService {
                 .msg("회원 정보 조회")
                 .build();
     }
+
+    public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
+        Optional<Employee> optionalEmployee = mypageRepository.findById(myPageUpdateDTO.getEmpNo());
+        if (optionalEmployee.isEmpty()) {
+            throw new IllegalArgumentException("Employee not found with empNo: " + myPageUpdateDTO.getEmpNo());
+        }
+
+        Optional<Timezone> optionalTimezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId());
+        if (optionalTimezone.isEmpty()) {
+            throw new IllegalArgumentException("Timezone not found with id: " + myPageUpdateDTO.getTimezoneId());
+        }
+
+        Employee employee = optionalEmployee.get();
+        Timezone timezone = optionalTimezone.get();
+
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmployee(employee).orElse(null);
+
+        if (timezoneEmp == null) {
+            timezoneEmp = new TimezoneEmp(timezone, employee, true); // 기본 값으로 새로운 TimezoneEmp 객체를 생성
+        } else {
+            timezoneEmp.setTimezone(timezone);
+        }
+
+        timezoneEmpRepository.save(timezoneEmp);
+    }
+
+
 }
