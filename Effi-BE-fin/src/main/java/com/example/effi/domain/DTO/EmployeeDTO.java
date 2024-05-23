@@ -22,7 +22,7 @@ public class EmployeeDTO {
 
     private Long deptId;
 
-    @Builder
+    @Builder(toBuilder = true)
     public EmployeeDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
                     String extensionNum, String rank, String password, Long deptId) {
         this.id = id;

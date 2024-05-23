@@ -24,4 +24,12 @@ public interface GroupEmpRepository extends JpaRepository<GroupEmp, Long> {
     @Modifying
     @Query("UPDATE GroupEmp ge SET ge.deleteYn = true WHERE ge.group.groupId = :groupId AND ge.employee.id = :employeeId")
     void updateDeleteYnByGroupIdAndEmployeeId(Long groupId, Long employeeId);
+
+    @Query("SELECT COUNT(ge) FROM GroupEmp ge WHERE ge.group.groupId = :groupId AND ge.deleteYn = FALSE")
+    Long countActiveMembersInGroup(Long groupId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM GroupEmp ge WHERE ge.group.groupId = :groupId")
+    void deleteAllByGroupId(Long groupId);
 }
