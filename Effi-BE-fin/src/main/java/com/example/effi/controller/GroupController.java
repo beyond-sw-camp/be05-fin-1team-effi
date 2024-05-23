@@ -41,15 +41,22 @@ public class GroupController {
 
     // 그룹 탈퇴
     @DeleteMapping("/{groupId}/employees/{empId}")
-    public ResponseEntity<Void> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
-        groupService.withdrawGroup(groupId, empId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<GroupResponseDTO> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
+        GroupResponseDTO response = groupService.withdrawGroup(groupId, empId);
+        return ResponseEntity.ok(response);
     }
 
     // 그룹 이름 변경
     @PutMapping("/{groupId}")
     public ResponseEntity<GroupResponseDTO> updateGroupName(@PathVariable Long groupId, @RequestBody UpdateGroupNameRequest request) {
         GroupResponseDTO response = groupService.updateGroupName(groupId, request.getNewGroupName());
+        return ResponseEntity.ok(response);
+    }
+
+    // 그룹 삭제
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<GroupResponseDTO> deleteGroup(@PathVariable Long groupId) {
+        GroupResponseDTO response = groupService.deleteGroup(groupId);
         return ResponseEntity.ok(response);
     }
 }

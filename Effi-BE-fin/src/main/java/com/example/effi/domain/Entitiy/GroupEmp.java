@@ -35,7 +35,8 @@ public class GroupEmp {
     private Boolean deleteYn;
 
     @Builder(toBuilder = true)
-    public GroupEmp(Group group, Employee employee, String groupEmpRank, Boolean deleteYn) {
+    public GroupEmp(Long groupEmpId, Group group, Employee employee, String groupEmpRank, Boolean deleteYn) {
+        this.groupEmpId = groupEmpId;
         this.group = group;
         this.employee = employee;
         this.groupEmpRank = groupEmpRank;
