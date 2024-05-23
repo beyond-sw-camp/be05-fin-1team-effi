@@ -43,6 +43,7 @@ public class MyPageService {
                 .build();
     }
 
+    // 기본 시단대 update
     @Transactional
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
         TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId());
