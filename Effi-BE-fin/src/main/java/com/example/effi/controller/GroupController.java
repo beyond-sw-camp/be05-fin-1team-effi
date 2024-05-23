@@ -1,8 +1,10 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.EmployeeDTO;
+import com.example.effi.domain.DTO.GroupDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.GroupResponseDTO;
+import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,26 @@ public class GroupController {
         return ResponseEntity.ok(employees);
     }
 
-    //
+
+    // 그룹 탈퇴
+    @DeleteMapping("/{groupId}/employees/{empId}")
+    public ResponseEntity<GroupResponseDTO> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
+        GroupResponseDTO response = groupService.withdrawGroup(groupId, empId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 그룹 이름 변경
+    @PutMapping("/{groupId}")
+    public ResponseEntity<GroupResponseDTO> updateGroupName(@PathVariable Long groupId, @RequestBody UpdateGroupNameRequest request) {
+        GroupResponseDTO response = groupService.updateGroupName(groupId, request.getNewGroupName());
+        return ResponseEntity.ok(response);
+    }
+
+    // 그룹 삭제
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<GroupResponseDTO> deleteGroup(@PathVariable Long groupId) {
+        GroupResponseDTO response = groupService.deleteGroup(groupId);
+        return ResponseEntity.ok(response);
+    }
 
 }

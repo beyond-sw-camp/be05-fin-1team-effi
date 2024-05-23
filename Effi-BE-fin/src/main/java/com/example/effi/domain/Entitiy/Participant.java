@@ -26,9 +26,17 @@ public class Participant {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
+    @Column(name = "delete_yn", nullable = false)
+    private Boolean deleteYn;
+
     @Builder
-    public Participant(Employee employee, Schedule schedule) {
+    public Participant(Employee employee, Schedule schedule, Boolean deleteYn) {
         this.employee = employee;
         this.schedule = schedule;
+        this.deleteYn = deleteYn;
+    }
+
+    public void delete() {
+        this.deleteYn = true;
     }
 }

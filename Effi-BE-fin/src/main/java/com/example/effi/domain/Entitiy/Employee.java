@@ -1,6 +1,5 @@
 package com.example.effi.domain.Entitiy;
 
-import com.example.effi.domain.Entitiy.Dept;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

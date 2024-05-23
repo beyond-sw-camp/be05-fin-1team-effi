@@ -1,6 +1,9 @@
 package com.example.effi.service;
 
+
 import java.util.Optional;
+
+import com.example.effi.domain.DTO.EmployeeDTO;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,9 @@ import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +69,10 @@ public class EmployeeService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    //empno -> empId 찾기
+    public Long findEmpIdByEmpNo(Long empNo) {
+        return employeeRepository.findByEmpNo(empNo).getId();
     }
 }

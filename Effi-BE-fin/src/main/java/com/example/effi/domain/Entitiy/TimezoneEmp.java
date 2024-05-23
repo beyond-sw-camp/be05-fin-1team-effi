@@ -3,10 +3,7 @@ package com.example.effi.domain.Entitiy;
 import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.Timezone;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -19,6 +16,7 @@ public class TimezoneEmp {
     private Long timezoneEmpId;
 
     //timezone
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "timezone_id")
     private Timezone timezone;
@@ -28,9 +26,15 @@ public class TimezoneEmp {
     @JoinColumn(name = "emp_id")
     private Employee employee;
 
+    @Column(name = "default_timezone")
+    private Boolean defaultTimezone;
+
+
     @Builder
-    public TimezoneEmp(Timezone timezone, Employee employee) {
+    public TimezoneEmp(Timezone timezone, Employee employee, Boolean defaultTimezone) {
         this.timezone = timezone;
         this.employee = employee;
+        this.defaultTimezone = defaultTimezone;
     }
+
 }

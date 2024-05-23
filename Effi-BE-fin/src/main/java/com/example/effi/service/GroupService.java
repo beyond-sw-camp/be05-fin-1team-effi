@@ -1,12 +1,8 @@
 package com.example.effi.service;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.example.effi.domain.DTO.EmployeeDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.GroupResponseDTO;
+import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.domain.Entitiy.Category;
 import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.Group;
@@ -15,7 +11,14 @@ import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.repository.GroupRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,29 +31,42 @@ public class GroupService {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-public GroupResponseDTO createGroup(GroupRequestDTO groupRequestDTO) {
-    // 카테고리 테이블에서 category_id가 3인 카테고리를 가져옵니다.
-    Category category = categoryRepository.findByCategoryId(3)
-            .orElseThrow(() -> new IllegalArgumentException("category_id가 3인 카테고리를 찾을 수 없습니다."));
+    public GroupResponseDTO createGroup(GroupRequestDTO groupRequestDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
 
-    Group group = Group.builder()
-            .groupName(groupRequestDTO.getGroupName())
-            .category(category) // 가져온 카테고리를 설정합니다.
-            .deleteYn(false)
-            .build();
-    Group savedGroup = groupRepository.save(group);
+        Category category = categoryRepository.findByCategoryId(3)
+                .orElseThrow(() -> new IllegalArgumentException("category_id가 3인 카테고리를 찾을 수 없습니다."));
 
-    // 직원들을 그룹에 추가
-    addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
+        Group group = Group.builder()
+                .groupName(groupRequestDTO.getGroupName())
+                .category(category)
+                .deleteYn(false)
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .build();
+        Group savedGroup = groupRepository.save(group);
 
-    return GroupResponseDTO.builder()
-            .code("200")
-            .message("그룹 생성 성공")
-            .groupName(savedGroup.getGroupName())
-            .build();
-}
+        Employee creator = employeeRepository.findByEmpNo(creatorEmpNo);
+        if (creator == null) {
+            throw new IllegalArgumentException("유효하지 않은 생성자 직원 번호: " + creatorEmpNo);
+        }
 
-    
+        GroupEmp groupLeader = GroupEmp.builder()
+                .group(savedGroup)
+                .employee(creator)
+                .groupEmpRank("Leader")
+                .deleteYn(false)
+                .build();
+        groupEmpRepository.save(groupLeader);
+
+        addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
+
+        return GroupResponseDTO.builder()
+                .code("200")
+                .message("그룹 생성 성공")
+                .groupName(savedGroup.getGroupName())
+                .build();
+    }
 
     @Transactional
     public void addEmployeesToGroup(Long groupId, List<Long> employeeIds) {
@@ -72,20 +88,83 @@ public GroupResponseDTO createGroup(GroupRequestDTO groupRequestDTO) {
         }
     }
 
+    @Transactional
+    public GroupResponseDTO updateGroupName(Long groupId, String newGroupName) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+
+        Group updatedGroup = group.updateGroupName(newGroupName);
+        Group savedGroup = groupRepository.save(updatedGroup);
+
+        return GroupResponseDTO.builder()
+                .code("200")
+                .message("그룹 이름 변경 성공")
+                .groupName(savedGroup.getGroupName())
+                .build();
+    }
+
+    @Transactional
+    public GroupResponseDTO withdrawGroup(Long groupId, Long empId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+
+        groupEmpRepository.updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
+
+        // 그룹에 남아있는 구성원이 있는지 확인
+        Long activeMemberCount = groupEmpRepository.countActiveMembersInGroup(groupId);
+        if (activeMemberCount == 0) {
+            Group deletedGroup = group.markAsDeleted();
+            groupRepository.save(deletedGroup);
+            return GroupResponseDTO.builder()
+                    .code("200")
+                    .message("모든 구성원이 그룹을 떠났기 때문에 그룹이 삭제되었습니다.")
+                    .groupName(deletedGroup.getGroupName())
+                    .build();
+        }
+
+        return GroupResponseDTO.builder()
+                .code("200")
+                .message("그룹 탈퇴 성공")
+                .groupName(group.getGroupName())
+                .build();
+    }
+
+    @Transactional
+    public GroupResponseDTO deleteGroup(Long groupId) {
+        deleteGroupAndMembers(groupId);
+        return GroupResponseDTO.builder()
+                .code("200")
+                .message("그룹 삭제 성공")
+                .groupName(null)
+                .build();
+    }
+
+    @Transactional
+    public void deleteGroupAndMembers(Long groupId) {
+        // 그룹 구성원을 모두 삭제
+        groupEmpRepository.deleteAllByGroupId(groupId);
+
+        // 그룹을 삭제
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+        Group deletedGroup = group.markAsDeleted();
+        groupRepository.save(deletedGroup);
+    }
+
     public List<EmployeeDTO> searchEmployeesByName(String name) {
         return employeeRepository.findByNameContaining(name).stream()
-            .map(employee -> EmployeeDTO.builder()
-                .id(employee.getId())
-                .empNo(employee.getEmpNo())
-                .company(employee.getCompany())
-                .name(employee.getName())
-                .email(employee.getEmail())
-                .phoneNum(employee.getPhoneNum())
-                .extensionNum(employee.getExtensionNum())
-                .rank(employee.getRank())
-                .password(employee.getPassword())
-                .deptId(employee.getDept().getDeptId())
-                .build())
-            .collect(Collectors.toList());
+                .map(employee -> EmployeeDTO.builder()
+                        .id(employee.getId())
+                        .empNo(employee.getEmpNo())
+                        .company(employee.getCompany())
+                        .name(employee.getName())
+                        .email(employee.getEmail())
+                        .phoneNum(employee.getPhoneNum())
+                        .extensionNum(employee.getExtensionNum())
+                        .rank(employee.getRank())
+                        .password(employee.getPassword())
+                        .deptId(employee.getDept().getDeptId())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
