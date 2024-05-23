@@ -37,6 +37,19 @@ public class EmployeeDTO {
         this.deptId = deptId;
     }
 
+    public EmployeeDTO(Employee employee) {
+        this.id = employee.getId();
+        this.empNo = employee.getEmpNo();
+        this.company = employee.getCompany();
+        this.name = employee.getName();
+        this.email = employee.getEmail();
+        this.phoneNum = employee.getPhoneNum();
+        this.extensionNum = employee.getExtensionNum();
+        this.rank = employee.getRank();
+        this.password = employee.getPassword();
+        this.deptId = employee.getDept().getDeptId();
+    }
+
     public Employee toEntity(Dept dept){
         return Employee.builder()
                 .empNo(empNo)

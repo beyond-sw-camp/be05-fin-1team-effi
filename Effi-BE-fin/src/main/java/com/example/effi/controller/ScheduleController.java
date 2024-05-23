@@ -31,7 +31,16 @@ public class ScheduleController {
         return ResponseEntity.ok(rtn);
     }
 
-    // 수정 (어떤 수정인지)
+    // 수정 (어떤 수정인지) -> shcedule 내용만
+    @PostMapping("/update/{scheduleId}")
+    public ResponseEntity<ScheduleResponseDTO> updateSchedule(@PathVariable Long scheduleId,
+                                                              @RequestBody ScheduleRequestDTO schedule) {
+        if (schedule.getScheduleId() != scheduleId) {
+            return ResponseEntity.badRequest().build(); // 뭔가 이상
+        }
+        ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule);
+        return ResponseEntity.ok(rtn);
+    }
 
     // 조회 (전체) -> empNo 어떻게 넣음????
    @GetMapping("/findAll")
@@ -58,4 +67,9 @@ public class ScheduleController {
     }
 
     // 삭제
+    @PutMapping("/delete/{scheduleId}")
+    public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") Long scheduleId){
+        scheduleService.deleteSchedule(scheduleId);
+        return ResponseEntity.ok().build();
+    }
 }
