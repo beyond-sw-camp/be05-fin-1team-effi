@@ -50,7 +50,7 @@ public class ScheduleService {
         List<Schedule> lst = scheduleRepository.findAllByCategory_CategoryId(categoryId);
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
-            Participant dto = participantRepository.findByEmployeeIdAndScheduleId(empId, sch.getScheduleId());
+            Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
             if (dto == null) {
                 res.add(new ScheduleResponseDTO(sch));
             }

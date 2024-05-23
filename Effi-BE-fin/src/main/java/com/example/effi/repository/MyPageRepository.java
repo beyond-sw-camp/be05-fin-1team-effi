@@ -15,4 +15,6 @@ public interface MyPageRepository extends JpaRepository<Employee, Long> {
             "and te.defaultTimezone = true")
     String findDefaultTimezoneName(@Param("empNo") Long empNo);
 
+
+
 }

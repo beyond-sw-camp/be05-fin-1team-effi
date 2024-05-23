@@ -32,11 +32,14 @@ public class TimezoneEmp {
     private Boolean defaultTimezone;
 
 
-
     @Builder
     public TimezoneEmp(Timezone timezone, Employee employee, Boolean defaultTimezone) {
         this.timezone = timezone;
         this.employee = employee;
         this.defaultTimezone = defaultTimezone;
+    }
+
+    public void setTimezone(Timezone timezone) {
+        this.timezone = timezone;
     }
 }

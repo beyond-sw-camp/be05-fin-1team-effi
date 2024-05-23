@@ -60,7 +60,7 @@ public class ScheduleController {
     }
 
     // 조회 (1개 scheduleId)
-    @GetMapping("/find/{scheduleId")
+    @GetMapping("/find/{scheduleId}")
     public ResponseEntity<ScheduleResponseDTO> findById(@PathVariable("scheduleId") Long scheduleId){
         ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
         return ResponseEntity.ok(schedule);
