@@ -22,7 +22,7 @@ public class MyPageController {
         return ResponseEntity.ok(mypage);
     }
 
-    @PutMapping(value = "/update", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(value = "/update/{empNo}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> updateTimezone(@RequestBody MyPageUpdateDTO myPageUpdateDTO) {
         myPageService.updateEmployeeTimezone(myPageUpdateDTO);
         return ResponseEntity.ok("Timezone updated successfully");
