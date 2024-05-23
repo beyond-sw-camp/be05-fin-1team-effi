@@ -37,7 +37,10 @@ public class ScheduleRequestDTO {
         this.createdAt = schedule.getCreatedAt();
         this.updatedAt = schedule.getUpdatedAt();
         this.categoryId = schedule.getCategory().getCategoryId();
-        this.routineId = schedule.getRoutine().getRoutineId();
+        if (schedule.getRoutine() != null)
+            this.routineId = schedule.getRoutine().getRoutineId();
+        else
+            this.routineId = null;
     }
 
     public Schedule toEntity(Category category, Routine routine) {

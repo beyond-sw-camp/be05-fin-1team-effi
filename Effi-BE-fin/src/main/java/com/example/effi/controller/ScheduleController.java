@@ -35,10 +35,11 @@ public class ScheduleController {
     @PostMapping("/update/{scheduleId}")
     public ResponseEntity<ScheduleResponseDTO> updateSchedule(@PathVariable Long scheduleId,
                                                               @RequestBody ScheduleRequestDTO schedule) {
-        if (schedule.getScheduleId() != scheduleId) {
-            return ResponseEntity.badRequest().build(); // 뭔가 이상
-        }
-        ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule);
+//        if (schedule.getScheduleId() != scheduleId) {
+//            return ResponseEntity.ok(null);
+////            return ResponseEntity.badRequest().build(); // 뭔가 이상
+//        }
+        ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
         return ResponseEntity.ok(rtn);
     }
 
@@ -63,7 +64,10 @@ public class ScheduleController {
     @GetMapping("/find/{scheduleId}")
     public ResponseEntity<ScheduleResponseDTO> findById(@PathVariable("scheduleId") Long scheduleId){
         ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
-        return ResponseEntity.ok(schedule);
+        if (schedule != null && schedule.getDeleteYn() == false)
+            return ResponseEntity.ok(schedule);
+        else
+            return ResponseEntity.ok(null);
     }
 
     // 삭제
