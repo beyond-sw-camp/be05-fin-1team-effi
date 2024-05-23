@@ -1,5 +1,6 @@
 package com.example.effi.service;
 
+import com.example.effi.domain.DTO.EmployeeDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,9 @@ import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.repository.EmployeeRepository;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +49,15 @@ public class EmployeeService {
     //empno -> empId 찾기
     public Long findEmpIdByEmpNo(Long empNo) {
         return employeeRepository.findByEmpNo(empNo).getId();
+    }
+
+    //전체 조회
+    public List<EmployeeDTO> findAll(){
+       List<Employee> lst = employeeRepository.findAll();
+       List<EmployeeDTO> dtos = new ArrayList<>();
+       for (Employee employee : lst) {
+           dtos.add(new EmployeeDTO(employee));
+       }
+       return dtos;
     }
 }

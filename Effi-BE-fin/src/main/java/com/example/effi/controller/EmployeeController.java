@@ -1,17 +1,17 @@
 package com.example.effi.controller;
 
+import com.example.effi.domain.DTO.EmployeeDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.effi.domain.DTO.SignInRequest;
 import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.service.EmployeeService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,5 +26,12 @@ public class EmployeeController {
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
+    }
+
+    // 전체조회
+    @GetMapping("/find")
+    public ResponseEntity<List<EmployeeDTO>> findAll() {
+        List<EmployeeDTO> employees = employeeService.findAll();
+        return ResponseEntity.ok(employees);
     }
 }

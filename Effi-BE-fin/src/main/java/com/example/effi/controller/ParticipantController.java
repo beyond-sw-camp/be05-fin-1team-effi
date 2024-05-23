@@ -1,7 +1,6 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.ParticipantResponseDTO;
-import com.example.effi.domain.Entitiy.Participant;
 import com.example.effi.service.ParticipantService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class ParticipantController {
     // 조회 participantId
     @GetMapping("/find/participant/{participantId}")
     public ResponseEntity<ParticipantResponseDTO> findByParticipantId(@PathVariable("participantId") Long participantId){
-        ParticipantResponseDTO responseDTO = participantService.findByParticipantId();
+        ParticipantResponseDTO responseDTO = participantService.findByParticipantId(participantId);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -43,8 +42,6 @@ public class ParticipantController {
         List<ParticipantResponseDTO> lst = participantService.findAllByEmpId(empId);
         return ResponseEntity.ok(lst);
     }
-
-    // 수정
 
 
     // 삭제
