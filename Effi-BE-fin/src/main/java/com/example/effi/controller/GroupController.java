@@ -39,6 +39,7 @@ public class GroupController {
         return ResponseEntity.ok(employees);
     }
 
+
     // 그룹 탈퇴
     @DeleteMapping("/{groupId}/employees/{empId}")
     public ResponseEntity<GroupResponseDTO> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
@@ -59,4 +60,5 @@ public class GroupController {
         GroupResponseDTO response = groupService.deleteGroup(groupId);
         return ResponseEntity.ok(response);
     }
+
 }
