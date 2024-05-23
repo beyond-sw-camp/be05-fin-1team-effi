@@ -28,10 +28,4 @@ public class EmployeeController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // 전체조회
-    @GetMapping("/find")
-    public ResponseEntity<List<EmployeeDTO>> findAll() {
-        List<EmployeeDTO> employees = employeeService.findAll();
-        return ResponseEntity.ok(employees);
-    }
 }
