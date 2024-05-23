@@ -50,14 +50,4 @@ public class EmployeeService {
     public Long findEmpIdByEmpNo(Long empNo) {
         return employeeRepository.findByEmpNo(empNo).getId();
     }
-
-    //전체 조회
-    public List<EmployeeDTO> findAll(){
-       List<Employee> lst = employeeRepository.findAll();
-       List<EmployeeDTO> dtos = new ArrayList<>();
-       for (Employee employee : lst) {
-           dtos.add(new EmployeeDTO(employee));
-       }
-       return dtos;
-    }
 }

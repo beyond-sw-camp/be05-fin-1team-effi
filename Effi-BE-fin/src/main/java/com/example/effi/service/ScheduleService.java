@@ -28,7 +28,7 @@ public class ScheduleService {
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null) {
+        if (sch == null || sch.getDeleteYn() == true) {
             return null;
         }
         return new ScheduleResponseDTO(sch);
@@ -40,7 +40,8 @@ public class ScheduleService {
         List<Participant> partiDTO = participantRepository.findAllByEmployee_Id(empId);
         List<ScheduleResponseDTO> schedules = new ArrayList<>();
         for (Participant p : partiDTO) {
-            schedules.add(new ScheduleResponseDTO(p.getSchedule()));
+            if (p.getSchedule().getDeleteYn() == false)
+                schedules.add(new ScheduleResponseDTO(p.getSchedule()));
         }
         return schedules;
     }
@@ -51,7 +52,7 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
             Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
-            if (dto == null) {
+            if (dto.getDeleteYn() == false) {
                 res.add(new ScheduleResponseDTO(sch));
             }
         }
@@ -61,18 +62,27 @@ public class ScheduleService {
     // add schedule
     public ScheduleResponseDTO addSchedule(ScheduleRequestDTO scheduleRequestDTO) {
         Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
-        Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).get();
-        return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
+        if (scheduleRequestDTO.getRoutineId() != null){
+            Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
+            return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
+        }
+        return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, null)));
     }
 
     // update schedule
-    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO) {
-        Schedule sch = scheduleRepository.findById(scheduleRequestDTO.getScheduleId()).get();
+    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
+        Schedule sch = scheduleRepository.findById(scheduleId).get();
         Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
-        Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).get();
-        sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
-                scheduleRequestDTO.getEndTime(), scheduleRequestDTO.getStatus(), scheduleRequestDTO.getNotificationYn(),
-                category, routine);
+        if (scheduleRequestDTO.getRoutineId() != null) {
+            Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
+            sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
+                    scheduleRequestDTO.getEndTime(), scheduleRequestDTO.getStatus(), scheduleRequestDTO.getNotificationYn(),
+                    category, routine);
+        }
+        else
+            sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
+                    scheduleRequestDTO.getEndTime(), scheduleRequestDTO.getStatus(), scheduleRequestDTO.getNotificationYn(),
+                    category, null);
         return new ScheduleResponseDTO(scheduleRepository.save(sch));
     }
 

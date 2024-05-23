@@ -37,7 +37,10 @@ public class ScheduleResponseDTO {
         this.updatedAt = schedule.getUpdatedAt();
         this.deleteYn = schedule.getDeleteYn();
         this.categoryId = schedule.getCategory().getCategoryId();
-        this.routineId = schedule.getRoutine().getRoutineId();
+        if (schedule.getRoutine() != null)
+            this.routineId = schedule.getRoutine().getRoutineId();
+        else
+            this.routineId = null;
     }
 
 
