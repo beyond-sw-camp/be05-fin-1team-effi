@@ -26,9 +26,9 @@ public class MyPageService {
     public MyPageResponseDTO getEmployee(Long empId) {
         String timezoneName = mypageRepository.findDefaultTimezoneName(empId);
 
-        Optional<Employee> byempId = mypageRepository.findById(empId);
+        Optional<Employee> byeId = mypageRepository.findById(empId);
 
-        Employee employee = byempId.get();
+        Employee employee = byeId.get();
         return MyPageResponseDTO.builder()
                 .empNo(employee.getEmpNo())
                 .name(employee.getName())
@@ -43,28 +43,15 @@ public class MyPageService {
                 .build();
     }
 
+    // 기본 시단대 update
+    @Transactional
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
-        Optional<Employee> optionalEmployee = mypageRepository.findById(myPageUpdateDTO.getEmpNo());
-        if (optionalEmployee.isEmpty()) {
-            throw new IllegalArgumentException("Employee not found with empNo: " + myPageUpdateDTO.getEmpNo());
-        }
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId());
 
-        Optional<Timezone> optionalTimezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId());
-        if (optionalTimezone.isEmpty()) {
-            throw new IllegalArgumentException("Timezone not found with id: " + myPageUpdateDTO.getTimezoneId());
-        }
+        Timezone timezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId())
+                .orElseThrow(() -> new IllegalArgumentException("시간대를 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
 
-        Employee employee = optionalEmployee.get();
-        Timezone timezone = optionalTimezone.get();
-
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmployee(employee).orElse(null);
-
-        if (timezoneEmp == null) {
-            timezoneEmp = new TimezoneEmp(timezone, employee, true); // 기본 값으로 새로운 TimezoneEmp 객체를 생성
-        } else {
-            timezoneEmp.setTimezone(timezone);
-        }
-
+        timezoneEmp.setTimezone(timezone);
         timezoneEmpRepository.save(timezoneEmp);
     }
 
