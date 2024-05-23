@@ -44,6 +44,7 @@ public class TagController {
     public ResponseEntity<TagResponseDTO> updateTag(@PathVariable("scheduleId") Long scheduleId,
                                                     @PathVariable("tagId") Long tagId,
                                                     @RequestParam String newTag) {
+        // update 구현 필요
         return new ResponseEntity<TagResponseDTO>(null);
     }
 

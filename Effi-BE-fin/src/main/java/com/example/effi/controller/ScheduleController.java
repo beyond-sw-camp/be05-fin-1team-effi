@@ -67,7 +67,7 @@ public class ScheduleController {
     }
 
     // 삭제
-    @PostMapping("/delete/{scheduleId}")
+    @PutMapping("/delete/{scheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") Long scheduleId){
         scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok().build();
