@@ -1,7 +1,5 @@
 package com.example.effi.domain.Entitiy;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -1,7 +1,5 @@
 package com.example.effi.domain.Entitiy;
 
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Timezone;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,10 +28,14 @@ public class TimezoneEmp {
     private Boolean defaultTimezone;
 
 
-    @Builder
+    @Builder(toBuilder = true)
     public TimezoneEmp(Timezone timezone, Employee employee, Boolean defaultTimezone) {
         this.timezone = timezone;
         this.employee = employee;
+        this.defaultTimezone = defaultTimezone;
+    }
+    
+    public void setDefaultTimezone(boolean defaultTimezone) {
         this.defaultTimezone = defaultTimezone;
     }
 

@@ -1,6 +1,8 @@
 package com.example.effi.domain.DTO;
 
+
 import com.example.effi.domain.Entitiy.Timezone;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,18 +11,42 @@ import lombok.NoArgsConstructor;
 public class TimezoneDTO {
     private Long timezoneId;
     private String timezoneName;
-    private Integer timezoneNum;
+    private String countryCode;
+    private String abbreviation;
+    private Long timeStart;
+    private Integer gmtOffset;
+    private String dst;
 
-    public TimezoneDTO(Long timezoneId, String timezoneName, Integer timezoneNum) {
+    public TimezoneDTO(Long timezoneId, String timezoneName, String countryCode, String abbreviation, Long timeStart, Integer gmtOffset, String dst) {
         this.timezoneId = timezoneId;
         this.timezoneName = timezoneName;
-        this.timezoneNum = timezoneNum;
+        this.countryCode = countryCode;
+        this.abbreviation = abbreviation;
+        this.timeStart = timeStart;
+        this.gmtOffset = gmtOffset;
+        this.dst = dst;
     }
 
     public Timezone toEntity(){
         return Timezone.builder()
                 .timezoneName(timezoneName)
-                .timezoneNum(timezoneNum)
+                .countryCode(countryCode)
+                .abbreviation(abbreviation)
+                .timeStart(timeStart)
+                .gmtOffset(gmtOffset)
+                .dst(dst)
                 .build();
+    }
+
+    public static TimezoneDTO fromEntity(Timezone timezone) {
+        return new TimezoneDTO(
+                timezone.getTimezoneId(),
+                timezone.getTimezoneName(),
+                timezone.getCountryCode(),
+                timezone.getAbbreviation(),
+                timezone.getTimeStart(),
+                timezone.getGmtOffset(),
+                timezone.getDst()
+        );
     }
 }
