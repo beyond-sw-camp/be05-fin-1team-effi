@@ -1,9 +1,13 @@
 package com.example.effi.domain.DTO;
 
 import com.example.effi.domain.Entitiy.Routine;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@Getter
+@NoArgsConstructor
 public class RoutineResponseDTO {
     private Long routineId;
     private Date routineStart;
