@@ -1,6 +1,7 @@
 package com.example.effi.repository;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,4 +33,6 @@ public interface GroupEmpRepository extends JpaRepository<GroupEmp, Long> {
     @Transactional
     @Query("DELETE FROM GroupEmp ge WHERE ge.group.groupId = :groupId")
     void deleteAllByGroupId(Long groupId);
+
+    List<GroupEmp> findAllByGroup_GroupId(Long groupId);
 }
