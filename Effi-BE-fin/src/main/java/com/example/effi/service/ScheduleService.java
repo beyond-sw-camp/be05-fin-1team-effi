@@ -86,6 +86,22 @@ public class ScheduleService {
         return new ScheduleResponseDTO(scheduleRepository.save(sch));
     }
 
+    //update routine
+    public ScheduleResponseDTO updateRoutine(Long routineId, Long scheduleId) {
+        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        Routine routine = routineRepository.findById(routineId).get();
+        if (routine == null || routine.getDeleteYn() == true) {
+            sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
+                    sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
+                    sch.getCategory(), null);
+            return new ScheduleResponseDTO(scheduleRepository.save(sch));
+        }
+        sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
+                sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
+                sch.getCategory(), routine);
+        return new ScheduleResponseDTO(scheduleRepository.save(sch));
+    }
+
     // delete schedule
     public void deleteSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
@@ -94,4 +110,5 @@ public class ScheduleService {
         sch.delete();
         scheduleRepository.save(sch);
     }
+
 }
