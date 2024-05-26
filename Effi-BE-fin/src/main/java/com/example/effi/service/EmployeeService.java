@@ -1,6 +1,8 @@
 package com.example.effi.service;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,5 +72,15 @@ public class EmployeeService {
     //empno -> empId 찾기
     public Long findEmpIdByEmpNo(Long empNo) {
         return employeeRepository.findByEmpNo(empNo).getId();
+    }
+
+    // dept 사람들 empid만 찾기
+    public List<Long> findEmpIdByDept(Long deptId) {
+        List<Employee> lst = employeeRepository.findAllByDept_DeptId(deptId);
+        List<Long> rtn = new ArrayList<>();
+        for (Employee emp : lst) {
+            rtn.add(emp.getId());
+        }
+        return rtn;
     }
 }

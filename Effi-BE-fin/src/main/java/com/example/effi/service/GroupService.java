@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -165,5 +166,15 @@ public class GroupService {
                         .deptId(employee.getDept().getDeptId())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // groupId로 속한 empId 리턴
+    public List<Long> findEmployeeIdsByGroupId(Long groupId) {
+        List<GroupEmp> lst = groupEmpRepository.findAllByGroup_GroupId(groupId);
+        List<Long> employeeIds = new ArrayList<>();
+        for (GroupEmp groupEmp : lst) {
+            employeeIds.add(groupEmp.getEmployee().getId());
+        }
+        return employeeIds;
     }
 }
