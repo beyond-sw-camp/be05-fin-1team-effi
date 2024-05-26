@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,6 +23,17 @@ public class TagScheduleService {
     private final TagService tagService;
     private final TagRepository tagRepository;
     private final ScheduleRepository scheduleRepository;
+
+    // tagId로 scheduleId List rtn
+    public List<TagScheduleResponseDTO> findByTagId(Long tagId) {
+        List<TagSchedule> tagScheduleList = tagScheduleRepository.findAllByTag_TagId(tagId);
+        List<TagScheduleResponseDTO> rtn = new ArrayList<>();
+        for (TagSchedule tagSchedule : tagScheduleList) {
+            if (tagSchedule.getDeleteYn() == false)
+                rtn.add(new TagScheduleResponseDTO(tagSchedule));
+        }
+        return rtn;
+    }
 
     // tagId & scheduleId로 tagSchedule return
     public TagScheduleResponseDTO findByScheduleIdAndTagId(Long scheduleId, Long tagId) {
@@ -43,7 +55,7 @@ public class TagScheduleService {
     }
 
     //t-sId로 t-s 리턴
-    public TagScheduleResponseDTO findSchedule(Long tagScheduleId){
+    public TagScheduleResponseDTO findTagSchedule(Long tagScheduleId){
         TagSchedule tagSchedule = tagScheduleRepository.findById(tagScheduleId).orElse(null);
         return new TagScheduleResponseDTO(tagSchedule);
     }

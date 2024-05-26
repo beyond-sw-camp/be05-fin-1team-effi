@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface TagScheduleRepository extends JpaRepository<TagSchedule, Long> {
     List<TagSchedule> findAllBySchedule_ScheduleId(Long scheduleId);
+
+    List<TagSchedule> findAllByTag_TagId(Long tagId);
 }
