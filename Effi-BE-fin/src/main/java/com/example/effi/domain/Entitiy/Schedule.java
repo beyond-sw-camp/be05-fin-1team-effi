@@ -1,7 +1,5 @@
 package com.example.effi.domain.Entitiy;
 
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Routine;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

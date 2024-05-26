@@ -2,7 +2,6 @@ package com.example.effi.service;
 import com.example.effi.domain.DTO.EmployeeDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.GroupResponseDTO;
-import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.domain.Entitiy.Category;
 import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.Group;

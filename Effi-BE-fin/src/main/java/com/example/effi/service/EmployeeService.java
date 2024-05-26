@@ -3,8 +3,6 @@ package com.example.effi.service;
 
 import java.util.Optional;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +17,6 @@ import com.example.effi.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

@@ -3,13 +3,10 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.RoutineRequestDTO;
 import com.example.effi.domain.DTO.RoutineResponseDTO;
-import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.service.RoutineService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/routine")
