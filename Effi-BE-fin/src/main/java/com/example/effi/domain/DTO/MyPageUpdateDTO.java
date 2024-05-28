@@ -13,12 +13,11 @@ import com.example.effi.domain.Entitiy.Timezone;
 @NoArgsConstructor
 public class MyPageUpdateDTO {
 
-    private Long empId;
+
     private Long timezoneId;
 
     @Builder
-    public MyPageUpdateDTO(Long empId, Long timezoneId){
-        this.empId = empId;
+    public MyPageUpdateDTO( Long timezoneId){
         this.timezoneId = timezoneId;
     }
 

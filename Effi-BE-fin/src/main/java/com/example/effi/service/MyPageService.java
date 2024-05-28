@@ -9,6 +9,8 @@ import com.example.effi.repository.MyPageRepository;
 import com.example.effi.repository.TimezoneEmpRepository;
 import com.example.effi.repository.TimezoneRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +25,19 @@ public class MyPageService {
     private final TimezoneRepository timezoneRepository;
 
     @Transactional
-    public MyPageResponseDTO getEmployee(Long empId) {
-        String timezoneName = mypageRepository.findDefaultTimezoneName(empId);
+    public MyPageResponseDTO getEmployee() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Optional<Employee> byeId = mypageRepository.findById(empId);
+        String empId = authentication.getName();
 
-        Employee employee = byeId.get();
+        String timezoneName = mypageRepository.findDefaultTimezoneName(Long.valueOf(empId));
+
+        Optional<Employee> byemp = mypageRepository.findById(Long.valueOf(empId));
+        if(!byemp.isPresent()){
+            throw new IllegalArgumentException("Employee not found with id: " + empId);
+        }
+
+        Employee employee = byemp.get();
         return MyPageResponseDTO.builder()
                 .empNo(employee.getEmpNo())
                 .name(employee.getName())
@@ -43,13 +52,17 @@ public class MyPageService {
                 .build();
     }
 
-    // 기본 시단대 update
+    // 기본 시간대 update
     @Transactional
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String empId = authentication.getName();
+
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(Long.valueOf(empId));
 
         Timezone timezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId())
-                .orElseThrow(() -> new IllegalArgumentException("시간대를 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
+                .orElseThrow(() -> new IllegalArgumentException("default timezone을 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
 
         timezoneEmp.setTimezone(timezone);
         timezoneEmpRepository.save(timezoneEmp);
