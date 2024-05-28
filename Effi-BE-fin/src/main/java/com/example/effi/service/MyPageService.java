@@ -43,10 +43,11 @@ public class MyPageService {
                 .build();
     }
 
-    // 기본 시단대 update
+    // 기본 시간대 update
     @Transactional
-    public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId());
+    public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO) {
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId())
+                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + myPageUpdateDTO.getEmpId()));
 
         Timezone timezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId())
                 .orElseThrow(() -> new IllegalArgumentException("시간대를 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
