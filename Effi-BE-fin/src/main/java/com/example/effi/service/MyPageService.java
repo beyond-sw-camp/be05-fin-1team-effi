@@ -54,15 +54,12 @@ public class MyPageService {
 
     // 기본 시간대 update
     @Transactional
-    public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String empId = authentication.getName();
-
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(Long.valueOf(empId));
+    public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO) {
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId())
+                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + myPageUpdateDTO.getEmpId()));
 
         Timezone timezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId())
-                .orElseThrow(() -> new IllegalArgumentException("default timezone을 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
+                .orElseThrow(() -> new IllegalArgumentException("시간대를 찾을 수 없습니다. 시간대 ID: " + myPageUpdateDTO.getTimezoneId()));
 
         timezoneEmp.setTimezone(timezone);
         timezoneEmpRepository.save(timezoneEmp);

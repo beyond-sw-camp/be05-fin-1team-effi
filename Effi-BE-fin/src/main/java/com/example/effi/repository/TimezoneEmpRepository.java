@@ -53,10 +53,15 @@ import java.util.Optional;
 
 public interface TimezoneEmpRepository extends JpaRepository<TimezoneEmp, Long> {
     @Query("SELECT te FROM TimezoneEmp te WHERE te.employee.id = :empId AND te.defaultTimezone = true")
-    TimezoneEmp findByEmpIdAndDefaultTimezone(@Param("empId") Long empId);
+    Optional<TimezoneEmp> findByEmpIdAndDefaultTimezone(@Param("empId") Long empId);
 
-    Optional<TimezoneEmp> findByEmployeeIdAndTimezone_TimezoneId(Long empId, Long timezoneId); // 변경된 메서드 이름
+    Optional<TimezoneEmp> findByEmployeeIdAndTimezone_TimezoneId(Long empId, Long timezoneId);
     Optional<TimezoneEmp> findByEmployeeIdAndDefaultTimezone(Long empId, boolean isDefault);
-    Optional<TimezoneEmp> findByEmployeeIdAndTimezoneTimezoneId(Long empId, Long timezoneId);
     List<TimezoneEmp> findByEmployeeId(Long empId);
+
+    @Query("SELECT COUNT(te) FROM TimezoneEmp te WHERE te.employee.id = :empId")
+    long countByEmployeeId(@Param("empId") Long empId);
+
+    @Query("SELECT COUNT(te) FROM TimezoneEmp te WHERE te.defaultTimezone = true")
+    long countByDefaultTimezone(boolean defaultTimezone);
 }
