@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.effi.domain.DTO.EmployeeDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,5 +83,34 @@ public class EmployeeService {
             rtn.add(emp.getId());
         }
         return rtn;
+    }
+
+    // dept 사람들 emp 찾기
+    public List<EmployeeDTO> findAllByDeptId(Long deptId) {
+        List<EmployeeDTO> lst = new ArrayList<>();
+        employeeRepository.findAllByDept_DeptId(deptId)
+                .forEach(employee -> {
+                    lst.add(new EmployeeDTO(employee));
+                });
+        return lst;
+    }
+
+    // 전체 찾기
+    public List<EmployeeDTO> findAll(){
+        List<Employee> lst = employeeRepository.findAll();
+        List<EmployeeDTO> rtn = new ArrayList<>();
+        for (Employee emp : lst) {
+            rtn.add(new EmployeeDTO(emp));
+        }
+        return rtn;
+    }
+
+    // empId로 emp 리턴
+    public EmployeeDTO findById(Long id) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if (employee.isPresent()) {
+            return new EmployeeDTO(employee.get());
+        }
+        return null;
     }
 }
