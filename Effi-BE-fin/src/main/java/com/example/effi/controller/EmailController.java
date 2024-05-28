@@ -4,12 +4,9 @@ import com.example.effi.service.EmailService;
 import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;
 import com.example.effi.service.ParticipantService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,49 +18,45 @@ public class EmailController {
     private final GroupService groupService;
     private final ParticipantService participantService;
 
-    // 메일 전송 컨트롤러 -> 함수 수정하면 될듯
-    // 그룹 추가,
-    // 편집시 그룹 구성원들에게 메일 전송 기능 구현
-    // 회사,
-    // 팀,
-    // 그룹의 일정이 추가 시 속한 사원들에게 메일 전송 기능 구현
-    // 일정에 대한 미리 알림 메일 전송 기능 구현
-
     // 그룹 추가 시 메일 전송
     @PostMapping("/send/group/add/{groupId}")
     public ResponseEntity<?> groupAddMail(@PathVariable("groupId") Long groupId) {
-        mailService.setEmail("a");
+        groupService.findEmployeeIdsByGroupId(groupId)
+                        .forEach(emp -> mailService.addGroupMail(employeeService.findById(emp).getEmail(), groupId));
         return ResponseEntity.ok().build();
     }
 
     // 그룹 편집 시 메일 전송
     @PostMapping("/send/group/update/{groupId}")
     public ResponseEntity<?> groupUpdateMail(@PathVariable("groupId") Long groupId) {
-        mailService.setEmail("a");
+        groupService.findEmployeeIdsByGroupId(groupId)
+                .forEach(emp -> mailService.updateGroupMail(employeeService.findById(emp).getEmail(), groupId));
         return ResponseEntity.ok().build();
     }
 
     // 전체 메일 전송
-    @PostMapping("/send/all")
-    public ResponseEntity<?> allMail() {
+    @PostMapping("/send/all/{scheduleId}")
+    public ResponseEntity<?> allMail(@PathVariable("scheduleId") Long scheduleId) {
         employeeService.findAll()
-                .forEach(employeeDTO -> mailService.setEmail(employeeDTO.getEmail()));
+                .forEach(employeeDTO -> mailService.allEmployeesMail(employeeDTO.getEmail(), scheduleId));
         return ResponseEntity.ok().build();
     }
 
     // 부서 메일 전송
-    @PostMapping("/send/dept/{deptId}")
-    public ResponseEntity<?> deptMail(@PathVariable("deptId") Long deptId) {
+    @PostMapping("/send/dept/{deptId}/{scheduleId}")
+    public ResponseEntity<?> deptMail(@PathVariable("deptId") Long deptId,
+                                      @PathVariable("scheduleId") Long scheduleId) {
         employeeService.findAllByDeptId(deptId)
-                .forEach(employeeDTO -> mailService.setEmail(employeeDTO.getEmail()));
+                .forEach(employeeDTO -> mailService.deptEmplyeesMail(employeeDTO.getEmail(), scheduleId));
         return ResponseEntity.ok().build();
     }
 
     // 그룹 메일 전송
-    @PostMapping("/send/group/{groupId}")
-    public ResponseEntity<?> groupMail(@PathVariable("groupId") Long groupId) {
+    @PostMapping("/send/group/{groupId}/{scheduleId}")
+    public ResponseEntity<?> groupMail(@PathVariable("groupId") Long groupId,
+                                       @PathVariable("scheduleId") Long scheduleId) {
         groupService.findEmployeeIdsByGroupId(groupId)
-                .forEach(empId -> mailService.setEmail(employeeService.findById(empId).getEmail()));
+                .forEach(empId -> mailService.groupEmplyesMail(employeeService.findById(empId).getEmail(), scheduleId));
         return ResponseEntity.ok().build();
     }
 
@@ -72,13 +65,9 @@ public class EmailController {
     public ResponseEntity<?> scheduleMail(@PathVariable("scheduleId") Long scheduleId) {
         participantService.findAllByScheduleId(scheduleId)
                         .forEach(participantResponseDTO
-                                -> mailService.setEmail(employeeService.findById(participantResponseDTO.getEmpId()).getEmail()));
+                                -> mailService.scheduleNotifyMail(employeeService.
+                                findById(participantResponseDTO.getEmpId()).getEmail(), scheduleId));
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/send")
-    public void mailSend(@RequestBody @Valid String email) {
-        mailService.setEmail(email);
     }
 
 }

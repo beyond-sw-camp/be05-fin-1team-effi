@@ -1,5 +1,6 @@
 package com.example.effi.service;
 import com.example.effi.domain.DTO.EmployeeDTO;
+import com.example.effi.domain.DTO.GroupDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.GroupResponseDTO;
 import com.example.effi.domain.Entitiy.Category;
@@ -176,5 +177,11 @@ public class GroupService {
             employeeIds.add(groupEmp.getEmployee().getId());
         }
         return employeeIds;
+    }
+
+    // groupId로 group 찾기
+    public GroupDTO findGroupById(Long groupId) {
+        Group grp = groupRepository.findById(groupId).get();
+        return new GroupDTO(grp);
     }
 }

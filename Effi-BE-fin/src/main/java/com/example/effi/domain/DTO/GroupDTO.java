@@ -21,6 +21,13 @@ public class GroupDTO {
         this.categoryId = category.getCategoryId();
     }
 
+    public GroupDTO(Group grp) {
+        this.groupId = grp.getGroupId();
+        this.groupName = grp.getGroupName();
+        this.deleteYn = grp.getDeleteYn();
+        this.categoryId = grp.getCategory().getCategoryId();
+    }
+
     public Group toEntity(Category category) {
         return Group.builder()
                 .groupName(groupName)
