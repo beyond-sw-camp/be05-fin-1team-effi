@@ -21,7 +21,7 @@ public class TimezoneEmpService {
     private final TimezoneEmpRepository timezoneEmpRepository;
     private final TimezoneRepository timezoneRepository;
     private final EmployeeRepository employeeRepository;
-    
+
     @Transactional
     public void addTimezoneForEmployee(Long empId, Long timezoneId, boolean isDefault) {
         Employee employee = employeeRepository.findById(empId)
@@ -114,7 +114,7 @@ public class TimezoneEmpService {
         validateDefaultTimezoneCount();
     }
 
-    // 기본 시단대 update
+    // 기본 시간대 update
     @Transactional
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO) {
         TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId())
