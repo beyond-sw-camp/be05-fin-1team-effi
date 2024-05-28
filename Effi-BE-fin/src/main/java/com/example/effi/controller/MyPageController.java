@@ -16,13 +16,13 @@ public class MyPageController {
 
     private final MyPageService myPageService;
 
-    @GetMapping(value = "/{empNo}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<MyPageResponseDTO> mypageView(@PathVariable("empNo") Long empNo){
-        MyPageResponseDTO mypage = myPageService.getEmployee(empNo);
+    @GetMapping(value="/me", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<MyPageResponseDTO> mypageView(){
+        MyPageResponseDTO mypage = myPageService.getEmployee();
         return ResponseEntity.ok(mypage);
     }
 
-    @PutMapping(value = "/update/{empNo}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(value = "/update", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> updateTimezone(@RequestBody MyPageUpdateDTO myPageUpdateDTO) {
         myPageService.updateEmployeeTimezone(myPageUpdateDTO);
         return ResponseEntity.ok("Timezone updated successfully");

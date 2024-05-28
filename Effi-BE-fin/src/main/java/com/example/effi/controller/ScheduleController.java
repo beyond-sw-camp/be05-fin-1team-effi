@@ -74,4 +74,6 @@ public class ScheduleController {
         scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok().build();
     }
+
+    //
 }
