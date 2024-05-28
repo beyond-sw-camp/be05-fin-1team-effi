@@ -15,8 +15,10 @@ import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.RefreshToken;
 import com.example.effi.domain.DTO.SignInRequest;
 import com.example.effi.domain.DTO.SignInResponse;
+import com.example.effi.domain.DTO.SignOutRequest;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RefreshTokenRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -68,6 +70,22 @@ public class EmployeeService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Transactional
+    public String signOut(String token)  throws JsonProcessingException {
+        String subject = tokenProvider.decodeJwtPayloadSubject(token);
+        Long empNo = Long.parseLong(subject.split(":")[0]);
+        Employee employee = employeeRepository.findByEmpNo(empNo);
+        if (refreshTokenRepository.findById(employee.getId()).isEmpty()){
+            return "로그아웃 실패";
+        }
+        try {
+            refreshTokenRepository.deleteById(employee.getId());
+        } catch (Exception e) {
+            return "로그아웃 실패";
+        }
+        return "로그아웃 성공";
     }
 
     //empno -> empId 찾기

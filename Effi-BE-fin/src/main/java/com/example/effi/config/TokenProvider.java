@@ -110,7 +110,7 @@ public class TokenProvider {
                 .parseClaimsJws(token);
     }
 
-    private String decodeJwtPayloadSubject(String oldAccessToken) throws JsonProcessingException {
+    public String decodeJwtPayloadSubject(String oldAccessToken) throws JsonProcessingException {
         return objectMapper.readValue(
                 new String(Base64.getDecoder().decode(oldAccessToken.split("\\.")[1]), StandardCharsets.UTF_8),
                 Map.class
