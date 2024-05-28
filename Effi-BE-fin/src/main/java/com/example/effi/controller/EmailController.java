@@ -4,12 +4,10 @@ import com.example.effi.service.EmailService;
 import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;
 import com.example.effi.service.ParticipantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -76,6 +74,11 @@ public class EmailController {
                         .forEach(participantResponseDTO
                                 -> mailService.setEmail(employeeService.findById(participantResponseDTO.getEmpId()).getEmail()));
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/send")
+    public void mailSend(@RequestBody @Valid String email) {
+        mailService.setEmail(email);
     }
 
 }

@@ -89,7 +89,7 @@ public class EmailService {
         String toEmail = email;
         String title = MessageBody;
         String body = "";
-        body += "<div style='margin:100px;'>";
+//        body += "<div style='margin:100px;'>";
         body += "<h1> 안녕하세요 이피 입니다. </h1>";
         body += "<br>";
         body += "<strong>";
