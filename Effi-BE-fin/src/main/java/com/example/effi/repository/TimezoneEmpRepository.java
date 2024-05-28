@@ -58,4 +58,10 @@ public interface TimezoneEmpRepository extends JpaRepository<TimezoneEmp, Long> 
     Optional<TimezoneEmp> findByEmployeeIdAndTimezone_TimezoneId(Long empId, Long timezoneId);
     Optional<TimezoneEmp> findByEmployeeIdAndDefaultTimezone(Long empId, boolean isDefault);
     List<TimezoneEmp> findByEmployeeId(Long empId);
+
+    @Query("SELECT COUNT(te) FROM TimezoneEmp te WHERE te.employee.id = :empId")
+    long countByEmployeeId(@Param("empId") Long empId);
+
+    @Query("SELECT COUNT(te) FROM TimezoneEmp te WHERE te.defaultTimezone = true")
+    long countByDefaultTimezone(boolean defaultTimezone);
 }
