@@ -11,6 +11,4 @@ public interface SearchRepository extends JpaRepository<Schedule, Long> {
 
     // containing ignore case -> 대소문자 구분 x / %title$
     List<Schedule> findAllByTitleContainingIgnoreCase(String title);
-
-    // List<Schedule> findBy
 }

@@ -1,6 +1,7 @@
 package com.example.effi.domain.DTO;
 
 import com.example.effi.domain.Entitiy.Schedule;
+import com.example.effi.domain.Entitiy.TagSchedule;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +23,9 @@ public class SearchResponseDTO {
     private Date updatedAt;
 
     private Long categoryId;
+    private String categoryName;
     private Long routineId;
+
 
     public SearchResponseDTO(Schedule schedule){
         this.scheduleId = schedule.getScheduleId();
@@ -36,6 +39,7 @@ public class SearchResponseDTO {
         this.updatedAt = schedule.getUpdatedAt();
         this.deleteYn = schedule.getDeleteYn();
         this.categoryId = schedule.getCategory().getCategoryId();
+        this.categoryName = schedule.getCategory().getCategoryName();
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else

@@ -23,12 +23,28 @@ public class SearchController {
     private final ParticipantService participantService;
     private final SearchService searchService;
 
-    // ?title=<search_term> -> 제목에 search_term 을 포함하는 모든 스케줄 검색
+    // api/search/title?title=<sch> -> 제목에 search_term 을 포함하는 모든 스케줄 검색
     @GetMapping("/title")
     public ResponseEntity<List<SearchResponseDTO>> searchSchedulesByTitle(@RequestParam String title) {
-        List<SearchResponseDTO> response = searchService.searchSchedulesByTitle(title);
-        return ResponseEntity.ok(response);
+        List<SearchResponseDTO> schedules = searchService.searchSchedulesByTitle(title);
+        return ResponseEntity.ok(schedules);
     }
+
+    // api/search/tag?tag=<tag_name> -> 정확히 tag이름이 tag_name 인 모든 스케줄 검색
+    @GetMapping("/tag")
+    public ResponseEntity<List<SearchResponseDTO>> searchSchedulesByTag(@RequestParam String tagName) {
+        List<SearchResponseDTO> schedules = searchService.searchSchedulesByTag(tagName);
+        return ResponseEntity.ok(schedules);
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<List<SearchResponseDTO>> searchSchedulesByCategory(@RequestParam String categoryName){
+        List<SearchResponseDTO> schedules = searchService.searchSchedulesByCategory(categoryName);
+        return ResponseEntity.ok(schedules);
+    }
+
+
+
 
 
 }
