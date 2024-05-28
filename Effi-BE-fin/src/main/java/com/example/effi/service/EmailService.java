@@ -21,12 +21,18 @@ public class EmailService {
     // 인증 코드 대신 상황에 맞는 문구 추기
 
     // 그룹 추가 -> 그룹 구성원들에게 (groupId, empId-email)
-    public static void addGroup(){
-        StringBuilder key = new StringBuilder();
-
-        key.append("그룹에 추가 되었습니다.");
-
-        MessageBody = key.toString();
+    public void addGroup(String email, Long groupId){
+        String fromEmail = "teseuteu593@gmail.com";//?
+        String toEmail = email;
+        String title = "그룹 추가 알림 메일";
+        String body = "";
+//        body += "<div style='margin:100px;'>";
+        body += "<h1> 안녕하세요 이피 입니다. </h1>";
+        body += "<br>";
+        body += "<strong>";
+        body += MessageBody + "</strong><div><br/> ";
+        body += "</div>";
+        sendMail(fromEmail, toEmail, title, body);
     }
 
     // 그룹 편집 -> 그룹 구성원들에게 (groupId, empId-email)
