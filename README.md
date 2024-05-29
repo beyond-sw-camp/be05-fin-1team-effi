@@ -1,4 +1,4 @@
-# Effi Planner
+# Effi Planner 
 
 <details>
     <summary>기획서</summary>

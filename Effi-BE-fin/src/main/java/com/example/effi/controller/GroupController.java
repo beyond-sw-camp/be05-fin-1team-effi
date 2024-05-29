@@ -1,8 +1,8 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.EmployeeDTO;
+import com.example.effi.domain.DTO.GlobalResponse;
 import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
 import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +19,14 @@ public class GroupController {
 
     // 그룹 생성
     @PostMapping
-    public ResponseEntity<GroupResponseDTO> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
-        GroupResponseDTO responseDTO = groupService.createGroup(groupRequestDTO);
-        return ResponseEntity.ok(responseDTO);
+    public ResponseEntity<GlobalResponse> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
+        return groupService.createGroup(groupRequestDTO);
     }
 
     // 그룹에 구성원 추가
     @PostMapping("/{groupId}/employees")
-    public ResponseEntity<Void> addEmployeesToGroup(@PathVariable Long groupId, @RequestBody List<Long> employeeIds) {
-        groupService.addEmployeesToGroup(groupId, employeeIds);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<GlobalResponse> addEmployeesToGroup(@PathVariable Long groupId, @RequestBody List<Long> employeeIds) {
+        return groupService.addEmployeesToGroup(groupId, employeeIds);
     }
 
     // 직원 검색
@@ -38,26 +36,21 @@ public class GroupController {
         return ResponseEntity.ok(employees);
     }
 
-
     // 그룹 탈퇴
     @DeleteMapping("/{groupId}/employees/{empId}")
-    public ResponseEntity<GroupResponseDTO> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
-        GroupResponseDTO response = groupService.withdrawGroup(groupId, empId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<GlobalResponse> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
+        return groupService.withdrawGroup(groupId, empId);
     }
 
     // 그룹 이름 변경
     @PutMapping("/{groupId}")
-    public ResponseEntity<GroupResponseDTO> updateGroupName(@PathVariable Long groupId, @RequestBody UpdateGroupNameRequest request) {
-        GroupResponseDTO response = groupService.updateGroupName(groupId, request.getNewGroupName());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<GlobalResponse> updateGroupName(@PathVariable Long groupId, @RequestBody UpdateGroupNameRequest request) {
+        return groupService.updateGroupName(groupId, request.getNewGroupName());
     }
 
     // 그룹 삭제
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<GroupResponseDTO> deleteGroup(@PathVariable Long groupId) {
-        GroupResponseDTO response = groupService.deleteGroup(groupId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<GlobalResponse> deleteGroup(@PathVariable Long groupId) {
+        return groupService.deleteGroup(groupId);
     }
-
 }
