@@ -1,5 +1,5 @@
 package com.example.effi.controller;
 
-public class GroupTestController {
+public class GroupControllerTest {
 
 }
