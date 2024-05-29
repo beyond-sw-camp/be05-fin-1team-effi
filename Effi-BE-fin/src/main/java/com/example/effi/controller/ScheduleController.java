@@ -26,6 +26,8 @@ public class ScheduleController {
         Long empId = employeeService.findEmpIdByEmpNo(empNo);
         ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
         participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+        if (schedule.getRoutineId() != null)
+            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
         return ResponseEntity.ok(rtn);
     }
 
@@ -33,11 +35,9 @@ public class ScheduleController {
     @PostMapping("/update/{scheduleId}")
     public ResponseEntity<ScheduleResponseDTO> updateSchedule(@PathVariable Long scheduleId,
                                                               @RequestBody ScheduleRequestDTO schedule) {
-//        if (schedule.getScheduleId() != scheduleId) {
-//            return ResponseEntity.ok(null);
-////            return ResponseEntity.badRequest().build(); // 뭔가 이상
-//        }
         ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
+        if (schedule.getRoutineId() != null)
+            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
         return ResponseEntity.ok(rtn);
     }
 
