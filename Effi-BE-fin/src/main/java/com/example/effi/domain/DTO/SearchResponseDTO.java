@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -26,8 +27,10 @@ public class SearchResponseDTO {
     private String categoryName;
     private Long routineId;
 
+    private List<String> tagNames;
 
-    public SearchResponseDTO(Schedule schedule){
+
+    public SearchResponseDTO(Schedule schedule, List<String> tagNames){
         this.scheduleId = schedule.getScheduleId();
         this.title = schedule.getTitle();
         this.context = schedule.getContext();
@@ -45,5 +48,8 @@ public class SearchResponseDTO {
         else
             this.routineId = null;
 
+        this.tagNames = tagNames;
+
     }
 }
+

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
 import java.util.List;
 
 @Repository
@@ -15,10 +16,17 @@ public interface TagScheduleRepository extends JpaRepository<TagSchedule, Long> 
 
     List<TagSchedule> findAllByTag_TagId(Long tagId);
 
-    // tagName 이 완전히 일치할 때 + 삭제되지 않음
-    @Query("SELECT ts.schedule " +
-            "FROM TagSchedule ts " +
-            "WHERE ts.tag.tagName = :tagName " +
+    // containing ignore case -> 대소문자 구분 x / %tagName%
+    @Query("SELECT s " +
+            "FROM Schedule s " +
+            "JOIN TagSchedule ts " +
+            "ON s.scheduleId = ts.schedule.scheduleId " +
+            "JOIN ts.tag t " +
+            "WHERE LOWER(t.tagName) " +
+            "LIKE LOWER(CONCAT('%', :tagName, '%')) " +
             "AND ts.deleteYn = false")
-    List<Schedule> findSchedulesByTagName(@Param("tagName") String tagName);
+    List<Schedule> findAllByTag_TagNameContainingIgnoreCase(@Param("tagName") String tagName);
+
+
 }
+
