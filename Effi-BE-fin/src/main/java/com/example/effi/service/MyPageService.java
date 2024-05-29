@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MyPageService {
 
@@ -24,17 +25,17 @@ public class MyPageService {
     private final TimezoneEmpRepository timezoneEmpRepository;
     private final TimezoneRepository timezoneRepository;
 
-    @Transactional
+    // 내 정보 조회
     public MyPageResponseDTO getEmployee() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String empId = authentication.getName();
+        Long empId = Long.valueOf(authentication.getName());
 
-        String timezoneName = mypageRepository.findDefaultTimezoneName(Long.valueOf(empId));
+        String timezoneName = mypageRepository.findDefaultTimezoneName(empId);
 
-        Optional<Employee> byemp = mypageRepository.findById(Long.valueOf(empId));
+        Optional<Employee> byemp = mypageRepository.findById(empId);
         if(!byemp.isPresent()){
-            throw new IllegalArgumentException("Employee not found with id: " + empId);
+            throw new IllegalArgumentException("사원이 검색되지 않습니다. id: " + empId);
         }
 
         Employee employee = byemp.get();
@@ -53,21 +54,16 @@ public class MyPageService {
     }
 
     // 기본 시간대 update
-    @Transactional
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO) {
 
         // 인증 정보를 통해 empId 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String authenticatedEmpId = authentication.getName();
 
-        // myPageUpdateDTO의 empId와 일치하는지 확인 (필요한 경우)
-        if (!authenticatedEmpId.equals(String.valueOf(myPageUpdateDTO.getEmpId()))) {
-            throw new IllegalArgumentException("인증된 사용자와 요청된 사용자가 일치하지 않습니다.");
-        }
+        Long empId = Long.valueOf(authentication.getName());
 
         // 기본 타임존 엔티티 조회
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(myPageUpdateDTO.getEmpId())
-                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + myPageUpdateDTO.getEmpId()));
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(empId)
+                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + empId));
 
         // 새로운 타임존 엔티티 조회
         Timezone timezone = timezoneRepository.findById(myPageUpdateDTO.getTimezoneId())

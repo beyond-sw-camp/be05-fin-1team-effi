@@ -29,24 +29,35 @@ public class SearchService {
     private final TagScheduleRepository tagScheduleRepository;
     private final CategoryRepository categoryRepository;
 
+    // 여러개의 tagName 을 list 형식으로
+    private List<String> getTagNamesForSchedule(Long scheduleId) {
+        List<TagSchedule> tagSchedules = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
+        List<String> tagNames = new ArrayList<>();
+        for (TagSchedule ts : tagSchedules) {
+            tagNames.add(ts.getTag().getTagName());
+        }
+        return tagNames;
+    }
+
     // title 검색으로 내 일정 검색하기
     // containing ignore case -> 대소문자 구분 x / %title$
     public List<SearchResponseDTO> searchSchedulesByTitle(String title) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String empId = authentication.getName();
+        Long empId = Long.valueOf(authentication.getName());
 
         // 제목 기준으로 일정 가져오기
         List<Schedule> allSchedules = searchRepository.findAllByTitleContainingIgnoreCase(title);
         // 로그인한 사원이 참여자인 일정 가져오기
-        List<Participant> participants = participantRepository.findAllByEmployee_Id(Long.valueOf(empId));
+        List<Participant> participants = participantRepository.findAllByEmployee_Id(empId);
         List<SearchResponseDTO> schedules = new ArrayList<>();
 
         for (Participant participant : participants) {
             Schedule schedule = participant.getSchedule();
             // 삭제되지 않은 일정
             if (!schedule.getDeleteYn() && allSchedules.contains(schedule)) {
-                schedules.add(new SearchResponseDTO(schedule));
+                List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
+                schedules.add(new SearchResponseDTO(schedule, tagNames));
             }
         }
         return schedules;
@@ -57,10 +68,11 @@ public class SearchService {
     public List<SearchResponseDTO> searchSchedulesByTag(String tagName){
         // 현재 로그인된 사용자의 empId를 가져옴
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long empId = Long.parseLong(authentication.getName());
+
+        Long empId = Long.valueOf(authentication.getName());
 
         // 태그 이름으로 모든 일정 검색
-        List<Schedule> taggedSchedules = tagScheduleRepository.findSchedulesByTagName(tagName);
+        List<Schedule> taggedSchedules = tagScheduleRepository.findAllByTag_TagNameContainingIgnoreCase(tagName);
         // 로그인한 사원이 참여자인 일정 가져오기
         List<Participant> participants = participantRepository.findAllByEmployee_Id(empId);
         List<SearchResponseDTO> schedules = new ArrayList<>();
@@ -69,7 +81,8 @@ public class SearchService {
             Schedule schedule = participant.getSchedule();
             // 삭제되지 않은 일정
             if (!schedule.getDeleteYn() && taggedSchedules.contains(schedule)) {
-                schedules.add(new SearchResponseDTO(schedule));
+                List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
+                schedules.add(new SearchResponseDTO(schedule, tagNames));
             }
         }
         return schedules;
@@ -80,7 +93,8 @@ public class SearchService {
     public List<SearchResponseDTO> searchSchedulesByCategory(String categoryName){
         // 현재 로그인된 사용자의 empId를 가져옴
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long empId = Long.parseLong(authentication.getName());
+
+        Long empId = Long.valueOf(authentication.getName());
 
         // 카테고리 이름으로 모든 일정 검색
         List<Schedule> categorySchedules = categoryRepository.findSchedulesByCategoryName(categoryName);
@@ -93,10 +107,12 @@ public class SearchService {
             Schedule schedule = participant.getSchedule();
             // 삭제되지 않은 일정
             if (!schedule.getDeleteYn() && categorySchedules.contains(schedule)) {
-                schedules.add(new SearchResponseDTO(schedule));
+                List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
+                schedules.add(new SearchResponseDTO(schedule, tagNames));
             }
         }
         return schedules;
     }
 
 }
+
