@@ -54,6 +54,7 @@ public class EmployeeController {
                                         .build());
     }
 
+    // hasAnyAuthority('관리자', '사원') : '관리자' 또는 '사원' 권한이 있어야 접근 가능
     @PreAuthorize("hasAuthority('사원')")
     @PostMapping("/test")
     public ResponseEntity<String> test() {
