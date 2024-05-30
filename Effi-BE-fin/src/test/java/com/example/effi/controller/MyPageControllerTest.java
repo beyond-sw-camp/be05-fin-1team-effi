@@ -35,15 +35,6 @@ class MyPageControllerTest {
     @MockBean
     private MyPageService myPageService;
 
-    // 불필요한 빈을 모킹하여 오류 방지
-    @MockBean
-    private GroupEmpRepository groupEmpRepository;
-    @MockBean
-    private TokenProvider tokenProvider;
-    @MockBean
-    private EmailService emailService;
-    @MockBean
-    private GroupService groupService;
 
     @BeforeEach
     void setUp() {

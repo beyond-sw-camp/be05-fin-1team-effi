@@ -2,6 +2,7 @@ package com.example.effi.domain.DTO;
 
 import com.example.effi.domain.Entitiy.Schedule;
 import com.example.effi.domain.Entitiy.TagSchedule;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,7 @@ public class SearchResponseDTO {
 
     private Long categoryId;
     private String categoryName;
+
     private Long routineId;
 
     private List<String> tagNames;
@@ -41,8 +43,10 @@ public class SearchResponseDTO {
         this.createdAt = schedule.getCreatedAt();
         this.updatedAt = schedule.getUpdatedAt();
         this.deleteYn = schedule.getDeleteYn();
-        this.categoryId = schedule.getCategory().getCategoryId();
-        this.categoryName = schedule.getCategory().getCategoryName();
+
+        this.categoryId = (schedule.getCategory() != null) ? schedule.getCategory().getCategoryId() : null; // null 체크
+        this.categoryName = (schedule.getCategory() != null) ? schedule.getCategory().getCategoryName() : null; // null 체크
+
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else
@@ -50,6 +54,26 @@ public class SearchResponseDTO {
 
         this.tagNames = tagNames;
 
+    }
+
+    @Builder
+    public SearchResponseDTO(Long scheduleId, String title, String context, Date startTime, Date endTime,
+                             Integer status, Boolean notificationYn, Boolean deleteYn, Date createdAt,
+                             Date updatedAt, Long categoryId, String categoryName, Long routineId, List<String> tagNames) {
+        this.scheduleId = scheduleId;
+        this.title = title;
+        this.context = context;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.notificationYn = notificationYn;
+        this.deleteYn = deleteYn;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.routineId = routineId;
+        this.tagNames = tagNames;
     }
 }
 
