@@ -43,18 +43,15 @@ public class ScheduleController {
 
     // 조회 (전체) -> empNo 어떻게 넣음????
    @GetMapping("/findAll")
-    public ResponseEntity<List<ScheduleResponseDTO>> findAll(Long empNo){
-       Long empId = employeeService.findEmpIdByEmpNo(empNo);
-       List<ScheduleResponseDTO> lst = scheduleService.getAllSchedules(empId);
+    public ResponseEntity<List<ScheduleResponseDTO>> findAll(){
+       List<ScheduleResponseDTO> lst = scheduleService.getAllSchedules();
        return ResponseEntity.ok(lst);
     }
 
     // 조회 카테고리별 -> empNo 어떻게 넣음????
     @GetMapping("/find/category/{categoryId}")
-    public ResponseEntity<List<ScheduleResponseDTO>> findByCategory(@PathVariable("categoryId") Long categoryId,
-                                                                    Long empNo) {
-        Long empId = employeeService.findEmpIdByEmpNo(empNo);
-        List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId, empId);
+    public ResponseEntity<List<ScheduleResponseDTO>> findByCategory(@PathVariable("categoryId") Long categoryId) {
+        List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId);
         return ResponseEntity.ok(scheduleResponseDTO);
     }
 
