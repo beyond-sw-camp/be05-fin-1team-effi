@@ -34,7 +34,7 @@ public class ScheduleService {
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        Schedule sch = scheduleRepository.findById(scheduleId).get();
         if (sch == null || sch.getDeleteYn() == true) {
             return null;
         }
@@ -75,12 +75,13 @@ public class ScheduleService {
 
     // add schedule
     public ScheduleResponseDTO addSchedule(ScheduleRequestDTO scheduleRequestDTO) {
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
+        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).orElse(null);
         if (scheduleRequestDTO.getRoutineId() != null){
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
         }
-        return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, null)));
+        Schedule entity = scheduleRequestDTO.toEntity(category, null);
+        return new ScheduleResponseDTO(scheduleRepository.save(entity));
     }
 
     // 루틴 스케줄 자동 추가
