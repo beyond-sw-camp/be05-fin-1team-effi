@@ -5,7 +5,9 @@ import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;
 import com.example.effi.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,9 +20,11 @@ public class EmailController {
     private final GroupService groupService;
     private final ParticipantService participantService;
 
-    // 그룹 추가 시 메일 전송
+    // 그룹 추가 시 메일 전송 Leader
     @PostMapping("/send/group/add/{groupId}")
     public ResponseEntity<?> groupAddMail(@PathVariable("groupId") Long groupId) {
+        if (!groupService.findGroupLeader(groupId))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("그룹 리더만 메일을 전송할 수 있습니다.");
         groupService.findEmployeeIdsByGroupId(groupId)
                         .forEach(emp -> mailService.addGroupMail(employeeService.findById(emp).getEmail(), groupId));
         return ResponseEntity.ok().build();
@@ -29,12 +33,15 @@ public class EmailController {
     // 그룹 편집 시 메일 전송
     @PostMapping("/send/group/update/{groupId}")
     public ResponseEntity<?> groupUpdateMail(@PathVariable("groupId") Long groupId) {
+        if (!groupService.findGroupLeader(groupId))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("그룹 리더만 메일을 전송할 수 있습니다.");
         groupService.findEmployeeIdsByGroupId(groupId)
                 .forEach(emp -> mailService.updateGroupMail(employeeService.findById(emp).getEmail(), groupId));
         return ResponseEntity.ok().build();
     }
 
     // 전체 메일 전송
+    @PreAuthorize("hasAuthority('사원')")
     @PostMapping("/send/all/{scheduleId}")
     public ResponseEntity<?> allMail(@PathVariable("scheduleId") Long scheduleId) {
         employeeService.findAll()

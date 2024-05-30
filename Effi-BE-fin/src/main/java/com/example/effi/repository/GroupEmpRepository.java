@@ -35,4 +35,6 @@ public interface GroupEmpRepository extends JpaRepository<GroupEmp, Long> {
     void deleteAllByGroupId(Long groupId);
 
     List<GroupEmp> findAllByGroup_GroupId(Long groupId);
+
+    GroupEmp findByGroup_GroupIdAndEmployee_EmpId(Group group, Employee byEmpNo);
 }

@@ -215,6 +215,7 @@ public class GroupService {
     }
 
     // groupId로 속한 empId 리턴
+    @Transactional
     public List<Long> findEmployeeIdsByGroupId(Long groupId) {
         List<GroupEmp> lst = groupEmpRepository.findAllByGroup_GroupId(groupId);
         List<Long> employeeIds = new ArrayList<Long>();
@@ -225,8 +226,24 @@ public class GroupService {
     }
 
     // groupId로 group 찾기
+    @Transactional
     public GroupDTO findGroupById(Long groupId) {
         Group grp = groupRepository.findById(groupId).get();
         return new GroupDTO(grp);
+    }
+
+    @Transactional
+    public Boolean findGroupLeader(Long groupId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = Long.valueOf(authentication.getName());
+
+        GroupEmp groupEmp = groupEmpRepository.findByGroup_GroupIdAndEmployee_EmpId(groupRepository.findById(groupId).get(),
+                employeeRepository.findByEmpNo(creatorEmpNo));
+        if (groupEmp != null) {
+            if(groupEmp.getGroupEmpRank().equals("Leader"))
+                return true;
+        }
+        return false;
     }
 }

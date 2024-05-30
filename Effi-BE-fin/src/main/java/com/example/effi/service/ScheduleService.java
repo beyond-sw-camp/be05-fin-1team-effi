@@ -42,8 +42,11 @@ public class ScheduleService {
     }
 
     //empId로 내 schedule만 조회
-    public List<ScheduleResponseDTO> getAllSchedules(Long empId) {
-       //empID로 participant에서 list 받아와서 scheduleId List로 받기
+    public List<ScheduleResponseDTO> getAllSchedules() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
         List<Participant> partiDTO = participantRepository.findAllByEmployee_Id(empId);
         List<ScheduleResponseDTO> schedules = new ArrayList<>();
         for (Participant p : partiDTO) {
@@ -54,7 +57,11 @@ public class ScheduleService {
     }
 
     // empId & categoryId로 조회
-    public List<ScheduleResponseDTO> getSchedulesByCategory(Long categoryId, Long empId) {
+    public List<ScheduleResponseDTO> getSchedulesByCategory(Long categoryId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+
         List<Schedule> lst = scheduleRepository.findAllByCategory_CategoryId(categoryId);
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
