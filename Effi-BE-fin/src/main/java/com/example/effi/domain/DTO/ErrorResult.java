@@ -1,4 +1,4 @@
-package com.example.effi.controller;
+package com.example.effi.domain.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

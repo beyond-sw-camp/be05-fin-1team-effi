@@ -26,6 +26,8 @@ public class ScheduleController {
         Long empId = employeeService.findEmpIdByEmpNo(empNo);
         ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
         participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+        if (schedule.getRoutineId() != null)
+            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
         return ResponseEntity.ok(rtn);
     }
 
@@ -33,28 +35,23 @@ public class ScheduleController {
     @PostMapping("/update/{scheduleId}")
     public ResponseEntity<ScheduleResponseDTO> updateSchedule(@PathVariable Long scheduleId,
                                                               @RequestBody ScheduleRequestDTO schedule) {
-//        if (schedule.getScheduleId() != scheduleId) {
-//            return ResponseEntity.ok(null);
-////            return ResponseEntity.badRequest().build(); // 뭔가 이상
-//        }
         ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
+        if (schedule.getRoutineId() != null)
+            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
         return ResponseEntity.ok(rtn);
     }
 
     // 조회 (전체) -> empNo 어떻게 넣음????
    @GetMapping("/findAll")
-    public ResponseEntity<List<ScheduleResponseDTO>> findAll(Long empNo){
-       Long empId = employeeService.findEmpIdByEmpNo(empNo);
-       List<ScheduleResponseDTO> lst = scheduleService.getAllSchedules(empId);
+    public ResponseEntity<List<ScheduleResponseDTO>> findAll(){
+       List<ScheduleResponseDTO> lst = scheduleService.getAllSchedules();
        return ResponseEntity.ok(lst);
     }
 
     // 조회 카테고리별 -> empNo 어떻게 넣음????
     @GetMapping("/find/category/{categoryId}")
-    public ResponseEntity<List<ScheduleResponseDTO>> findByCategory(@PathVariable("categoryId") Long categoryId,
-                                                                    Long empNo) {
-        Long empId = employeeService.findEmpIdByEmpNo(empNo);
-        List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId, empId);
+    public ResponseEntity<List<ScheduleResponseDTO>> findByCategory(@PathVariable("categoryId") Long categoryId) {
+        List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId);
         return ResponseEntity.ok(scheduleResponseDTO);
     }
 
@@ -74,4 +71,6 @@ public class ScheduleController {
         scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok().build();
     }
+
+    //
 }

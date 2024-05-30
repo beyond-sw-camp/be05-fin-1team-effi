@@ -1,18 +1,17 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Routine;
 import com.example.effi.domain.Entitiy.Schedule;
+import com.example.effi.domain.Entitiy.TagSchedule;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
-@Setter
 @Getter
 @NoArgsConstructor
-public class ScheduleRequestDTO {
+public class SearchResponseDTO {
+
     private Long scheduleId;
     private String title;
     private String context;
@@ -25,9 +24,13 @@ public class ScheduleRequestDTO {
     private Date updatedAt;
 
     private Long categoryId;
+    private String categoryName;
     private Long routineId;
 
-    public ScheduleRequestDTO(Schedule schedule) {
+    private List<String> tagNames;
+
+
+    public SearchResponseDTO(Schedule schedule, List<String> tagNames){
         this.scheduleId = schedule.getScheduleId();
         this.title = schedule.getTitle();
         this.context = schedule.getContext();
@@ -35,29 +38,18 @@ public class ScheduleRequestDTO {
         this.endTime = schedule.getEndTime();
         this.status = schedule.getStatus();
         this.notificationYn = schedule.getNotificationYn();
-        this.deleteYn = schedule.getDeleteYn();
         this.createdAt = schedule.getCreatedAt();
         this.updatedAt = schedule.getUpdatedAt();
+        this.deleteYn = schedule.getDeleteYn();
         this.categoryId = schedule.getCategory().getCategoryId();
+        this.categoryName = schedule.getCategory().getCategoryName();
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else
             this.routineId = null;
-    }
 
-    public Schedule toEntity(Category category, Routine routine) {
-        return Schedule.builder()
-                .title(title)
-                .context(context)
-                .startTime(startTime)
-                .endTime(endTime)
-                .status(status)
-                .notificationYn(notificationYn)
-                .deleteYn(deleteYn)
-                .category(category)
-                .routine(routine)
-                .createdAt(createdAt)
-                .updatedAt(updatedAt)
-                .build();
+        this.tagNames = tagNames;
+
     }
 }
+

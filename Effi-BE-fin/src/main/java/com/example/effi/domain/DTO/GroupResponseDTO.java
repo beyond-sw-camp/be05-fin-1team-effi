@@ -1,31 +1,14 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Group;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 
 @Getter
-@NoArgsConstructor
+@Builder
 public class GroupResponseDTO {
-    private String code;
-    private String message;
-    private Data data;
 
-    @Builder
-    public GroupResponseDTO(String code, String message, String groupName) {
-        this.code = code;
-        this.message = message;
-        this.data = new Data(groupName);
-    }
-
-    @Getter
-    @NoArgsConstructor
-    public static class Data {
-        private String groupName;
-
-        public Data(String groupName) {
-            this.groupName = groupName;
-        }
-    }
+    private String groupName;
+    private List<Long> employeeIds;
 }
