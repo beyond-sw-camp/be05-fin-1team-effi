@@ -22,7 +22,7 @@ public class ScheduleController {
     // 추가
     @PostMapping("/add")
     public ResponseEntity<ScheduleResponseDTO> addSchedule(@RequestBody ScheduleRequestDTO schedule,
-                                                           Long empNo) {
+                                                           @RequestParam Long empNo) {
         Long empId = employeeService.findEmpIdByEmpNo(empNo);
         ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
         participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
