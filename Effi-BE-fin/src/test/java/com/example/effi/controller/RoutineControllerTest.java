@@ -1,6 +1,11 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.*;
+import com.example.effi.domain.Dto.*;
+import com.example.effi.domain.Dto.Schedule.CategoryDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineRequestDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineResponseDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
 import com.example.effi.service.RoutineService;
 import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;

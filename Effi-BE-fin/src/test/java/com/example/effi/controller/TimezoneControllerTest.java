@@ -1,6 +1,6 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.Dto.Timezone.TimezoneDTO;
 import com.example.effi.service.TimezoneService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

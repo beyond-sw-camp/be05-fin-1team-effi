@@ -1,6 +1,5 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.example.effi.domain.Dto.*;
+import com.example.effi.domain.Dto.Schedule.CategoryDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineRequestDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineResponseDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

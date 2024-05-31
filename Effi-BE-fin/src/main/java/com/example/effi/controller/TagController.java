@@ -1,8 +1,8 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.ScheduleResponseDTO;
-import com.example.effi.domain.DTO.TagResponseDTO;
-import com.example.effi.domain.DTO.TagScheduleResponseDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
+import com.example.effi.domain.Dto.Tag.TagResponseDTO;
+import com.example.effi.domain.Dto.Tag.TagScheduleResponseDTO;
 import com.example.effi.service.ScheduleService;
 import com.example.effi.service.TagScheduleService;
 import com.example.effi.service.TagService;
