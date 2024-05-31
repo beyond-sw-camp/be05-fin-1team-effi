@@ -1,12 +1,13 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
-import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.service.GroupService;
 import com.example.effi.config.TokenProvider;
+import com.example.effi.domain.Dto.Auth.GlobalResponse;
+import com.example.effi.domain.Dto.Group.GroupRequestDTO;
+import com.example.effi.domain.Dto.Group.GroupResponseDTO;
+import com.example.effi.domain.Dto.Group.UpdateGroupNameRequest;
+import com.example.effi.domain.Dto.User.EmployeeDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

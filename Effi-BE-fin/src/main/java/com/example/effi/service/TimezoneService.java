@@ -1,8 +1,9 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.Dto.Timezone.TimezoneDTO;
+import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.repository.TimezoneRepository;
-import com.example.effi.domain.Entitiy.Timezone;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

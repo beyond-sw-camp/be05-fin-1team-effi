@@ -1,8 +1,8 @@
 package com.example.effi.controller;
 
 
-import com.example.effi.domain.DTO.MyPageResponseDTO;
-import com.example.effi.domain.DTO.MyPageUpdateDTO;
+import com.example.effi.domain.Dto.Mypage.MyPageResponseDTO;
+import com.example.effi.domain.Dto.Mypage.MyPageUpdateDTO;
 import com.example.effi.service.MyPageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;

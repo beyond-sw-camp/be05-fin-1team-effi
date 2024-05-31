@@ -1,14 +1,14 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupDTO;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Group;
-import com.example.effi.domain.Entitiy.GroupEmp;
+import com.example.effi.domain.Dto.Auth.GlobalResponse;
+import com.example.effi.domain.Dto.Group.GroupDTO;
+import com.example.effi.domain.Dto.Group.GroupRequestDTO;
+import com.example.effi.domain.Dto.Group.GroupResponseDTO;
+import com.example.effi.domain.Dto.User.EmployeeDTO;
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Group;
+import com.example.effi.domain.Entity.GroupEmp;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.GroupEmpRepository;

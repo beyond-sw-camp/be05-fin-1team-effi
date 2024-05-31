@@ -1,9 +1,10 @@
 package com.example.effi.repository;
 
-import com.example.effi.domain.Entitiy.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.example.effi.domain.Entity.Employee;
 
 public interface MyPageRepository extends JpaRepository<Employee, Long> {
 

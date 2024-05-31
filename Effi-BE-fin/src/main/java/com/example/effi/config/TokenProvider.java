@@ -18,7 +18,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.effi.domain.Entitiy.RefreshToken;
+import com.example.effi.domain.Entity.RefreshToken;
 import com.example.effi.repository.RefreshTokenRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

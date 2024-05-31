@@ -1,8 +1,8 @@
 
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.TagResponseDTO;
-import com.example.effi.domain.Entitiy.Tag;
+import com.example.effi.domain.Dto.Tag.TagResponseDTO;
+import com.example.effi.domain.Entity.Tag;
 import com.example.effi.repository.TagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

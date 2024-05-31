@@ -1,7 +1,10 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.*;
-import com.example.effi.domain.Entitiy.*;
+import com.example.effi.domain.Dto.*;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
+import com.example.effi.domain.Dto.Tag.TagResponseDTO;
+import com.example.effi.domain.Dto.Tag.TagScheduleResponseDTO;
+import com.example.effi.domain.Entity.*;
 import com.example.effi.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

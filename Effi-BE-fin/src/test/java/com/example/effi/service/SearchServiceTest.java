@@ -1,8 +1,8 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.SearchResponseDTO;
-import com.example.effi.domain.Entitiy.Participant;
-import com.example.effi.domain.Entitiy.Schedule;
+import com.example.effi.domain.Dto.Schedule.SearchResponseDTO;
+import com.example.effi.domain.Entity.Participant;
+import com.example.effi.domain.Entity.Schedule;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.SearchRepository;
