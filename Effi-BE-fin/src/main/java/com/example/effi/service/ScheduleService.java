@@ -34,7 +34,7 @@ public class ScheduleService {
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
         if (sch == null || sch.getDeleteYn() == true) {
             return null;
         }
@@ -66,9 +66,8 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
             Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
-            if (dto.getDeleteYn() == false) {
+            if (dto != null && dto.getDeleteYn() == false)
                 res.add(new ScheduleResponseDTO(sch));
-            }
         }
         return res;
     }
@@ -90,8 +89,8 @@ public class ScheduleService {
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
 
-        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryId()).get();
-        Schedule schedule = scheduleRepository.findById(scheduleResponseDTO.getScheduleId()).get();
+        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryId()).orElse(null);
+        Schedule schedule = scheduleRepository.findById(scheduleResponseDTO.getScheduleId()).orElse(null);
         Routine routine = null;
 
         if (scheduleResponseDTO.getRoutineId() != null) {

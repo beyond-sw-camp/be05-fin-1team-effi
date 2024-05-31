@@ -3,6 +3,8 @@ package com.example.effi.domain.DTO;
 import com.example.effi.domain.Entitiy.Category;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 
 @Getter
 @NoArgsConstructor
