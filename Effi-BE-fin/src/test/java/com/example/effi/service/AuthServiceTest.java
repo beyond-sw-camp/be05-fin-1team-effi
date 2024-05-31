@@ -20,6 +20,7 @@ import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.RefreshToken;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RefreshTokenRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class AuthServiceTest {
     
@@ -109,5 +110,56 @@ public class AuthServiceTest {
         // then
         SignInResponse response = employeeService.signIn(request);
         assertEquals(response.getMsg(), "비밀번호가 일치하지 않습니다.");
+    }
+
+    @DisplayName("사원 로그아웃 테스트 : 성공")
+    @Test
+    public void signOutTest() throws JsonProcessingException {
+        // given
+        String token = "validToken";
+        String subject = "1:사원";
+        Long empNo = 1L;
+        Employee employee = Employee.builder()
+                .id(1L)
+                .empNo(empNo)
+                .rank("사원")
+                .build();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .tokenId(1L)
+                .refreshToken("refreshToken")
+                .employee(employee)
+                .build();
+
+        // when
+        when(tokenProvider.decodeJwtPayloadSubject(token)).thenReturn(subject);
+        when(employeeRepository.findByEmpNo(empNo)).thenReturn(employee);
+        when(refreshTokenRepository.findById(employee.getId())).thenReturn(Optional.of(refreshToken));
+
+        // then
+        String response = employeeService.signOut(token);
+        assertEquals(response, "로그아웃 성공");
+    }
+
+    @DisplayName("사원 로그아웃 테스트 : 실패")
+    @Test
+    public void signOutTestFail() throws JsonProcessingException {
+        // given
+        String token = "invalidToken";
+        String subject = "1:사원";
+        Long empNo = 1L;
+        Employee employee = Employee.builder()
+                .id(1L)
+                .empNo(empNo)
+                .rank("사원")
+                .build();
+
+        // when
+        when(tokenProvider.decodeJwtPayloadSubject(token)).thenReturn(subject);
+        when(employeeRepository.findByEmpNo(empNo)).thenReturn(employee);
+        when(refreshTokenRepository.findById(employee.getId())).thenReturn(Optional.empty());
+
+        // then
+        String response = employeeService.signOut(token);
+        assertEquals(response, "로그아웃 실패");
     }
 }
