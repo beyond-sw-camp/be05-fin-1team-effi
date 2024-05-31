@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -35,11 +36,11 @@ public class TagService {
 
     //tag 조회(id로 검색 name 리턴)
     public String getTagName(Long tagId) {
-        Tag tag = tagRepository.findById(tagId).get();
-        if (tag == null) {
+        Optional<Tag> tag = tagRepository.findById(tagId); // 수정된 부분
+        if (tag.isEmpty()) { // 수정된 부분
             return null;
         }
-        return tag.getTagName();
+        return tag.get().getTagName(); // 수정된 부분
     }
 
     // tag 조회 (tag 리턴)
@@ -53,12 +54,9 @@ public class TagService {
 
     //  tag 전체 조회
     public List<TagResponseDTO> getAllTag() {
-        List<Tag> tag = tagRepository.findAll();
-        if (tag == null) {
-            return null;
-        }
+        List<Tag> tags = tagRepository.findAll(); // 수정된 부분
         List<TagResponseDTO> tagResponseDTOS = new ArrayList<>();
-        for (Tag t : tag) {
+        for (Tag t : tags) { // 수정된 부분
             tagResponseDTOS.add(new TagResponseDTO(t));
         }
         return tagResponseDTOS;
