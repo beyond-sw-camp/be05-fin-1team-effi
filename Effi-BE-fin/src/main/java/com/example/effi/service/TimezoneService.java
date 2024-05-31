@@ -1,6 +1,6 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.Dto.Timezone.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneDTO;
 import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.repository.TimezoneRepository;
 

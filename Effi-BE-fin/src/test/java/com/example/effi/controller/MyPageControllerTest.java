@@ -1,8 +1,8 @@
 package com.example.effi.controller;
 
 import com.example.effi.config.TokenProvider;
-import com.example.effi.domain.Dto.Mypage.MyPageResponseDTO;
-import com.example.effi.domain.Dto.Mypage.MyPageUpdateDTO;
+import com.example.effi.domain.DTO.MyPageResponseDTO;
+import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.service.EmailService;
 import com.example.effi.service.GroupService;

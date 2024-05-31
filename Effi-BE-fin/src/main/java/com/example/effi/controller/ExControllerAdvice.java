@@ -1,13 +1,12 @@
 package com.example.effi.controller;
 
+import com.example.effi.domain.DTO.ErrorResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.example.effi.domain.Dto.Auth.ErrorResult;
 
 
 @Slf4j

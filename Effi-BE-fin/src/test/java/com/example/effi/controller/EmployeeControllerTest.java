@@ -12,9 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.example.effi.domain.Dto.Auth.SignInRequest;
-import com.example.effi.domain.Dto.Auth.SignInResponse;
+import com.example.effi.domain.DTO.SignInRequest;
+import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.service.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
