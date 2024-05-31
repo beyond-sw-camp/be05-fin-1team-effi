@@ -1,8 +1,8 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.CategoryDTO;
-import com.example.effi.domain.DTO.ScheduleRequestDTO;
-import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.domain.Dto.Schedule.CategoryDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
 import com.example.effi.domain.Entity.Category;
 
 import org.assertj.core.api.Assertions;

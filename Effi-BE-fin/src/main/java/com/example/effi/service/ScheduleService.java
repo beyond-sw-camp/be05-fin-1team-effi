@@ -1,6 +1,8 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.*;
+import com.example.effi.domain.Dto.*;
+import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Participant;
 import com.example.effi.domain.Entity.Routine;

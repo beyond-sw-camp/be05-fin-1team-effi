@@ -1,7 +1,7 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.MyPageResponseDTO;
-import com.example.effi.domain.DTO.MyPageUpdateDTO;
+import com.example.effi.domain.Dto.Mypage.MyPageResponseDTO;
+import com.example.effi.domain.Dto.Mypage.MyPageUpdateDTO;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.domain.Entity.TimezoneEmp;

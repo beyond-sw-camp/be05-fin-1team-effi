@@ -1,6 +1,6 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.ParticipantResponseDTO;
+import com.example.effi.domain.Dto.Schedule.ParticipantResponseDTO;
 import com.example.effi.domain.Entity.Participant;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.ParticipantRepository;

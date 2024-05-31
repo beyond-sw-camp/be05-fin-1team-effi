@@ -1,9 +1,9 @@
 package com.example.effi.controller;
 
 
-import com.example.effi.domain.DTO.RoutineRequestDTO;
-import com.example.effi.domain.DTO.RoutineResponseDTO;
-import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineRequestDTO;
+import com.example.effi.domain.Dto.Schedule.RoutineResponseDTO;
+import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
 import com.example.effi.service.RoutineService;
 import com.example.effi.service.ScheduleService;
 import lombok.AllArgsConstructor;
