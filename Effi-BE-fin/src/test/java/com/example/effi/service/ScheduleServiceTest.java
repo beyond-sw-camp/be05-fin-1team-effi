@@ -1,249 +1,332 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.ScheduleRequestDTO;
-import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import ch.qos.logback.classic.Logger;
+import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Participant;
+import com.example.effi.domain.Entitiy.Employee;
 import com.example.effi.domain.Entitiy.Routine;
 import com.example.effi.domain.Entitiy.Schedule;
 import com.example.effi.repository.CategoryRepository;
-import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
-import com.example.effi.repository.ScheduleRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import com.example.effi.service.ScheduleService;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.println;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ScheduleServiceTest {
 
-    @Mock
-    private ScheduleRepository scheduleRepository;
-
-    @Mock
+    @Autowired
+    ScheduleService scheduleService;
+    @Autowired
     private CategoryRepository categoryRepository;
-
-    @Mock
+    @Autowired
     private RoutineRepository routineRepository;
-
-    @Mock
-    private ParticipantRepository participantRepository;
-
-    @Mock
-    private ParticipantService participantService;
-
-    @Mock
+    @Autowired
     private EmployeeService employeeService;
-
-    @InjectMocks
-    private ScheduleService scheduleService;
+    @Autowired
+    private ParticipantService participantService;
+    @Autowired
+    private RoutineService routineService;
 
     @BeforeEach
-    void setUp() {
-        employeeService = mock(EmployeeService.class); // Mock 객체 생성
-        participantService = mock(ParticipantService.class); // Mock 객체 생성
-        scheduleService = new ScheduleService(scheduleRepository, categoryRepository, routineRepository,
-                participantRepository, participantService, employeeService);
+    public void setUp() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("1", null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-//    @Test
-//    void testGetSchedule() {
-//        Category category = Category.builder()
-//                .categoryId(1L)
-//                .categoryName("1번")
-//                .build();
-//
-//        categoryRepository.save(category);
-//
-//        Schedule schedule = Schedule.builder()
-//                .title("title")
-//                .context("context")
-//                .startTime(new Date())
-//                .endTime(new Date())
-//                .status(0)
-//                .deleteYn(false)
-//                .notificationYn(false)
-//                .routine(null)
-//                .category(category)
-//                .createdAt(new Date())
-//                .updatedAt(null)
-//                .build();
-//
-//        Schedule savedSchedule = scheduleRepository.save(schedule);
-//        System.out.println("schedule = " + schedule.getContext());
-//
-//        verify(scheduleRepository, times(1)).save(any(Schedule.class));
-//
-//        System.out.println("savedschedule " + savedSchedule);
-//        Long id = savedSchedule.getScheduleId();
-//
-//        System.out.println(id);
-//
-//        when(scheduleRepository.findById(id)).thenReturn(Optional.of(savedSchedule));
-//
-//        ScheduleResponseDTO result = scheduleService.getSchedule(id);
-//        assertNotNull(result);
-//        assertEquals(id, result.getScheduleId());
-//    }
-
-
-//    @Test
-//    void testGetAllSchedules() {
-//        Authentication authentication = mock(Authentication.class);
-//        when(authentication.getName()).thenReturn("123");
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        when(securityContext.getAuthentication()).thenReturn(authentication);
-//        SecurityContextHolder.setContext(securityContext);
-//
-//        Participant participant = new Participant();
-//        Schedule schedule = new Schedule();
-//        schedule.setDeleteYn(false);
-//        participant.setSchedule(schedule);
-//        when(employeeService.findEmpIdByEmpNo(anyLong())).thenReturn(1L);
-//        when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Arrays.asList(participant));
-//
-//        assertNotNull(scheduleService.getAllSchedules());
-//    }
-
-//    @Test
-//    void testGetSchedulesByCategory() {
-//        Authentication authentication = mock(Authentication.class);
-//        when(authentication.getName()).thenReturn("123");
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        when(securityContext.getAuthentication()).thenReturn(authentication);
-//        SecurityContextHolder.setContext(securityContext);
-//
-//        Schedule schedule = new Schedule();
-//        schedule.setScheduleId(1L);
-//        Participant participant = new Participant();
-//        participant.setDeleteYn(false);
-//        participant.setSchedule(schedule);
-//        when(employeeService.findEmpIdByEmpNo(anyLong())).thenReturn(1L);
-//        when(scheduleRepository.findAllByCategory_CategoryId(anyLong())).thenReturn(Arrays.asList(schedule));
-//        when(participantRepository.findByEmployee_IdAndSchedule_ScheduleId(anyLong(), anyLong())).thenReturn(participant);
-//
-//        assertNotNull(scheduleService.getSchedulesByCategory(1L));
-//    }
-
+    @DisplayName("schedule_id로 schedule 조회")
     @Test
-    void testAddSchedule() {
+    public void getScheduleTest() {
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(new Date());
+        scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(1L);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+        Long scheduleId = responseDTO.getScheduleId();
+
+        ScheduleResponseDTO findSchedule = scheduleService.getSchedule(scheduleId);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getScheduleId()).isEqualTo(scheduleId);
+        assertThat(findSchedule.getContext()).isEqualTo("hello");
+    }
+
+    @DisplayName("emp_id로 본인 schedule 조회")
+    @Test
+    public void getAllScheduleTest() { // ? auth 어떻게 가져오지
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(new Date());
+        scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(1L);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+
+        List<ScheduleResponseDTO> allSchedules = scheduleService.getAllSchedules();
+        assertThat(allSchedules).isNotEmpty();
+
+        List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
+        assertThat(allByEmpId).isNotEmpty();
+
+        List<Long> scheduleIdList = new ArrayList<>();
+        for (ParticipantResponseDTO participantResponseDTO : allByEmpId) {
+            assertThat(participantResponseDTO.getEmpId()).isEqualTo(empId);
+            scheduleIdList.add(participantResponseDTO.getScheduleId());
+        }
+
+        // 본인 스케줄 검증
+        for (ScheduleResponseDTO schedule : allSchedules) {
+            assertThat(scheduleIdList).contains(schedule.getScheduleId());
+        }
+
+
+
+    }
+
+    @DisplayName("emp_id, category_id로 schedule 조회")
+    @Test
+    public void getSchedulesByCategoryTest() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+        Long categoryId = categoryDTO.getCategoryId();
+
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(new Date());
+        scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(categoryId);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+
+        List<ScheduleResponseDTO> allSchedules = scheduleService.getSchedulesByCategory(categoryId);
+        assertThat(allSchedules).isNotEmpty();
+
+        for (ScheduleResponseDTO scheduleDTO : allSchedules)
+            assertThat(scheduleDTO.getCategoryId()).isEqualTo(categoryId);
+    }
+
+    @DisplayName("routine 추가 확인")
+    @Test
+    public void addRoutineScheduleTest() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Date date = new Date();
+
+        // Date를 LocalDate로 변환
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // 한 달 더하기
+        LocalDate newLocalDate = localDate.plusMonths(1);
+        // LocalDate를 Date로 변환
+        Date newDate = Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         Category category = Category.builder()
                 .categoryId(1L)
-                .categoryName("1번")
+                .categoryName("one")
                 .build();
 
         categoryRepository.save(category);
-        verify(categoryRepository, times(1)).save(any(Category.class));
 
+        Routine routine = Routine.builder()
+                .deleteYn(false)
+                .routineCycle("weekly")
+                .routineStart(date)
+                .routineEnd(newDate)
+                .build();
+        routineRepository.save(routine);
 
-        ScheduleRequestDTO scheduleRequestDTO = new ScheduleRequestDTO();
-        scheduleRequestDTO.setScheduleId(1L);
-        scheduleRequestDTO.setCategoryId(1L);
-        scheduleRequestDTO.setTitle("Test Title");
-        scheduleRequestDTO.setContext("Test Context");
-        scheduleRequestDTO.setStartTime(new Date());
-        scheduleRequestDTO.setEndTime(new Date());
-        scheduleRequestDTO.setDeleteYn(false);
-        scheduleRequestDTO.setNotificationYn(false);
-        scheduleRequestDTO.setStatus(0);
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(date);
+        scheduleRequest.setUpdatedAt(null);
+        scheduleRequest.setStartTime(date);
+        scheduleRequest.setEndTime(newDate);
+        scheduleRequest.setRoutineId(routine.getRoutineId());
+        scheduleRequest.setCategoryId(category.getCategoryId());
 
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(scheduleRepository.save(any(Schedule.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        ScheduleResponseDTO result = scheduleService.addSchedule(scheduleRequestDTO);
-        assertNotNull(result);
-        assertEquals(1L, result.getCategoryId());
+        List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.addRoutineSchedule(responseDTO);
+        assertThat(scheduleResponseDTOS).isNotNull();
+        assertThat(scheduleResponseDTOS.size()).isEqualTo(4); // 한달이라
     }
 
-//    @Test
-//    void testAddRoutineSchedule() {
-//        Authentication authentication = mock(Authentication.class);
-//        when(authentication.getName()).thenReturn("123");
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        when(securityContext.getAuthentication()).thenReturn(authentication);
-//        SecurityContextHolder.setContext(securityContext);
-//
-//        Schedule schedule = new Schedule();
-//        schedule.setScheduleId(1L);
-//        schedule.setStartTime(new Date());
-//        schedule.setEndTime(new Date());
-//
-//        ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO();
-//        scheduleResponseDTO.setScheduleId(1L);
-//        scheduleResponseDTO.setCategoryId(1L);
-//        scheduleResponseDTO.setRoutineId(1L);
-//
-//        Category category = new Category();
-//        category.setCategoryId(1L);
-//
-//        Routine routine = new Routine();
-//        routine.setRoutineCycle("daily");
-//        routine.setRoutineEnd(Date.from(LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant()));
-//
-//        when(employeeService.findEmpIdByEmpNo(anyLong())).thenReturn(1L);
-//        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-//        when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
-//        when(routineRepository.findById(1L)).thenReturn(Optional.of(routine));
-//        when(scheduleRepository.saveAll(anyList())).thenReturn(Arrays.asList(schedule));
-//
-//        assertNotNull(scheduleService.addRoutineSchedule(scheduleResponseDTO));
-//    }
+    @DisplayName("schedule 업데이트 (전체)")
+    @Test
+    public void updateScheduleTest() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-//    @Test
-//    void testUpdateSchedule() {
-//        ScheduleRequestDTO scheduleRequestDTO = new ScheduleRequestDTO();
-//        scheduleRequestDTO.setCategoryId(1L);
-//        scheduleRequestDTO.setRoutineId(1L);
-//
-//        Schedule schedule = new Schedule();
-//        schedule.setScheduleId(1L);
-//
-//        Category category = new Category();
-//        category.setCategoryId(1L);
-//
-//        Routine routine = new Routine();
-//        routine.setRoutineId(1L);
-//
-//        when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
-//        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-//        when(routineRepository.findById(1L)).thenReturn(Optional.of(routine));
-//        when(scheduleRepository.save(any(Schedule.class))).thenAnswer(i -> i.getArguments()[0]);
-//
-//        ScheduleResponseDTO result = scheduleService.updateSchedule(scheduleRequestDTO, 1L);
-//        assertNotNull(result);
-//        assertEquals(1L, result.getCategoryId());
-//    }
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+        Long categoryId = categoryDTO.getCategoryId();
 
-//    @Test
-//    void testDeleteSchedule() {
-//        Schedule schedule = new Schedule();
-//        schedule.setScheduleId(1L);
-//
-//        when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
-//
-//        scheduleService.deleteSchedule(1L);
-//        verify(scheduleRepository, times(1)).save(any(Schedule.class));
-//    }
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(null);
+        scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(categoryId);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+        assertThat(responseDTO).isNotNull();
+        assertThat(responseDTO.getUpdatedAt()).isNull();
+
+        ScheduleRequestDTO newRequest = new ScheduleRequestDTO();
+        newRequest.setTitle("updated");
+        newRequest.setContext("updated");
+        newRequest.setStatus(0);
+        newRequest.setNotificationYn(false);
+        newRequest.setDeleteYn(false);
+        newRequest.setCreatedAt(new Date());
+        newRequest.setUpdatedAt(new Date());
+        newRequest.setStartTime(new Date());
+        newRequest.setEndTime(new Date());
+        newRequest.setRoutineId(null);
+        newRequest.setCategoryId(categoryId);
+
+        ScheduleResponseDTO updateSchedule = scheduleService.updateSchedule(newRequest, responseDTO.getScheduleId());
+        assertThat(updateSchedule).isNotNull();
+        assertThat(updateSchedule.getUpdatedAt()).isNotNull();
+        assertThat(updateSchedule.getTitle()).isEqualTo("updated");
+        assertThat(updateSchedule.getScheduleId()).isEqualTo(responseDTO.getScheduleId());
+    }
+
+    @DisplayName("schedule 업데이트 (루틴)")
+    @Test
+    public void updateRoutineTest() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        Date date = new Date();
+        // Date를 LocalDate로 변환
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // 한 달 더하기
+        LocalDate newLocalDate = localDate.plusMonths(1);
+        // LocalDate를 Date로 변환
+        Date newDate = Date.from(newLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+        Long categoryId = categoryDTO.getCategoryId();
+
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(date);
+        scheduleRequest.setUpdatedAt(null);
+        scheduleRequest.setStartTime(date);
+        scheduleRequest.setEndTime(date);
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(categoryId);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+        assertThat(responseDTO).isNotNull();
+        assertThat(responseDTO.getUpdatedAt()).isNull();
+
+        RoutineRequestDTO routineRequestDTO = new RoutineRequestDTO();
+        routineRequestDTO.setRoutineStart(date);
+        routineRequestDTO.setRoutineEnd(newDate);
+        routineRequestDTO.setRoutineCycle("weekly");
+
+        Long routineId = routineService.addRoutine(routineRequestDTO);
+
+
+        ScheduleResponseDTO updateRoutine = scheduleService.updateRoutine(routineId, responseDTO.getScheduleId());
+
+        assertThat(updateRoutine).isNotNull();
+        assertThat(updateRoutine.getUpdatedAt()).isNotNull();
+        assertThat(updateRoutine.getRoutineId()).isEqualTo(routineId);
+        assertThat(updateRoutine.getTitle()).isEqualTo(responseDTO.getTitle());
+        assertThat(updateRoutine.getContext()).isEqualTo(responseDTO.getContext());
+    }
+
+    @DisplayName("schedule 삭제")
+    @Test
+    public void deleteScheduleTest() {
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setCategoryId(1L);
+        categoryDTO.setCategoryName("hi");
+
+        ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
+        scheduleRequest.setTitle("bye");
+        scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);
+        scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(new Date());
+        scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryId(1L);
+
+        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+
+        scheduleService.deleteSchedule(responseDTO.getScheduleId());
+        assertThat(responseDTO.getDeleteYn()).isFalse();
+
+    }
+
 }

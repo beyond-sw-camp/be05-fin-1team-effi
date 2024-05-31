@@ -1,17 +1,16 @@
 package com.example.effi.domain.Entitiy;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 @Table(name = "schedule")
+@EqualsAndHashCode
 public class Schedule {
     @Id
     @Column(name = "schedule_id", nullable = false)
