@@ -22,7 +22,7 @@ public class ParticipantService {
     public ParticipantResponseDTO addParticipant(Long scheduleId, Long empId) {
         return new ParticipantResponseDTO(participantRepository.save(
                 Participant.builder()
-                        .employee(employeeRepository.findById(empId).get())
+                        .employee(employeeRepository.findById(empId).orElse(null))
                         .schedule(scheduleRepository.findByScheduleId(scheduleId))
                         .deleteYn(false)
                         .build()
@@ -47,12 +47,6 @@ public class ParticipantService {
             lstDto.add(new ParticipantResponseDTO(participant));
         }
         return lstDto;
-    }
-
-    //select by ( scheduleId & empId )
-    public ParticipantResponseDTO findByEmployeeIdAndScheduleId(Long employeeId, Long scheduleId) {
-        Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(employeeId, scheduleId);
-        return new ParticipantResponseDTO(dto);
     }
 
     // select by particiapantID

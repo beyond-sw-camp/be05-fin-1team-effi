@@ -1,8 +1,6 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
-import com.example.effi.repository.CategoryRepository;
-import com.example.effi.repository.RoutineRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,14 +24,6 @@ public class RoutineServiceTest {
 
     @Autowired
     ScheduleService scheduleService;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private RoutineRepository routineRepository;
-    @Autowired
-    private EmployeeService employeeService;
-    @Autowired
-    private ParticipantService participantService;
     @Autowired
     private RoutineService routineService;
 
