@@ -36,7 +36,7 @@ public class RoutineController {
     }
 
     // 루틴 추가 후 스케줄 업데이트
-    @PostMapping("/add/routine/{schdeuleId}")
+    @PostMapping("/add/{schdeuleId}")
     public ResponseEntity<RoutineResponseDTO> addRoutine(@PathVariable("schdeuleId") Long schdeuleId, @RequestBody RoutineRequestDTO input) {
         Long routineId = routineService.addRoutine(input);
         scheduleService.updateRoutine(routineId,schdeuleId);
