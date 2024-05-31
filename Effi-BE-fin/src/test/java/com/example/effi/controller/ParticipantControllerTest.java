@@ -1,7 +1,7 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.ParticipantResponseDTO;
-import com.example.effi.domain.Entitiy.Participant;
+import com.example.effi.domain.Entity.Participant;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;

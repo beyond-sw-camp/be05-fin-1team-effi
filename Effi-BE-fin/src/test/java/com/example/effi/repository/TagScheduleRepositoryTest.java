@@ -1,9 +1,5 @@
 package com.example.effi.repository;
 
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Schedule;
-import com.example.effi.domain.Entitiy.Tag;
-import com.example.effi.domain.Entitiy.TagSchedule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Schedule;
+import com.example.effi.domain.Entity.Tag;
+import com.example.effi.domain.Entity.TagSchedule;
 
 import java.util.Date;
 import java.util.List;

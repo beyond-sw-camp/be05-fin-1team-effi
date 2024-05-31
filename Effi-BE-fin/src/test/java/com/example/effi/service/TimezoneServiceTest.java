@@ -1,7 +1,7 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.TimezoneDTO;
-import com.example.effi.domain.Entitiy.Timezone;
+import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.repository.TimezoneRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

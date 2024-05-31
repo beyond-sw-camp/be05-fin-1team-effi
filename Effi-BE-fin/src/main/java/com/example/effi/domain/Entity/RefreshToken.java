@@ -1,4 +1,4 @@
-package com.example.effi.domain.Entitiy;
+package com.example.effi.domain.Entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -2,10 +2,10 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.DTO.TagScheduleResponseDTO;
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Schedule;
-import com.example.effi.domain.Entitiy.Tag;
-import com.example.effi.domain.Entitiy.TagSchedule;
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Schedule;
+import com.example.effi.domain.Entity.Tag;
+import com.example.effi.domain.Entity.TagSchedule;
 import com.example.effi.repository.ScheduleRepository;
 import com.example.effi.repository.TagRepository;
 import com.example.effi.repository.TagScheduleRepository;

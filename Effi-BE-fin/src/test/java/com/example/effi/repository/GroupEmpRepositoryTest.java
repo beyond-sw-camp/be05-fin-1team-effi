@@ -1,9 +1,5 @@
 package com.example.effi.repository;
 
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Group;
-import com.example.effi.domain.Entitiy.GroupEmp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +9,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Group;
+import com.example.effi.domain.Entity.GroupEmp;
 
 import jakarta.persistence.EntityManager;
 

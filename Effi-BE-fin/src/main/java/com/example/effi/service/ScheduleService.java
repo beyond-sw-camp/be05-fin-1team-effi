@@ -1,10 +1,10 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Participant;
-import com.example.effi.domain.Entitiy.Routine;
-import com.example.effi.domain.Entitiy.Schedule;
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Participant;
+import com.example.effi.domain.Entity.Routine;
+import com.example.effi.domain.Entity.Schedule;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;

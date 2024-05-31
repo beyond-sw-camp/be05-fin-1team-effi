@@ -4,7 +4,7 @@ import com.example.effi.domain.DTO.CategoryDTO;
 import com.example.effi.domain.DTO.ParticipantResponseDTO;
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
-import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entity.Employee;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.RoutineRepository;
 import org.junit.jupiter.api.BeforeEach;

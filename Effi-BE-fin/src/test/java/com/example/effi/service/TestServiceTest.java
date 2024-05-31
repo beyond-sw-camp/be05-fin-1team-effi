@@ -3,7 +3,8 @@ package com.example.effi.service;
 import com.example.effi.domain.DTO.CategoryDTO;
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
-import com.example.effi.domain.Entitiy.Category;
+import com.example.effi.domain.Entity.Category;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

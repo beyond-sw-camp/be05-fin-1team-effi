@@ -1,8 +1,5 @@
 package com.example.effi.repository;
 
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Timezone;
-import com.example.effi.domain.Entitiy.TimezoneEmp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +7,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Timezone;
+import com.example.effi.domain.Entity.TimezoneEmp;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.annotation.Rollback;
 

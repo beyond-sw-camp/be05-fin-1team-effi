@@ -1,4 +1,4 @@
-package com.example.effi.domain.Entitiy;
+package com.example.effi.domain.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

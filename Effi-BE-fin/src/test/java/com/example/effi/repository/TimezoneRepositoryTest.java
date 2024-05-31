@@ -1,10 +1,11 @@
 package com.example.effi.repository;
 
-import com.example.effi.domain.Entitiy.Timezone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import com.example.effi.domain.Entity.Timezone;
 
 import java.util.List;
 import java.util.Optional;
