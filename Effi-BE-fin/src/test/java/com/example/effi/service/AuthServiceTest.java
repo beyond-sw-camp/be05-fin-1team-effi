@@ -14,8 +14,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.effi.config.TokenProvider;
-import com.example.effi.domain.Dto.Auth.SignInRequest;
-import com.example.effi.domain.Dto.Auth.SignInResponse;
+import com.example.effi.domain.DTO.SignInRequest;
+import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.RefreshToken;
 import com.example.effi.repository.EmployeeRepository;

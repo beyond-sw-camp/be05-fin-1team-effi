@@ -1,6 +1,6 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.Dto.Schedule.SearchResponseDTO;
+import com.example.effi.domain.DTO.SearchResponseDTO;
 import com.example.effi.service.SearchService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

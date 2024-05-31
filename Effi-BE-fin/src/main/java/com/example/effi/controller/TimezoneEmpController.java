@@ -1,6 +1,6 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.Dto.Timezone.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneDTO;
 import com.example.effi.service.TimezoneEmpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

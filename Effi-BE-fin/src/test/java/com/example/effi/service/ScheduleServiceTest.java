@@ -1,13 +1,7 @@
 package com.example.effi.service;
 
 import ch.qos.logback.classic.Logger;
-
-import com.example.effi.domain.Dto.*;
-import com.example.effi.domain.Dto.Schedule.CategoryDTO;
-import com.example.effi.domain.Dto.Schedule.ParticipantResponseDTO;
-import com.example.effi.domain.Dto.Schedule.RoutineRequestDTO;
-import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
-import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
+import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Routine;

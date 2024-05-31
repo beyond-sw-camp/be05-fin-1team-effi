@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.effi.domain.Dto.Schedule.ScheduleTags;
+import com.example.effi.domain.DTO.ScheduleTags;
 
 import lombok.RequiredArgsConstructor;
 
