@@ -3,6 +3,7 @@ package com.example.effi.domain.DTO;
 
 import com.example.effi.domain.Entitiy.Timezone;
 
+import groovy.transform.builder.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ public class TimezoneDTO {
     private Integer gmtOffset;
     private String dst;
 
+   
     public TimezoneDTO(Long timezoneId, String timezoneName, String countryCode, String abbreviation, Long timeStart, Integer gmtOffset, String dst) {
         this.timezoneId = timezoneId;
         this.timezoneName = timezoneName;
