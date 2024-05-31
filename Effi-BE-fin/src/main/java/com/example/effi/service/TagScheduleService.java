@@ -2,6 +2,7 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.DTO.TagScheduleResponseDTO;
+import com.example.effi.domain.Entitiy.Schedule;
 import com.example.effi.domain.Entitiy.Tag;
 import com.example.effi.domain.Entitiy.TagSchedule;
 import com.example.effi.repository.ScheduleRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -39,8 +41,9 @@ public class TagScheduleService {
     public TagScheduleResponseDTO findByScheduleIdAndTagId(Long scheduleId, Long tagId) {
         List<TagSchedule> lst = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
         for (TagSchedule tagSchedule : lst) {
-            if (tagSchedule.getTag().getTagId() == tagId)
+            if (tagSchedule.getTag() != null && tagSchedule.getTag().getTagId().equals(tagId)) { // 수정된 부분
                 return new TagScheduleResponseDTO(tagSchedule);
+            }
         }
         return null;
     }
@@ -48,8 +51,9 @@ public class TagScheduleService {
     //t-sId로 tag 리턴
     public TagResponseDTO findTag(Long tagScheduleId){
         TagSchedule tagSchedule = tagScheduleRepository.findById(tagScheduleId).orElse(null);
-        if(tagSchedule == null)
+        if(tagSchedule == null || tagSchedule.getTag() == null) { // 수정된 부분
             return null;
+        }
         Tag tag = tagSchedule.getTag();
         return new TagResponseDTO(tag);
     }
@@ -57,18 +61,28 @@ public class TagScheduleService {
     //t-sId로 t-s 리턴
     public TagScheduleResponseDTO findTagSchedule(Long tagScheduleId){
         TagSchedule tagSchedule = tagScheduleRepository.findById(tagScheduleId).orElse(null);
+        if(tagSchedule == null) { // 수정된 부분
+            return null;
+        }
         return new TagScheduleResponseDTO(tagSchedule);
     }
 
     // schedule에 tag 추가했을 경우 (scheduleid 입력받았다고 가정) -> tagschedule 칼럼 추가
     // 이름으로 tag 찾아서 있는지 확인
     // (없을경우 tag 추가 후) tagschedule id 리턴
-    public Long addTagSchedule(Long schduleId, String tagName) {
+    public Long addTagSchedule(Long scheduleId, String tagName) {
         Long tagId = tagService.getTagId(tagName);
-        if (tagId == null)
+        if (tagId == null) {
             tagId = tagService.addTag(tagName);
-        return tagScheduleRepository.save(new TagSchedule(tagRepository.findById(tagId).get(),
-                scheduleRepository.findById(schduleId).get(), false)).getTagScheduleId();
+        }
+        Optional<Tag> tagOpt = tagRepository.findById(tagId); // 수정된 부분
+        Optional<Schedule> scheduleOpt = scheduleRepository.findById(scheduleId); // 수정된 부분
+
+        if (tagOpt.isPresent() && scheduleOpt.isPresent()) { // 수정된 부분
+            TagSchedule tagSchedule = new TagSchedule(tagOpt.get(), scheduleOpt.get(), false); // 수정된 부분
+            return tagScheduleRepository.save(tagSchedule).getTagScheduleId(); // 수정된 부분
+        }
+        return null; // 수정된 부분
     }
 
     // schedule에서 tag 삭제 -> deleteYn 수정
