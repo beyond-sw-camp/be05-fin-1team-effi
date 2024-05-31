@@ -238,8 +238,8 @@ public class GroupService {
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = Long.valueOf(authentication.getName());
 
-        GroupEmp groupEmp = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(groupRepository.findById(groupId).get(),
-                employeeRepository.findByEmpNo(creatorEmpNo));
+        GroupEmp groupEmp = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(groupRepository.findById(groupId).get().getGroupId(),
+                employeeRepository.findByEmpNo(creatorEmpNo).getEmpNo());
         if (groupEmp != null) {
             if(groupEmp.getGroupEmpRank().equals("Leader"))
                 return true;

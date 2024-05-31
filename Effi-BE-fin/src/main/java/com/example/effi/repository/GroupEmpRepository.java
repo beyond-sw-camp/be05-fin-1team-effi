@@ -36,5 +36,5 @@ public interface GroupEmpRepository extends JpaRepository<GroupEmp, Long> {
 
     List<GroupEmp> findAllByGroup_GroupId(Long groupId);
 
-    GroupEmp findByGroup_GroupIdAndEmployee_Id(Group group, Employee byEmpNo);
+    GroupEmp findByGroup_GroupIdAndEmployee_Id(Long groupId, Long employeeId);
 }
