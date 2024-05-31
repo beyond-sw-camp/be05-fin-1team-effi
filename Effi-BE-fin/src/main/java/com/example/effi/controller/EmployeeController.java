@@ -5,10 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.effi.domain.Dto.Auth.GlobalResponse;
-import com.example.effi.domain.Dto.Auth.SignInRequest;
-import com.example.effi.domain.Dto.Auth.SignInResponse;
-import com.example.effi.domain.Dto.Auth.SignOutRequest;
+import com.example.effi.domain.DTO.GlobalResponse;
+import com.example.effi.domain.DTO.SignInRequest;
+import com.example.effi.domain.DTO.SignInResponse;
+import com.example.effi.domain.DTO.SignOutRequest;
 import com.example.effi.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 

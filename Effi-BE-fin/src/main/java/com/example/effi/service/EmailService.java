@@ -1,8 +1,7 @@
 package com.example.effi.service;
 
 import com.example.effi.config.RedisUtil;
-import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
-
+import com.example.effi.domain.DTO.ScheduleResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

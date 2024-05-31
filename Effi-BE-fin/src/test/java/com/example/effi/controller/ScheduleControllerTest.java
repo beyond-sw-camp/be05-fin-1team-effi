@@ -1,7 +1,7 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.Dto.Schedule.ScheduleRequestDTO;
-import com.example.effi.domain.Dto.Schedule.ScheduleResponseDTO;
+import com.example.effi.domain.DTO.ScheduleRequestDTO;
+import com.example.effi.domain.DTO.ScheduleResponseDTO;
 import com.example.effi.service.EmployeeService;
 import com.example.effi.service.ParticipantService;
 import com.example.effi.service.ScheduleService;

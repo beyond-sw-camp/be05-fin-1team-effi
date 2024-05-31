@@ -1,6 +1,6 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.Dto.Schedule.CategoryResponseDTO;
+import com.example.effi.domain.DTO.CategoryResponseDTO;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;

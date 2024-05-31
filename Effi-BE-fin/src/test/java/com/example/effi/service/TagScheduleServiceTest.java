@@ -1,7 +1,7 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.Dto.Tag.TagResponseDTO;
-import com.example.effi.domain.Dto.Tag.TagScheduleResponseDTO;
+import com.example.effi.domain.DTO.TagResponseDTO;
+import com.example.effi.domain.DTO.TagScheduleResponseDTO;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Schedule;
 import com.example.effi.domain.Entity.Tag;

@@ -1,9 +1,9 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.Dto.Auth.GlobalResponse;
-import com.example.effi.domain.Dto.Group.GroupRequestDTO;
-import com.example.effi.domain.Dto.Group.UpdateGroupNameRequest;
-import com.example.effi.domain.Dto.User.EmployeeDTO;
+import com.example.effi.domain.DTO.EmployeeDTO;
+import com.example.effi.domain.DTO.GlobalResponse;
+import com.example.effi.domain.DTO.GroupRequestDTO;
+import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
