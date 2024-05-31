@@ -2,9 +2,9 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.domain.DTO.TimezoneDTO;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Timezone;
-import com.example.effi.domain.Entitiy.TimezoneEmp;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Timezone;
+import com.example.effi.domain.Entity.TimezoneEmp;
 import com.example.effi.repository.TimezoneEmpRepository;
 import com.example.effi.repository.TimezoneRepository;
 import com.example.effi.repository.EmployeeRepository;

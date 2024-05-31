@@ -1,6 +1,7 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Category;
+import com.example.effi.domain.Entity.Category;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

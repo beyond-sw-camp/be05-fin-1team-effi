@@ -8,8 +8,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.example.effi.domain.Entitiy.Dept;
-import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entity.Dept;
+import com.example.effi.domain.Entity.Employee;
 
 import java.util.Optional;
 

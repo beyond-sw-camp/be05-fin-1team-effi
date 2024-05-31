@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.effi.config.TokenProvider;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.RefreshToken;
 import com.example.effi.domain.DTO.SignInRequest;
 import com.example.effi.domain.DTO.SignInResponse;
 import com.example.effi.domain.DTO.SignOutRequest;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.RefreshToken;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RefreshTokenRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;

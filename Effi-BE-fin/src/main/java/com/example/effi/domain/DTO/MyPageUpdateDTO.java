@@ -1,11 +1,12 @@
 package com.example.effi.domain.DTO;
 
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Timezone;
+import com.example.effi.domain.Entity.TimezoneEmp;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.TimezoneEmp;
-import com.example.effi.domain.Entitiy.Timezone;
 
 
 

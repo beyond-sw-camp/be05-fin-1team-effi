@@ -8,13 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import com.example.effi.domain.Entitiy.Category;
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Group;
-import com.example.effi.domain.Entitiy.GroupEmp;
-
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Group;
+import com.example.effi.domain.Entity.GroupEmp;
 
 @Repository
 public interface GroupEmpRepository extends JpaRepository<GroupEmp, Long> {

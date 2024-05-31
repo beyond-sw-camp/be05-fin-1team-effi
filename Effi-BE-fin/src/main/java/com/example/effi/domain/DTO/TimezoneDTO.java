@@ -1,7 +1,7 @@
 package com.example.effi.domain.DTO;
 
 
-import com.example.effi.domain.Entitiy.Timezone;
+import com.example.effi.domain.Entity.Timezone;
 
 import groovy.transform.builder.Builder;
 import lombok.Getter;

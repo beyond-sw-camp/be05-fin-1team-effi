@@ -1,7 +1,7 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.TagResponseDTO;
-import com.example.effi.domain.Entitiy.Tag;
+import com.example.effi.domain.Entity.Tag;
 import com.example.effi.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,9 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Employee;
-import com.example.effi.domain.Entitiy.Participant;
-import com.example.effi.domain.Entitiy.Schedule;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Participant;
+import com.example.effi.domain.Entity.Schedule;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

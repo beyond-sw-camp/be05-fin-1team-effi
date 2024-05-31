@@ -1,7 +1,7 @@
 package com.example.effi.domain.DTO;
 
-import com.example.effi.domain.Entitiy.Dept;
-import com.example.effi.domain.Entitiy.Employee;
+import com.example.effi.domain.Entity.Dept;
+import com.example.effi.domain.Entity.Employee;
 
 import lombok.Builder;
 import lombok.Getter;
