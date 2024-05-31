@@ -15,6 +15,7 @@ import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.repository.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -65,6 +66,7 @@ class GroupServiceTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
+    @DisplayName("그룹 생성 서비스 테스트")
     @Test
     void createGroup_success() {
         // Given
@@ -109,6 +111,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(3)).save(any(GroupEmp.class));  // 그룹 리더 + 2명의 구성원
     }
 
+    @DisplayName("그룹 생성 서비스 테스트 - 중복된 사원 번호가 포함된 경우")
     @Test
     void createGroup_duplicateEmployeeIds() {
         // Given
@@ -131,6 +134,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, never()).save(any());
     }
 
+    @DisplayName("구성원 추가 서비스 테스트")
     @Test
     void addEmployeesToGroup_success() {
         // Given
@@ -156,6 +160,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(2)).save(any(GroupEmp.class));
     }
 
+    @DisplayName("구성원 추가 서비스 테스트 - 중복된 사원 번호가 포함된 경우")
     @Test
     void addEmployeesToGroup_duplicateEmployeeIds() {
         // Given
@@ -177,6 +182,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, never()).save(any(GroupEmp.class));
     }
 
+    @DisplayName("그룹 이름 변경 테스트")
     @Test
     void updateGroupName_success() {
         // Given
@@ -203,6 +209,7 @@ class GroupServiceTest {
         verify(groupRepository, times(1)).save(any(Group.class));
     }
 
+    @DisplayName("그룹 탈퇴 서비스 테스트")
     @Test
     void withdrawGroup_success() {
         // Given
@@ -229,6 +236,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(1)).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
     }
 
+    @DisplayName("그룹 탈퇴 서비스 테스트 - 모든 구성원이 그룹을 떠난 경우")
     @Test
     void withdrawGroup_andDeleteGroupIfNoMembers() {
         // Given
@@ -257,6 +265,7 @@ class GroupServiceTest {
         verify(groupRepository, times(1)).save(any(Group.class));
     }
 
+    @DisplayName("그룹 삭제 서비스 테스트")
     @Test
     void deleteGroup_success() {
         // Given
@@ -279,6 +288,7 @@ class GroupServiceTest {
         verify(groupRepository, times(1)).save(any(Group.class));
     }
 
+    @DisplayName("직원 이름으로 검색 서비스 테스트")
     @Test
     void searchEmployeesByName_success() {
         // Given
@@ -310,6 +320,7 @@ class GroupServiceTest {
         verify(employeeRepository, times(1)).findByNameContaining(name);
     }
 
+    @DisplayName("직원 검색 서비스 테스트 - 그룹id로 직원 조회 ")
     @Test
     void findEmployeeIdsByGroupId_success() {
         // Given
@@ -333,6 +344,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(1)).findAllByGroup_GroupId(groupId);
     }
 
+    @DisplayName("id로 그룹 조회 서비스 테스트")
     @Test
     void findGroupById_success() {
         // Given
