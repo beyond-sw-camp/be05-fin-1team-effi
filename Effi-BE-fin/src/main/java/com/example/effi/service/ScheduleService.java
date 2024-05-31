@@ -66,21 +66,21 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
             Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
-            if (dto.getDeleteYn() == false) {
+            if (dto != null && dto.getDeleteYn() == false)
                 res.add(new ScheduleResponseDTO(sch));
-            }
         }
         return res;
     }
 
     // add schedule
     public ScheduleResponseDTO addSchedule(ScheduleRequestDTO scheduleRequestDTO) {
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
+        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).orElse(null);
         if (scheduleRequestDTO.getRoutineId() != null){
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
         }
-        return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, null)));
+        Schedule entity = scheduleRequestDTO.toEntity(category, null);
+        return new ScheduleResponseDTO(scheduleRepository.save(entity));
     }
 
     // 루틴 스케줄 자동 추가
@@ -89,8 +89,8 @@ public class ScheduleService {
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
 
-        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryId()).get();
-        Schedule schedule = scheduleRepository.findById(scheduleResponseDTO.getScheduleId()).get();
+        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryId()).orElse(null);
+        Schedule schedule = scheduleRepository.findById(scheduleResponseDTO.getScheduleId()).orElse(null);
         Routine routine = null;
 
         if (scheduleResponseDTO.getRoutineId() != null) {

@@ -8,7 +8,6 @@ import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -17,8 +16,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -52,7 +49,6 @@ public class ScheduleControllerTest {
 
     @Test
     void testAddSchedule() throws Exception {
-//        ScheduleRequestDTO scheduleRequestDTO = new ScheduleRequestDTO();
         ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO();
         scheduleResponseDTO.setScheduleId(1L);
 
