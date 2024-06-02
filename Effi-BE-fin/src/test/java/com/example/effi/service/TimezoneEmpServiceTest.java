@@ -8,6 +8,7 @@ import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.TimezoneEmpRepository;
 import com.example.effi.repository.TimezoneRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,7 +20,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class TimezoneEmpServiceTest {
@@ -52,6 +55,7 @@ class TimezoneEmpServiceTest {
     }
 
     @Test
+    @DisplayName("타임존을 직원에게 추가한다. - 성공")
     void addTimezoneForEmployee() {
         Employee employee = Employee.builder().id(1L).build();
         when(employeeRepository.findById(anyLong())).thenReturn(Optional.of(employee));
@@ -68,6 +72,22 @@ class TimezoneEmpServiceTest {
     }
 
     @Test
+    @DisplayName("타임존을 직원에게 추가할 때 타임존이 존재하지 않으면 예외를 던진다. - 실패")
+    void addTimezoneForEmployeeWithNonExistingTimezone() {
+        Employee employee = Employee.builder().id(1L).build();
+        when(employeeRepository.findById(anyLong())).thenReturn(Optional.of(employee));
+        when(timezoneRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.addTimezoneForEmployee(1L, 1L, true));
+
+        verify(employeeRepository, times(1)).findById(anyLong());
+        verify(timezoneRepository, times(1)).findById(anyLong());
+        verify(timezoneEmpRepository, times(0)).countByEmployeeId(anyLong());
+        verify(timezoneEmpRepository, times(0)).save(any(TimezoneEmp.class));
+    }
+
+    @Test
+    @DisplayName("타임존을 직원에게 추가할 때 직원이 존재하지 않으면 예외를 던진다. - 실패")
     void getTimezonesForEmployee() {
         Employee employee = Employee.builder().id(1L).build();
         TimezoneEmp timezoneEmp = TimezoneEmp.builder().timezone(timezone).employee(employee).build();
@@ -80,6 +100,7 @@ class TimezoneEmpServiceTest {
     }
 
     @Test
+    @DisplayName("기본 타임존을 변경한다. - 성공")
     void updateDefaultTimezoneForEmployee() {
         Employee employee = Employee.builder().id(1L).build();
         TimezoneEmp timezoneEmp = TimezoneEmp.builder().timezone(timezone).employee(employee).defaultTimezone(true).build();
@@ -99,6 +120,22 @@ class TimezoneEmpServiceTest {
     }
 
     @Test
+    @DisplayName("기본 타임존을 변경할 때 타임존이 존재하지 않으면 예외를 던진다. - 실패")
+    void updateDefaultTimezoneForEmployeeWithNonExistingTimezone() {
+        when(timezoneEmpRepository.findByEmployeeIdAndDefaultTimezone(anyLong(), anyBoolean()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.updateDefaultTimezoneForEmployee(1L, 1L));
+
+        verify(timezoneEmpRepository, times(1))
+                .findByEmployeeIdAndDefaultTimezone(anyLong(), anyBoolean());
+        verify(timezoneRepository, times(0)).findById(anyLong());
+        verify(employeeRepository, times(0)).findById(anyLong());
+        verify(timezoneEmpRepository, times(0)).save(any(TimezoneEmp.class));
+    }
+
+    @DisplayName("직원의 타임존을 삭제한다. - 성공")
+    @Test
     void removeTimezoneForEmployee() {
         Employee employee = Employee.builder().id(1L).build();
         TimezoneEmp timezoneEmp = TimezoneEmp.builder().timezone(timezone).employee(employee).build();
@@ -112,4 +149,34 @@ class TimezoneEmpServiceTest {
                 .findByEmployeeIdAndTimezone_TimezoneId(anyLong(), anyLong());
         verify(timezoneEmpRepository, times(1)).delete(any(TimezoneEmp.class));
     }
+
+    @DisplayName("직원의 타임존을 삭제할 때 타임존이 존재하지 않으면 예외를 던진다. - 실패")
+    @Test
+    void removeTimezoneForEmployeeWithNonExistingTimezone() {
+        when(timezoneEmpRepository.findByEmployeeIdAndTimezone_TimezoneId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.removeTimezoneForEmployee(1L, 1L));
+
+        verify(timezoneEmpRepository, times(1))
+                .findByEmployeeIdAndTimezone_TimezoneId(anyLong(), anyLong());
+        verify(timezoneEmpRepository, times(0)).delete(any(TimezoneEmp.class));
+    }
+
+    @DisplayName("직원의 타임존을 삭제할 때 직원이 존재하지 않으면 예외를 던진다. - 실패")
+    @Test
+    void removeTimezoneForEmployeeWithNonExistingEmployee() {
+        // Arrange: 빈 Optional 반환하도록 설정
+        when(timezoneEmpRepository.findByEmployeeIdAndTimezone_TimezoneId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert: 예외가 던져지는지 확인
+        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.removeTimezoneForEmployee(1L, 1L));
+
+        // Verify: 저장소 메서드 호출 확인
+        verify(timezoneEmpRepository, times(1))
+                .findByEmployeeIdAndTimezone_TimezoneId(anyLong(), anyLong());
+        verify(timezoneEmpRepository, times(0)).delete(any(TimezoneEmp.class));
+    }
+
 }
