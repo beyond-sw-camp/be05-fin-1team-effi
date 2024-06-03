@@ -126,21 +126,26 @@ public class GroupService {
                 .build());
     }
 
+    // 그룹 이름 변경
     @Transactional
     public ResponseEntity<GlobalResponse> updateGroupName(Long groupId, String newGroupName) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+      Group group = groupRepository.findById(groupId)
+          .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
 
-        Group updatedGroup = group.updateGroupName(newGroupName);
-        Group savedGroup = groupRepository.save(updatedGroup);
+      if (groupRepository.findByGroupName(newGroupName).isPresent()) {
+        throw new IllegalArgumentException("이미 존재하는 그룹 이름입니다.");
+      }
 
-        return ResponseEntity.ok().body(GlobalResponse.builder()
-                .message("그룹 이름 변경 성공")
-                .status(HttpStatus.OK.value())
-                .data(GroupResponseDTO.builder()
-                        .groupName(savedGroup.getGroupName())
-                        .build())
-                .build());
+      Group updatedGroup = group.updateGroupName(newGroupName);
+      Group savedGroup = groupRepository.save(updatedGroup);
+
+      return ResponseEntity.ok().body(GlobalResponse.builder()
+          .message("그룹 이름 변경 성공")
+          .status(HttpStatus.OK.value())
+          .data(GroupResponseDTO.builder()
+              .groupName(savedGroup.getGroupName())
+              .build())
+          .build());
     }
 
     @Transactional
