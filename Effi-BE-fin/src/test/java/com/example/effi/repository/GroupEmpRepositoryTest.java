@@ -76,7 +76,7 @@ public class GroupEmpRepositoryTest {
     }
 
     @Test
-    @DisplayName("그룹 ID와 직원 ID로 그룹 구성원 찾기")
+    @DisplayName("그룹 ID와 직원 ID로 그룹 구성원 찾기 - 성공 ")
     @Rollback(false)
     @Transactional
     public void testFindByGroup_GroupIdAndEmployee_Id() {
@@ -85,7 +85,16 @@ public class GroupEmpRepositoryTest {
     }
 
     @Test
-    @DisplayName("그룹 ID와 직원 ID로 deleteYn 업데이트하기")
+    @DisplayName("그룹 ID와 직원 ID로 그룹 구성원 찾기 - 실패 ")
+    @Rollback(false)
+    @Transactional
+    public void testFindByGroup_GroupIdAndEmployee_Id_Fail() {
+        GroupEmp found = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(), 0L);
+        assertThat(found).isNull();
+    }
+
+    @Test
+    @DisplayName("그룹 ID와 직원 ID로 deleteYn 업데이트하기 - 성공")
     @Rollback(false)
     @Transactional
     public void testUpdateDeleteYnByGroupIdAndEmployeeId() {
@@ -98,7 +107,20 @@ public class GroupEmpRepositoryTest {
     }
 
     @Test
-    @DisplayName("활성 구성원 수 확인")
+    @DisplayName("그룹 ID와 직원 ID로 deleteYn 업데이트하기 - 실패")
+    @Rollback(false)
+    @Transactional
+    public void testUpdateDeleteYnByGroupIdAndEmployeeId_Fail() {
+        groupEmpRepository.updateDeleteYnByGroupIdAndEmployeeId(testGroup.getGroupId(), 0L);
+        entityManager.flush(); // 상태를 데이터베이스에 반영
+        entityManager.clear(); // 엔티티 매니저를 초기화하여 최신 상태를 반영
+
+        GroupEmp updated = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(), 0L);
+        assertThat(updated).isNull();
+    }
+
+    @Test
+    @DisplayName("활성 구성원 수 확인 - 성공")
     @Rollback(false)
     @Transactional
     public void testCountActiveMembersInGroup() {
@@ -107,7 +129,16 @@ public class GroupEmpRepositoryTest {
     }
 
     @Test
-    @DisplayName("그룹 ID로 모든 구성원 삭제")
+    @DisplayName("활성 구성원 수 확인 - 실패")
+    @Rollback(false)
+    @Transactional
+    public void testCountActiveMembersInGroup_Fail() {
+        Long count = groupEmpRepository.countActiveMembersInGroup(0L);
+        assertThat(count).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("그룹 ID로 모든 구성원 삭제 - 성공")
     @Rollback(false)
     @Transactional
     public void testDeleteAllByGroupId() {
@@ -117,4 +148,17 @@ public class GroupEmpRepositoryTest {
 
         assertThat(groupEmpRepository.findAllByGroup_GroupId(testGroup.getGroupId())).isEmpty();
     }
+
+    @Test
+    @DisplayName("그룹 ID로 모든 구성원 삭제 - 실패")
+    @Rollback(false)
+    @Transactional
+    public void testDeleteAllByGroupId_Fail() {
+        groupEmpRepository.deleteAllByGroupId(0L);
+        entityManager.flush(); // 상태를 데이터베이스에 반영
+        entityManager.clear(); // 엔티티 매니저를 초기화하여 최신 상태를 반영
+
+        assertThat(groupEmpRepository.findAllByGroup_GroupId(0L)).isEmpty();
+    }
+    
 }
