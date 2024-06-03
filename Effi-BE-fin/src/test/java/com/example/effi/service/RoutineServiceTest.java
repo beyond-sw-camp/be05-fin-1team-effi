@@ -1,6 +1,8 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +28,16 @@ public class RoutineServiceTest {
     ScheduleService scheduleService;
     @Autowired
     private RoutineService routineService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @BeforeEach
     public void setUp() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("1", null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        categoryRepository.save(Category.builder()
+                .categoryId(1L)
+                .categoryName("hi").build());
     }
 
     @DisplayName("routine_id routine 조회")
@@ -74,11 +81,6 @@ public class RoutineServiceTest {
 
         Long routineId = routineService.addRoutine(routineRequestDTO);
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
-        Long categoryId = categoryDTO.getCategoryId();
-
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
         scheduleRequest.setContext("hello");
@@ -90,7 +92,7 @@ public class RoutineServiceTest {
         scheduleRequest.setStartTime(date);
         scheduleRequest.setEndTime(date);
         scheduleRequest.setRoutineId(routineId);
-        scheduleRequest.setCategoryId(categoryId);
+        scheduleRequest.setCategoryId(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();

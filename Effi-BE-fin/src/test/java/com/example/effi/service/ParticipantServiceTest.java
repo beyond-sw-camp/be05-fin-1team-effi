@@ -4,9 +4,12 @@ import com.example.effi.domain.DTO.CategoryDTO;
 import com.example.effi.domain.DTO.ParticipantResponseDTO;
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.repository.CategoryRepository;
+import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RoutineRepository;
+import io.lettuce.core.AbstractRedisAsyncCommands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,11 +42,28 @@ public class ParticipantServiceTest {
     private ParticipantService participantService;
     @Autowired
     private RoutineService routineService;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @BeforeEach
     public void setUp() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("1", null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        employeeRepository.save(Employee.builder()
+                .id(1L)
+                .empNo(1L)
+                .password("password1")
+                .company("Example Company")
+                .name("John Doe")
+                .email("john@example.com")
+                .phoneNum("123-456-7890")
+                .extensionNum("123")
+                .rank("Manager")
+                .build()
+        );
+        categoryRepository.save(Category.builder()
+                .categoryId(1L)
+                .categoryName("hi").build());
     }
 
     @DisplayName("schedule_id랑 empId로 participant 추가")
@@ -116,10 +136,6 @@ public class ParticipantServiceTest {
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
-        Long categoryId = categoryDTO.getCategoryId();
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
@@ -132,7 +148,7 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
-        scheduleRequest.setCategoryId(categoryId);
+        scheduleRequest.setCategoryId(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
