@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -34,7 +35,7 @@ public class GroupController {
     @GetMapping("/search")
     public ResponseEntity<List<EmployeeDTO>> searchEmployees(@RequestParam String name) {
         List<EmployeeDTO> employees = groupService.searchEmployeesByName(name);
-        return ResponseEntity.ok(employees);
+        return ResponseEntity.ok(employees != null ? employees : Collections.emptyList());
     }
 
     // 그룹 탈퇴
@@ -60,4 +61,8 @@ public class GroupController {
     public ResponseEntity<List<GroupDTO>> findAllGroups() {
         return ResponseEntity.ok(groupService.findAllGroups());
     }
+
+    // 직원 이름으로 검색
+
+
 }
