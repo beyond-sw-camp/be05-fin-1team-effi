@@ -10,10 +10,12 @@ import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -36,7 +38,7 @@ public class ScheduleService {
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
         if (sch == null) {
-            throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found");
         }
         if (sch.getDeleteYn() == false)
             return new ScheduleResponseDTO(sch);
@@ -174,7 +176,7 @@ public class ScheduleService {
 
     // update schedule
     public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
         Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
@@ -210,8 +212,9 @@ public class ScheduleService {
 
     // delete schedule
     public void deleteSchedule(Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null) {
+        Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
+//        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        if (sch == null || sch.getDeleteYn() == true) {
             throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
         }
         sch.delete();

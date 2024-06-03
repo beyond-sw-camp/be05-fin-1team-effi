@@ -51,7 +51,7 @@ public class ScheduleController {
         catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Failed to update schedule: " + e.getMessage());
         }
     }
@@ -108,10 +108,5 @@ public class ScheduleController {
                 .body("Failed to delete schedule: " + e.getMessage());
         }
     }
-//    @DeleteMapping("/schedule/delete/{scheduleId}")
-//    public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") Long scheduleId) {
-//        scheduleService.deleteSchedule(scheduleId);
-//        return ResponseEntity.ok().build();
-//    }
 
 }

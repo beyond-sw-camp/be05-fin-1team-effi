@@ -11,16 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -68,16 +67,16 @@ public class ScheduleControllerTest {
         verify(participantService, times(1)).addParticipant(eq(1L), eq(1L));
     }
 
-//    @Test
-//    void testAddScheduleFailure() throws Exception {
-//        when(scheduleService.addSchedule(any(ScheduleRequestDTO.class))).thenThrow(new RuntimeException("Service exception"));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/add")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("{\"title\": \"Test\", \"context\": \"Test context\", \"startTime\": \"2023-12-01T00:00:00.000+00:00\", \"endTime\": \"2023-12-02T00:00:00.000+00:00\", \"categoryId\": 1}")
-//                        .param("empNo", "123"))
-//                .andExpect(status().isInternalServerError());
-//    }
+    @Test
+    void testAddScheduleFailure() throws Exception {
+        when(scheduleService.addSchedule(any(ScheduleRequestDTO.class))).thenThrow(new RuntimeException("Service exception"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Test\", \"context\": \"Test context\", \"startTime\": \"2023-12-01T00:00:00.000+00:00\", \"endTime\": \"2023-12-02T00:00:00.000+00:00\", \"categoryId\": 1}")
+                        .param("empNo", "123"))
+                .andExpect(status().isInternalServerError());
+    }
 
     @Test
     void testUpdateSchedule() throws Exception {
@@ -92,17 +91,16 @@ public class ScheduleControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    void testUpdateScheduleNotFound() throws Exception {
-//        when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong())).thenThrow(new IllegalArgumentException("Schedule not found"));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/update/999")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("{\"title\": \"Test\", \"context\": \"Test context\", \"startTime\": \"2023-12-01T00:00:00.000+00:00\", \"endTime\": \"2023-12-02T00:00:00.000+00:00\", \"categoryId\": 1}"))
-//                .andExpect(status().isNotFound())
-//                .andExpect(result -> assertThat(result.getResolvedException()).isInstanceOf(IllegalArgumentException.class))
-//                .andExpect(result -> assertThat(result.getResolvedException().getMessage()).contains("Schedule not found with ID: "));
-//    }
+    @Test
+    void testUpdateScheduleNotFound() throws Exception {
+        when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong()))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/update/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Test\", \"context\": \"Test context\", \"startTime\": \"2023-12-01T00:00:00.000+00:00\", \"endTime\": \"2023-12-02T00:00:00.000+00:00\", \"categoryId\": 1}"))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     void testFindAll() throws Exception {
@@ -134,16 +132,14 @@ public class ScheduleControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    void testFindByIdNotFound() throws Exception {
-//        when(scheduleService.getSchedule(anyLong())).thenThrow(new IllegalArgumentException("Schedule not found"));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.get("/api/schedule/find/999")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isNotFound())
-//                .andExpect(result -> assertThat(result.getResolvedException()).isInstanceOf(IllegalArgumentException.class))
-//                .andExpect(result -> assertThat(result.getResolvedException().getMessage()).isEqualTo("Schedule not found"));
-//    }
+    @Test
+    void testFindByIdNotFound() throws Exception {
+        when(scheduleService.getSchedule(anyLong())).thenThrow(new IllegalArgumentException("Schedule not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/schedule/find/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     void testDeleteSchedule() throws Exception {
@@ -154,13 +150,11 @@ public class ScheduleControllerTest {
         verify(scheduleService, times(1)).deleteSchedule(anyLong());
     }
 
-//    @Test
-//    void testDeleteScheduleNotFound() throws Exception {
-//        doThrow(new IllegalArgumentException("Schedule not found")).when(scheduleService).deleteSchedule(anyLong());
-//
-//        mockMvc.perform(MockMvcRequestBuilders.delete("/api/schedule/delete/1"))
-//                .andExpect(status().isNotFound())
-//                .andExpect(result -> assertNotNull(result.getResolvedException()))
-//                .andExpect(result -> assertEquals("Schedule not found", result.getResolvedException().getMessage()));
-//    }
+    @Test
+    void testDeleteScheduleNotFound() throws Exception {
+        doThrow(new IllegalArgumentException("Schedule not found")).when(scheduleService).deleteSchedule(anyLong());
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/schedule/delete/100"))
+                .andExpect(status().isNotFound());
+    }
 }
