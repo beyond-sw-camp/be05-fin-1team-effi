@@ -72,7 +72,7 @@ public class RoutineControllerTest {
         assertThat(result.getRoutineId()).isEqualTo(routineId);
     }
 
-    @DisplayName("Add Routine and Update Schedule")
+    @DisplayName("Add Routine and Update Schedule - error")
     @Test
     public void testAddRoutineAndUpdateSchedule() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
