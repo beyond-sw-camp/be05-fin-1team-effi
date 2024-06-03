@@ -126,14 +126,14 @@ public class EmailService {
     }
 
     @Transactional
-    public void sendMail(String fromEmail, String toEmail, String title, String content) {
+    public void sendMail(String fromEmail, String toEmail, String title, String body) {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
             helper.setSubject(title);
-            helper.setText(content, true);
+            helper.setText(body, true);
             javaMailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
