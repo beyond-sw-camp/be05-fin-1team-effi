@@ -58,7 +58,6 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('사원')")
     @PostMapping("/test")
     public ResponseEntity<String> test() {
-   
         return ResponseEntity.ok("test");
     }
 

@@ -18,7 +18,7 @@ public class TimezoneDTO {
     private Integer gmtOffset;
     private String dst;
 
-   
+    @Builder
     public TimezoneDTO(Long timezoneId, String timezoneName, String countryCode, String abbreviation, Long timeStart, Integer gmtOffset, String dst) {
         this.timezoneId = timezoneId;
         this.timezoneName = timezoneName;
