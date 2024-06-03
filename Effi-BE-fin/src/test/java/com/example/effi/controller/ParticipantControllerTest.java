@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,18 @@ public class ParticipantControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @DisplayName("Add Participant Test - Failure")
+    @Test
+    public void addParticipantTestFailure() throws Exception {
+        when(participantService.addParticipant(anyLong(), anyLong())).thenThrow(new RuntimeException("Failed to add participant"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/participant/add")
+                        .param("scheduleId", "1")
+                        .param("empId", "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+
     @DisplayName("Add Participant by Department Test")
     @Test
     public void addParticipantDeptTest() throws Exception {
@@ -72,6 +85,17 @@ public class ParticipantControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @DisplayName("Add Participant by Department Test - Failure") //
+    @Test
+    public void addParticipantDeptTestFailure() throws Exception {
+        when(employeeService.findEmpIdByDept(anyLong())).thenThrow(new RuntimeException("Failed to find employees"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/participant/add/dept/1")
+                        .param("scheduleId", "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+
     @DisplayName("Add Participant by Group Test")
     @Test
     public void addParticipantGroupTest() throws Exception {
@@ -82,6 +106,17 @@ public class ParticipantControllerTest {
                         .param("scheduleId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @DisplayName("Add Participant by Group Test - Failure")
+    @Test
+    public void addParticipantGroupTestFailure() throws Exception {
+        when(groupService.findEmployeeIdsByGroupId(anyLong())).thenThrow(new RuntimeException("Failed to find group members"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/participant/add/group/1")
+                        .param("scheduleId", "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 
     @DisplayName("Find Participant by Participant ID Test")
@@ -98,6 +133,15 @@ public class ParticipantControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @DisplayName("Find Participant by Participant ID Test - Failure")
+    @Test
+    public void findByParticipantIdTestFailure() throws Exception {
+        when(participantService.findByParticipantId(anyLong())).thenThrow(new RuntimeException("Participant not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/participant/find/participant/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
     @DisplayName("Find Participant by Schedule ID Test")
     @Test
     public void findByScheduleIdTest() throws Exception {
@@ -105,6 +149,15 @@ public class ParticipantControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/participant/find/schedule/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @DisplayName("Find Participant by Schedule ID Test - Failure")
+    @Test
+    public void findByScheduleIdTestFailure() throws Exception {
+        when(participantService.findAllByScheduleId(anyLong())).thenThrow(new RuntimeException("Schedule not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/participant/find/schedule/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @DisplayName("Find Participant by Employee ID Test")
@@ -116,10 +169,28 @@ public class ParticipantControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @DisplayName("Find Participant by Employee ID Test - Failure")
+    @Test
+    public void findByEmpIdTestFailure() throws Exception {
+        when(participantService.findAllByEmpId(anyLong())).thenThrow(new NotFoundException("Employee not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/participant/find/emp/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
     @DisplayName("Delete Participant Test")
     @Test
     public void deleteTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.put("/api/participant/delete/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @DisplayName("Delete Participant Test - Failure")
+    @Test
+    public void deleteTestFailure() throws Exception {
+        when(participantService.delete(anyLong())).thenThrow(new NotFoundException("Failed to delete participant"));
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/participant/delete/1"))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 }

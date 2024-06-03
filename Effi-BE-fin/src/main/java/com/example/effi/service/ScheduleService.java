@@ -10,10 +10,12 @@ import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -35,10 +37,13 @@ public class ScheduleService {
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null || sch.getDeleteYn() == true) {
-            return null;
+        if (sch == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found");
         }
-        return new ScheduleResponseDTO(sch);
+        if (sch.getDeleteYn() == false)
+            return new ScheduleResponseDTO(sch);
+        else
+            return null;
     }
 
     //empId로 내 schedule만 조회
@@ -171,7 +176,7 @@ public class ScheduleService {
 
     // update schedule
     public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
         Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
@@ -188,8 +193,11 @@ public class ScheduleService {
 
     //update routine
     public ScheduleResponseDTO updateRoutine(Long routineId, Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).get();
-        Routine routine = routineRepository.findById(routineId).get();
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        if (sch == null) {
+            throw new IllegalArgumentException("Schedule not found with id: " + scheduleId);
+        }
+        Routine routine = routineRepository.findById(routineId).orElse(null);
         if (routine == null || routine.getDeleteYn() == true) {
             sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                     sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
@@ -204,9 +212,11 @@ public class ScheduleService {
 
     // delete schedule
     public void deleteSchedule(Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null)
-            return;
+        Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
+//        Schedule sch = scheduleRepository.findById(scheduleId).get();
+        if (sch == null || sch.getDeleteYn() == true) {
+            throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
+        }
         sch.delete();
         scheduleRepository.save(sch);
     }

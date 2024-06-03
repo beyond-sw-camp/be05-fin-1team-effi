@@ -6,6 +6,7 @@ import com.example.effi.service.EmployeeService;
 import com.example.effi.service.ParticipantService;
 import com.example.effi.service.ScheduleService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,24 +22,38 @@ public class ScheduleController {
 
     // 추가
     @PostMapping("/add")
-    public ResponseEntity<ScheduleResponseDTO> addSchedule(@RequestBody ScheduleRequestDTO schedule,
+    public ResponseEntity<?> addSchedule(@RequestBody ScheduleRequestDTO schedule,
                                                            @RequestParam Long empNo) {
-        Long empId = employeeService.findEmpIdByEmpNo(empNo);
-        ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
-        participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
-        if (schedule.getRoutineId() != null)
-            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
-        return ResponseEntity.ok(rtn);
+        try{
+            Long empId = employeeService.findEmpIdByEmpNo(empNo);
+            ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
+            participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
+        }
     }
 
     // 수정 (어떤 수정인지) -> shcedule 내용만
     @PostMapping("/update/{scheduleId}")
-    public ResponseEntity<ScheduleResponseDTO> updateSchedule(@PathVariable Long scheduleId,
+    public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId,
                                                               @RequestBody ScheduleRequestDTO schedule) {
-        ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
-        if (schedule.getRoutineId() != null)
-            scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
-        return ResponseEntity.ok(rtn);
+        try {
+            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Failed to update schedule: " + e.getMessage());
+        }
     }
 
     // 조회 (전체) -> empNo 어떻게 넣음????
@@ -50,27 +65,48 @@ public class ScheduleController {
 
     // 조회 카테고리별 -> empNo 어떻게 넣음????
     @GetMapping("/find/category/{categoryId}")
-    public ResponseEntity<List<ScheduleResponseDTO>> findByCategory(@PathVariable("categoryId") Long categoryId) {
-        List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId);
-        return ResponseEntity.ok(scheduleResponseDTO);
+    public ResponseEntity<?> findByCategory(@PathVariable("categoryId") Long categoryId) {
+        try {
+            List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(categoryId);
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find schedule: " + e.getMessage());
+        }
     }
 
     // 조회 (1개 scheduleId)
     @GetMapping("/find/{scheduleId}")
-    public ResponseEntity<ScheduleResponseDTO> findById(@PathVariable("scheduleId") Long scheduleId){
-        ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
-        if (schedule != null && schedule.getDeleteYn() == false)
-            return ResponseEntity.ok(schedule);
-        else
-            return ResponseEntity.ok(null);
+    public ResponseEntity<?> findById(@PathVariable("scheduleId") Long scheduleId){
+        try {
+            ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
+            if (schedule != null && schedule.getDeleteYn() == false)
+                return ResponseEntity.ok(schedule);
+            else
+                return ResponseEntity.ok(null);
+
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find schedule: " + e.getMessage());
+        }
     }
 
     // 삭제
     @PutMapping("/delete/{scheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") Long scheduleId){
-        scheduleService.deleteSchedule(scheduleId);
-        return ResponseEntity.ok().build();
+        try{
+            scheduleService.deleteSchedule(scheduleId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to delete schedule: " + e.getMessage());
+        }
     }
 
-    //
 }

@@ -23,8 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Date;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -98,7 +98,6 @@ public class ParticipantServiceTest {
         assertThat(participantResponseDTO).isNotNull();
         assertThat(participantResponseDTO.getEmpId()).isEqualTo(empId);
         assertThat(participantResponseDTO.getScheduleId()).isEqualTo(responseDTO.getScheduleId());
-
     }
 
     @DisplayName("schedule_id로 participantList 조회")
