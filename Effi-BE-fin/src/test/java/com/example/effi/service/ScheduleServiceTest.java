@@ -7,6 +7,7 @@ import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Routine;
 import com.example.effi.domain.Entity.Schedule;
 import com.example.effi.repository.CategoryRepository;
+import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.*;
@@ -40,19 +41,35 @@ public class ScheduleServiceTest {
     private ParticipantService participantService;
     @Autowired
     private RoutineService routineService;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @BeforeEach
     public void setUp() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("1", null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        employeeRepository.save(Employee.builder()
+                .id(1L)
+                .empNo(1L)
+                .password("password1")
+                .company("Example Company")
+                .name("John Doe")
+                .email("john@example.com")
+                .phoneNum("123-456-7890")
+                .extensionNum("123")
+                .rank("Manager")
+                .build()
+        );
+        categoryRepository.save(Category.builder()
+                .categoryId(1L)
+                .categoryName("hi").build());
     }
 
     @DisplayName("schedule_id로 schedule 조회")
     @Test
     public void getScheduleTest() {
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
@@ -82,10 +99,6 @@ public class ScheduleServiceTest {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
-
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
@@ -126,12 +139,10 @@ public class ScheduleServiceTest {
     @DisplayName("emp_id, category_id로 schedule 조회")
     @Test
     public void getSchedulesByCategoryTest() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().getAuthentication();
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
-        Long categoryId = categoryDTO.getCategoryId();
+        Long categoryId = categoryService.findCategory(1L).getCategoryId();
+
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
@@ -146,10 +157,11 @@ public class ScheduleServiceTest {
         scheduleRequest.setRoutineId(null);
         scheduleRequest.setCategoryId(categoryId);
 
-        ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
+       scheduleService.addSchedule(scheduleRequest);
 
-        List<ScheduleResponseDTO> allSchedules = scheduleService.getSchedulesByCategory(categoryId);
-        assertThat(allSchedules).isNotEmpty();
+
+       List<ScheduleResponseDTO> allSchedules = scheduleService.getSchedulesByCategory(categoryId);
+       assertThat(allSchedules).isNotEmpty();
 
         for (ScheduleResponseDTO scheduleDTO : allSchedules)
             assertThat(scheduleDTO.getCategoryId()).isEqualTo(categoryId);

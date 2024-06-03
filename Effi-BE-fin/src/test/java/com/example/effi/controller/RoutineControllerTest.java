@@ -1,6 +1,10 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.*;
+import com.example.effi.domain.Entity.Category;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.repository.CategoryRepository;
+import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.service.RoutineService;
 import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +29,11 @@ public class RoutineControllerTest {
 
     @Autowired
     private ScheduleService scheduleService;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @BeforeEach
     public void setUp() {
@@ -75,12 +84,24 @@ public class RoutineControllerTest {
     @DisplayName("Add Routine and Update Schedule - error")
     @Test
     public void testAddRoutineAndUpdateSchedule() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().getAuthentication();
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setCategoryId(1L);
-        categoryDTO.setCategoryName("hi");
-        Long categoryId = categoryDTO.getCategoryId();
+        categoryRepository.save(Category.builder()
+                .categoryId(1L)
+                .categoryName("hi").build());
+
+        employeeRepository.save(Employee.builder()
+                        .id(1L)
+                        .empNo(1L)
+                        .password("password1")
+                        .company("Example Company")
+                        .name("John Doe")
+                        .email("john@example.com")
+                        .phoneNum("123-456-7890")
+                        .extensionNum("123")
+                        .rank("Manager")
+                        .build()
+        );
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
@@ -93,7 +114,7 @@ public class RoutineControllerTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
-        scheduleRequest.setCategoryId(categoryId);
+        scheduleRequest.setCategoryId(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
