@@ -35,10 +35,13 @@ public class ScheduleService {
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null || sch.getDeleteYn() == true) {
-            return null;
+        if (sch == null) {
+            throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
         }
-        return new ScheduleResponseDTO(sch);
+        if (sch.getDeleteYn() == false)
+            return new ScheduleResponseDTO(sch);
+        else
+            return null;
     }
 
     //empId로 내 schedule만 조회
@@ -188,8 +191,11 @@ public class ScheduleService {
 
     //update routine
     public ScheduleResponseDTO updateRoutine(Long routineId, Long scheduleId) {
-        Schedule sch = scheduleRepository.findById(scheduleId).get();
-        Routine routine = routineRepository.findById(routineId).get();
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        if (sch == null) {
+            throw new IllegalArgumentException("Schedule not found with id: " + scheduleId);
+        }
+        Routine routine = routineRepository.findById(routineId).orElse(null);
         if (routine == null || routine.getDeleteYn() == true) {
             sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                     sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
@@ -205,8 +211,9 @@ public class ScheduleService {
     // delete schedule
     public void deleteSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
-        if (sch == null)
-            return;
+        if (sch == null) {
+            throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
+        }
         sch.delete();
         scheduleRepository.save(sch);
     }

@@ -3,8 +3,10 @@ package com.example.effi.controller;
 import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.Schedule;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.EmployeeRepository;
+import com.example.effi.repository.ScheduleRepository;
 import com.example.effi.service.RoutineService;
 import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +18,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class RoutineControllerTest {
@@ -29,11 +35,14 @@ public class RoutineControllerTest {
 
     @Autowired
     private ScheduleService scheduleService;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     @BeforeEach
     public void setUp() {
@@ -91,16 +100,16 @@ public class RoutineControllerTest {
                 .categoryName("hi").build());
 
         employeeRepository.save(Employee.builder()
-                        .id(1L)
-                        .empNo(1L)
-                        .password("password1")
-                        .company("Example Company")
-                        .name("John Doe")
-                        .email("john@example.com")
-                        .phoneNum("123-456-7890")
-                        .extensionNum("123")
-                        .rank("Manager")
-                        .build()
+                .id(1L)
+                .empNo(1L)
+                .password("password1")
+                .company("Example Company")
+                .name("John Doe")
+                .email("john@example.com")
+                .phoneNum("123-456-7890")
+                .extensionNum("123")
+                .rank("Manager")
+                .build()
         );
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
@@ -185,5 +194,82 @@ public class RoutineControllerTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getDeleteYn()).isTrue();
+    }
+
+    @DisplayName("Find Routine by ID - Failure")
+    @Test
+    public void testFindByRoutineIdFailure() {
+        // When
+        Long nonExistingRoutineId = 9999L;
+
+        // Then
+        assertThatThrownBy(() -> routineService.findRoutineById(nonExistingRoutineId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Routine not found with ID: " + nonExistingRoutineId);
+    }
+
+    @DisplayName("Update Non-Existing Routine - Failure")
+    @Test
+    public void testUpdateNonExistingRoutine() {
+        // When
+        Long nonExistingRoutineId = 9999L;
+        RoutineRequestDTO updateRoutine = new RoutineRequestDTO();
+        updateRoutine.setRoutineCycle("monthly");
+        updateRoutine.setRoutineStart(new Date());
+        updateRoutine.setRoutineEnd(new Date());
+
+        // Then
+        assertThatThrownBy(() -> routineService.updateRoutine(nonExistingRoutineId, updateRoutine))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Routine not found with ID: " + nonExistingRoutineId);
+    }
+
+    @DisplayName("Add Routine and Update Schedule - Invalid Schedule")
+    @Test
+    public void testAddRoutineAndUpdateScheduleInvalidSchedule() {
+        // Given
+        // 잘못된 scheduleId 지정
+        Long scheduleId = 999L;
+
+        // When
+        RoutineRequestDTO routineRequest = new RoutineRequestDTO();
+        routineRequest.setRoutineCycle("weekly");
+        routineRequest.setRoutineStart(new Date());
+        routineRequest.setRoutineEnd(new Date());
+        Long routineId = routineService.addRoutine(routineRequest);
+
+        // Attempt to update with invalid scheduleId
+           assertThrows(IllegalArgumentException.class, () -> {
+            scheduleService.updateRoutine(routineId, scheduleId);
+        });
+
+        // Then
+        // Assert that routine is not updated
+        List<Schedule> all = scheduleRepository.findAll();
+        List<ScheduleResponseDTO> result = new ArrayList<>();
+        for (Schedule s : all){
+            if (s.getRoutine().getRoutineId() == routineId)
+                result.add(new ScheduleResponseDTO(s));
+        }
+
+        assertThat(result).size().isEqualTo(0);
+    }
+
+    @DisplayName("Delete Routine - Invalid Routine id")
+    @Test
+    public void testDeleteRoutineInvalidRoutineId() {
+        // Given
+        // 잘못된 routineId 지정
+        Long invalidRoutineId = 999L;
+
+        // When
+        // Attempt to delete with invalid routineId
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            routineService.deleteRoutine(invalidRoutineId);
+        });
+
+        // Then
+        // Assert no changes are made
+        assertThat(exception.getMessage()).isEqualTo("Routine not found with ID: " + invalidRoutineId);
     }
 }

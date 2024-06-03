@@ -24,8 +24,9 @@ public class RoutineService {
     //루틴 조회 (routineId)
     public RoutineResponseDTO findRoutineById(Long Id){
         Routine routine = routineRepository.findById(Id).orElse(null);
-        if(routine == null)
-            return null;
+        if (routine == null) {
+            throw new IllegalArgumentException("Routine not found with ID: " + Id);
+        }
         return new RoutineResponseDTO(routine);
     }
 
@@ -47,8 +48,9 @@ public class RoutineService {
     //루틴 수정
     public RoutineResponseDTO updateRoutine(Long routineId, RoutineRequestDTO routineRequestDTO){
         Routine routine = routineRepository.findById(routineId).orElse(null);
-        if(routine == null)
-            return null;
+        if (routine == null) {
+            throw new IllegalArgumentException("Routine not found with ID: " + routineId);
+        }
         routine.update(routineRequestDTO.getRoutineStart(), routineRequestDTO.getRoutineEnd(),
                 routineRequestDTO.getRoutineCycle());
         return new RoutineResponseDTO(routine);
@@ -57,6 +59,9 @@ public class RoutineService {
     //루틴 삭제 (deleteYn = true)
     public Long deleteRoutine(Long Id){
         Routine routine = routineRepository.findById(Id).orElse(null);
+        if (routine == null) {
+            throw new IllegalArgumentException("Routine not found with ID: " + Id);
+        }
         routine.delete();
         return routineRepository.save(routine).getRoutineId();
     }
