@@ -2,6 +2,7 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.EmployeeDTO;
 import com.example.effi.domain.DTO.GlobalResponse;
+import com.example.effi.domain.DTO.GroupDTO;
 import com.example.effi.domain.DTO.GroupRequestDTO;
 import com.example.effi.domain.DTO.UpdateGroupNameRequest;
 import com.example.effi.service.GroupService;
@@ -52,5 +53,11 @@ public class GroupController {
     @DeleteMapping("/{groupId}")
     public ResponseEntity<GlobalResponse> deleteGroup(@PathVariable Long groupId) {
         return groupService.deleteGroup(groupId);
+    }
+
+    // 모든 그룹 조회
+    @GetMapping("/all")
+    public ResponseEntity<List<GroupDTO>> findAllGroups() {
+        return ResponseEntity.ok(groupService.findAllGroups());
     }
 }

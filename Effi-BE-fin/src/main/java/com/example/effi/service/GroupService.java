@@ -145,24 +145,24 @@ public class GroupService {
 
     @Transactional
     public ResponseEntity<GlobalResponse> withdrawGroup(Long groupId, Long empId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+      Group group = groupRepository.findById(groupId)
+          .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
 
-        groupEmpRepository.updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
+      groupEmpRepository.updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
 
-        // 그룹에 남아있는 구성원이 있는지 확인
-        Long activeMemberCount = groupEmpRepository.countActiveMembersInGroup(groupId);
-        if (activeMemberCount == 0) {
-            Group deletedGroup = group.markAsDeleted();
-            groupRepository.save(deletedGroup);
-            return ResponseEntity.ok().body(GlobalResponse.builder()
-                    .message("모든 구성원이 그룹을 떠났기 때문에 그룹이 삭제되었습니다.")
-                    .status(HttpStatus.OK.value())
-                    .data(GroupResponseDTO.builder()
-                            .groupName(deletedGroup.getGroupName())
-                            .build())
-                    .build());
-        }
+      // 그룹에 남아있는 구성원이 있는지 확인
+      Long activeMemberCount = groupEmpRepository.countActiveMembersInGroup(groupId);
+      if (activeMemberCount == 0) {
+        Group deletedGroup = group.markAsDeleted();
+        groupRepository.save(deletedGroup);
+        return ResponseEntity.ok().body(GlobalResponse.builder()
+            .message("모든 구성원이 그룹을 떠났기 때문에 그룹이 삭제되었습니다.")
+            .status(HttpStatus.OK.value())
+            .data(GroupResponseDTO.builder()
+                .groupName(deletedGroup.getGroupName())
+                .build())
+            .build());
+      }
 
         return ResponseEntity.ok().body(GlobalResponse.builder()
                 .message("그룹 탈퇴 성공")
@@ -175,16 +175,23 @@ public class GroupService {
 
     @Transactional
     public ResponseEntity<GlobalResponse> deleteGroup(Long groupId) {
-        deleteGroupAndMembers(groupId);
-        return ResponseEntity.ok().body(GlobalResponse.builder()
-                .message("그룹 삭제 성공")
-                .status(HttpStatus.OK.value())
-                .data(GroupResponseDTO.builder()
-                        .groupName(null)
-                        .build())
-                .build());
+      // 그룹이 존재하지 않을 경우 예외를 던짐
+      Group group = groupRepository.findById(groupId)
+          .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+
+      // 그룹이 존재할 경우 그룹과 구성원 삭제
+      deleteGroupAndMembers(groupId);
+
+      return ResponseEntity.ok().body(GlobalResponse.builder()
+          .message("그룹 삭제 성공")
+          .status(HttpStatus.OK.value())
+          .data(GroupResponseDTO.builder()
+              .groupName(null)
+              .build())
+          .build());
     }
 
+    // 그룹과 구성원 삭제
     @Transactional
     public void deleteGroupAndMembers(Long groupId) {
         // 그룹 구성원을 모두 삭제
@@ -197,6 +204,7 @@ public class GroupService {
         groupRepository.save(deletedGroup);
     }
 
+    // 그룹에 속한 구성원 목록 조회
     public List<EmployeeDTO> searchEmployeesByName(String name) {
         return employeeRepository.findByNameContaining(name).stream()
                 .map(employee -> EmployeeDTO.builder()
@@ -228,10 +236,23 @@ public class GroupService {
     // groupId로 group 찾기
     @Transactional
     public GroupDTO findGroupById(Long groupId) {
-        Group grp = groupRepository.findById(groupId).get();
-        return new GroupDTO(grp);
+      Group group = groupRepository.findById(groupId)
+          .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+      return new GroupDTO(group);
     }
 
+    // 모든 그룹 조회
+    @Transactional
+    public List<GroupDTO> findAllGroups() {
+        List<Group> lst = groupRepository.findAll();
+        List<GroupDTO> groupDTOs = new ArrayList<GroupDTO>();
+        for (Group group : lst) {
+            groupDTOs.add(new GroupDTO(group));
+        }
+        return groupDTOs;
+    }
+
+    // groupId로 groupLeader 찾기
     @Transactional
     public Boolean findGroupLeader(Long groupId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -246,4 +267,6 @@ public class GroupService {
         }
         return false;
     }
+
+    
 }
