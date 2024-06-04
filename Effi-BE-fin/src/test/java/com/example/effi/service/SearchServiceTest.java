@@ -18,11 +18,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +71,15 @@ public class SearchServiceTest {
     }
 
     @Test
+    void testSearchSchedulesByTitleFailure() {
+        when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());
+
+        List<SearchResponseDTO> results = searchService.searchSchedulesByTitle("title");
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
     void testSearchSchedulesByTag() {
         Schedule schedule = mock(Schedule.class);
         Participant participant = mock(Participant.class);
@@ -85,6 +94,15 @@ public class SearchServiceTest {
     }
 
     @Test
+    void testSearchSchedulesByTagFailure() {
+        when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());
+
+        List<SearchResponseDTO> results = searchService.searchSchedulesByTag("tag");
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
     void testSearchSchedulesByCategory() {
         Schedule schedule = mock(Schedule.class);
         Participant participant = mock(Participant.class);
@@ -96,5 +114,14 @@ public class SearchServiceTest {
         List<SearchResponseDTO> results = searchService.searchSchedulesByCategory("category");
 
         assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    void testSearchSchedulesByCategoryFailure() {
+        when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());
+
+        List<SearchResponseDTO> results = searchService.searchSchedulesByCategory("category");
+
+        assertThat(results).isEmpty();
     }
 }

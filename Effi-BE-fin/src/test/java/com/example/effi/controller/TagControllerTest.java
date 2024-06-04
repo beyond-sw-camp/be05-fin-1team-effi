@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -53,7 +54,7 @@ public class TagControllerTest {
         Schedule sampleSchedule = Schedule.builder()
                 .title("Sample Schedule")
                 .context("Sample Context")
-                .category(sampleCategory)  // Category 설정
+                .category(sampleCategory)
                 .build();
         setScheduleId(sampleSchedule, 1L);
         sampleScheduleResponseDTO = new ScheduleResponseDTO(sampleSchedule);
@@ -114,6 +115,17 @@ public class TagControllerTest {
     }
 
     @Test
+    void testAddTagFailure() {
+        when(tagService.addTag(anyString())).thenThrow(new RuntimeException("Tag creation failed"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.addTag(1L, "Sample Tag");
+        });
+
+        verify(tagService).addTag(anyString());
+    }
+
+    @Test
     void testFindTag() {
         when(tagService.getTag(anyString())).thenReturn(sampleTagResponseDTO);
 
@@ -122,6 +134,17 @@ public class TagControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getTagId()).isEqualTo(1L);
         assertThat(response.getBody().getTagName()).isEqualTo("Sample Tag");
+
+        verify(tagService).getTag(anyString());
+    }
+
+    @Test
+    void testFindTagFailure() {
+        when(tagService.getTag(anyString())).thenThrow(new RuntimeException("Tag not found"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.findTag("Nonexistent Tag");
+        });
 
         verify(tagService).getTag(anyString());
     }
@@ -136,6 +159,17 @@ public class TagControllerTest {
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody().get(0).getTagId()).isEqualTo(1L);
         assertThat(response.getBody().get(0).getTagName()).isEqualTo("Sample Tag");
+
+        verify(tagService).getAllTag();
+    }
+
+    @Test
+    void testFindAllTagFailure() {
+        when(tagService.getAllTag()).thenThrow(new RuntimeException("Failed to fetch tags"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.findAllTag();
+        });
 
         verify(tagService).getAllTag();
     }
@@ -158,6 +192,17 @@ public class TagControllerTest {
     }
 
     @Test
+    void testFindTagByIdFailure() {
+        when(tagScheduleService.findByTagId(anyLong())).thenThrow(new RuntimeException("Tag not found"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.findTagById(1L);
+        });
+
+        verify(tagScheduleService).findByTagId(anyLong());
+    }
+
+    @Test
     void testUpdateTag() {
         when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenReturn(sampleTagScheduleResponseDTO);
         when(tagScheduleService.addTagSchedule(anyLong(), anyString())).thenReturn(1L);
@@ -177,6 +222,17 @@ public class TagControllerTest {
     }
 
     @Test
+    void testUpdateTagFailure() {
+        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenThrow(new RuntimeException("TagSchedule not found"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.updateTag(1L, 1L, "Updated Tag");
+        });
+
+        verify(tagScheduleService).findByScheduleIdAndTagId(anyLong(), anyLong());
+    }
+
+    @Test
     void testDeleteTag() {
         when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenReturn(sampleTagScheduleResponseDTO);
 
@@ -186,5 +242,16 @@ public class TagControllerTest {
 
         verify(tagScheduleService).findByScheduleIdAndTagId(anyLong(), anyLong());
         verify(tagScheduleService).deleteTag(anyLong());
+    }
+
+    @Test
+    void testDeleteTagFailure() {
+        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenThrow(new RuntimeException("TagSchedule not found"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagController.deleteTag(1L, 1L);
+        });
+
+        verify(tagScheduleService).findByScheduleIdAndTagId(anyLong(), anyLong());
     }
 }

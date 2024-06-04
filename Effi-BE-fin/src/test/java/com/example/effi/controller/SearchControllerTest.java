@@ -39,7 +39,6 @@ public class SearchControllerTest {
 
     @Test
     void testSearchSchedulesByTitle() throws Exception {
-        // 빌더 패턴을 사용하여 SearchResponseDTO 객체 생성
         SearchResponseDTO searchResponseDTO = SearchResponseDTO.builder()
                 .scheduleId(1L)
                 .title("Sample Title")
@@ -67,8 +66,18 @@ public class SearchControllerTest {
     }
 
     @Test
+    void testSearchSchedulesByTitleFailure() throws Exception {
+        when(searchService.searchSchedulesByTitle(anyString())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/search/title")
+                        .param("title", "Nonexistent Title")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
     void testSearchSchedulesByTag() throws Exception {
-        // 빌더 패턴을 사용하여 SearchResponseDTO 객체 생성
         SearchResponseDTO searchResponseDTO = SearchResponseDTO.builder()
                 .scheduleId(1L)
                 .title("Sample Title")
@@ -96,8 +105,18 @@ public class SearchControllerTest {
     }
 
     @Test
+    void testSearchSchedulesByTagFailure() throws Exception {
+        when(searchService.searchSchedulesByTag(anyString())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/search/tag")
+                        .param("tagName", "Nonexistent Tag")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
     void testSearchSchedulesByCategory() throws Exception {
-        // 빌더 패턴을 사용하여 SearchResponseDTO 객체 생성
         SearchResponseDTO searchResponseDTO = SearchResponseDTO.builder()
                 .scheduleId(1L)
                 .title("Sample Title")
@@ -122,5 +141,16 @@ public class SearchControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Sample Title"));
+    }
+
+    @Test
+    void testSearchSchedulesByCategoryFailure() throws Exception {
+        when(searchService.searchSchedulesByCategory(anyString())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/search/category")
+                        .param("categoryName", "Nonexistent Category")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

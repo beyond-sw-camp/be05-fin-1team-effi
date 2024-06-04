@@ -1,31 +1,36 @@
 package com.example.effi.controller;
 
-
 import com.example.effi.domain.DTO.MyPageResponseDTO;
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.service.MyPageService;
-import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/api/mypage")
+@RequiredArgsConstructor
 public class MyPageController {
 
     private final MyPageService myPageService;
 
-    @GetMapping(value="/me", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<MyPageResponseDTO> mypageView(){
-        MyPageResponseDTO mypage = myPageService.getEmployee();
-        return ResponseEntity.ok(mypage);
+    @GetMapping("/me")
+    public ResponseEntity<MyPageResponseDTO> mypageView() {
+        try {
+            MyPageResponseDTO responseDTO = myPageService.getEmployee();
+            return ResponseEntity.ok(responseDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(null);
+        }
     }
 
-    @PutMapping(value = "/update", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping("/update")
     public ResponseEntity<String> updateTimezone(@RequestBody MyPageUpdateDTO myPageUpdateDTO) {
-        myPageService.updateEmployeeTimezone(myPageUpdateDTO);
-        return ResponseEntity.ok("Timezone updated successfully");
+        try {
+            myPageService.updateEmployeeTimezone(myPageUpdateDTO);
+            return ResponseEntity.ok("Timezone updated successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
-
 }
