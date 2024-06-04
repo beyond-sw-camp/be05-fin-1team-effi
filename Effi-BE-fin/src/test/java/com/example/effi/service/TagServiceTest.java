@@ -1,4 +1,3 @@
-
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.TagResponseDTO;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -34,8 +34,6 @@ public class TagServiceTest {
     @BeforeEach
     void setUp() {
         sampleTag = new Tag("Sample Tag");
-        // Reflection을 사용하여 private 필드에 값을 설정할 수 있습니다.
-        // 이를 통해 @Builder 없이도 필드를 설정할 수 있습니다.
         setTagId(sampleTag, 1L);
     }
 
@@ -51,16 +49,27 @@ public class TagServiceTest {
 
     @Test
     void testAddTag() {
-        when(tagRepository.findTagByTagName(anyString())).thenReturn(null).thenReturn(sampleTag);
+        when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
         when(tagRepository.save(any(Tag.class))).thenReturn(sampleTag);
 
         Long tagId = tagService.addTag("Sample Tag");
 
         assertThat(tagId).isEqualTo(1L);
         verify(tagRepository).save(any(Tag.class));
-        verify(tagRepository, times(2)).findTagByTagName(anyString());
+        verify(tagRepository).findTagByTagName(anyString());
     }
 
+    @Test
+    void testAddTagFailure() {
+        when(tagRepository.findTagByTagName(anyString())).thenReturn(sampleTag);
+
+        assertThrows(RuntimeException.class, () -> {
+            tagService.addTag("Sample Tag");
+        });
+
+        verify(tagRepository, times(1)).findTagByTagName(anyString());
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
 
     @Test
     void testGetTagId() {
@@ -69,6 +78,16 @@ public class TagServiceTest {
         Long tagId = tagService.getTagId("Sample Tag");
 
         assertThat(tagId).isEqualTo(1L);
+    }
+
+    @Test
+    void testGetTagIdFailure() {
+        when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
+
+        Long tagId = tagService.getTagId("Nonexistent Tag");
+
+        assertThat(tagId).isNull();
+        verify(tagRepository).findTagByTagName(anyString());
     }
 
     @Test
@@ -81,6 +100,17 @@ public class TagServiceTest {
     }
 
     @Test
+    void testGetTagNameFailure() {
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> {
+            tagService.getTagName(1L);
+        });
+
+        verify(tagRepository).findById(anyLong());
+    }
+
+    @Test
     void testGetTag() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(sampleTag);
 
@@ -89,6 +119,17 @@ public class TagServiceTest {
         assertThat(tagResponseDTO).isNotNull();
         assertThat(tagResponseDTO.getTagId()).isEqualTo(1L);
         assertThat(tagResponseDTO.getTagName()).isEqualTo("Sample Tag");
+    }
+
+    @Test
+    void testGetTagFailure() {
+        when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
+
+        assertThrows(RuntimeException.class, () -> {
+            tagService.getTag("Nonexistent Tag");
+        });
+
+        verify(tagRepository).findTagByTagName(anyString());
     }
 
     @Test
@@ -108,5 +149,15 @@ public class TagServiceTest {
         assertThat(allTags.get(1).getTagId()).isEqualTo(2L);
         assertThat(allTags.get(1).getTagName()).isEqualTo("Tag 2");
     }
-}
 
+    @Test
+    void testGetAllTagFailure() {
+        when(tagRepository.findAll()).thenThrow(new RuntimeException("Failed to fetch tags"));
+
+        assertThrows(RuntimeException.class, () -> {
+            tagService.getAllTag();
+        });
+
+        verify(tagRepository).findAll();
+    }
+}

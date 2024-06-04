@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 
 class MyPageServiceTest {
 
-    // Mock 객체 선언
     @Mock
     private MyPageRepository myPageRepository;
 
@@ -43,27 +42,19 @@ class MyPageServiceTest {
     @Mock
     private SecurityContext securityContext;
 
-    // 테스트할 서비스 클래스에 Mock 객체 주입
     @InjectMocks
     private MyPageService myPageService;
 
-    // 각 테스트 전에 실행될 설정 메소드
     @BeforeEach
     void setUp() {
-        // Mock 객체 초기화
         MockitoAnnotations.openMocks(this);
-        // SecurityContextHolder에 Mock SecurityContext 설정
         SecurityContextHolder.setContext(securityContext);
-        // Mock SecurityContext에서 인증 객체 반환 설정
         when(securityContext.getAuthentication()).thenReturn(authentication);
-        // Mock 인증 객체에서 사용자 ID 반환 설정
         when(authentication.getName()).thenReturn("1");
     }
 
     @Test
     void getEmployee_ShouldReturnMyPageResponseDTO() {
-        // 테스트 데이터 준비
-        // given
         Employee employee = Employee.builder()
                 .empNo(1L)
                 .name("John Doe")
@@ -75,16 +66,11 @@ class MyPageServiceTest {
                 .dept(new Dept("Sales"))
                 .build();
 
-        // Mock 객체의 동작 정의
         when(myPageRepository.findById(anyLong())).thenReturn(Optional.of(employee));
         when(myPageRepository.findDefaultTimezoneName(anyLong())).thenReturn("UTC");
 
-        // 서비스 메소드 호출 및 결과 검증
-        // when
         MyPageResponseDTO responseDTO = myPageService.getEmployee();
 
-        // 예상 결과와 실제 결과 비교
-        // then
         assertEquals(1L, responseDTO.getEmpNo());
         assertEquals("John Doe", responseDTO.getName());
         assertEquals("Example Corp", responseDTO.getCompany());
@@ -96,26 +82,44 @@ class MyPageServiceTest {
         assertEquals("UTC", responseDTO.getTimezoneName());
         assertEquals("회원 정보 조회", responseDTO.getMsg());
 
-        // Mock 객체의 메소드 호출 횟수 검증
         verify(myPageRepository, times(1)).findById(anyLong());
         verify(myPageRepository, times(1)).findDefaultTimezoneName(anyLong());
     }
 
     @Test
     void getEmployee_ShouldThrowException_WhenEmployeeNotFound() {
-        // Mock 객체의 동작 정의: 직원이 없는 경우
         when(myPageRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // 예외 발생 여부 검증
         assertThrows(IllegalArgumentException.class, () -> myPageService.getEmployee());
 
-        // Mock 객체의 메소드 호출 횟수 검증
         verify(myPageRepository, times(1)).findById(anyLong());
+        verify(myPageRepository, never()).findDefaultTimezoneName(anyLong());
+    }
+
+    @Test
+    void getEmployee_ShouldThrowException_WhenDefaultTimezoneNotFound() {
+        Employee employee = Employee.builder()
+                .empNo(1L)
+                .name("John Doe")
+                .company("Example Corp")
+                .email("john.doe@example.com")
+                .rank("Manager")
+                .phoneNum("123-456-7890")
+                .extensionNum("1234")
+                .dept(new Dept("Sales"))
+                .build();
+
+        when(myPageRepository.findById(anyLong())).thenReturn(Optional.of(employee));
+        when(myPageRepository.findDefaultTimezoneName(anyLong())).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () -> myPageService.getEmployee());
+
+        verify(myPageRepository, times(1)).findById(anyLong());
+        verify(myPageRepository, times(1)).findDefaultTimezoneName(anyLong());
     }
 
     @Test
     void updateEmployeeTimezone_ShouldUpdateTimezone() {
-        // 가상의 테스트 데이터 준비
         Timezone existingTimezone = Timezone.builder()
                 .timezoneName("UTC")
                 .countryCode("US")
@@ -151,12 +155,10 @@ class MyPageServiceTest {
                 .defaultTimezone(true)
                 .build();
 
-        // 새로운 timezone 지정
         MyPageUpdateDTO myPageUpdateDTO = MyPageUpdateDTO.builder()
                 .empId(1L)
                 .timezoneId(1L)
                 .build();
-
 
         when(timezoneEmpRepository.findByEmpIdAndDefaultTimezone(anyLong())).thenReturn(Optional.of(timezoneEmp));
         when(timezoneRepository.findById(anyLong())).thenReturn(Optional.of(newTimezone));
@@ -172,25 +174,20 @@ class MyPageServiceTest {
 
     @Test
     void updateEmployeeTimezone_ShouldThrowException_WhenTimezoneEmpNotFound() {
-        // 테스트 데이터 준비
         MyPageUpdateDTO myPageUpdateDTO = MyPageUpdateDTO.builder()
                 .empId(1L)
                 .timezoneId(1L)
                 .build();
 
-        // Mock 객체의 동작 정의: 기본 타임존을 찾을 수 없는 경우
         when(timezoneEmpRepository.findByEmpIdAndDefaultTimezone(anyLong())).thenReturn(Optional.empty());
 
-        // 예외 발생 여부 검증
         assertThrows(IllegalArgumentException.class, () -> myPageService.updateEmployeeTimezone(myPageUpdateDTO));
 
-        // Mock 객체의 메소드 호출 횟수 검증
         verify(timezoneEmpRepository, times(1)).findByEmpIdAndDefaultTimezone(anyLong());
     }
 
     @Test
     void updateEmployeeTimezone_ShouldThrowException_WhenTimezoneNotFound() {
-        // 가상의 테스트 데이터 준비
         Timezone existingTimezone = Timezone.builder()
                 .timezoneName("UTC")
                 .countryCode("US")
@@ -211,27 +208,22 @@ class MyPageServiceTest {
                 .dept(new Dept("Sales"))
                 .build();
 
-        // TimezoneEmp 객체 생성
         TimezoneEmp timezoneEmp = TimezoneEmp.builder()
                 .timezone(existingTimezone)
                 .employee(employee)
                 .defaultTimezone(true)
                 .build();
 
-        // MyPageUpdateDTO 객체 생성
         MyPageUpdateDTO myPageUpdateDTO = MyPageUpdateDTO.builder()
                 .empId(1L)
                 .timezoneId(2L)
                 .build();
 
-        // Mock 설정
         when(timezoneEmpRepository.findByEmpIdAndDefaultTimezone(anyLong())).thenReturn(Optional.of(timezoneEmp));
         when(timezoneRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // 예외 발생 검증
         assertThrows(IllegalArgumentException.class, () -> myPageService.updateEmployeeTimezone(myPageUpdateDTO));
 
-        // 메소드 호출 검증
         verify(timezoneEmpRepository, times(1)).findByEmpIdAndDefaultTimezone(anyLong());
         verify(timezoneRepository, times(1)).findById(anyLong());
     }

@@ -21,21 +21,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MyPageService {
 
-    private final MyPageRepository mypageRepository;
+    private final MyPageRepository myPageRepository;
     private final TimezoneEmpRepository timezoneEmpRepository;
     private final TimezoneRepository timezoneRepository;
 
     // 내 정보 조회
     public MyPageResponseDTO getEmployee() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         Long empId = Long.valueOf(authentication.getName());
 
-        String timezoneName = mypageRepository.findDefaultTimezoneName(empId);
-
-        Optional<Employee> byemp = mypageRepository.findById(empId);
-        if(!byemp.isPresent()){
+        Optional<Employee> byemp = myPageRepository.findById(empId);
+        if (!byemp.isPresent()) {
             throw new IllegalArgumentException("사원이 검색되지 않습니다. id: " + empId);
+        }
+
+        String timezoneName = myPageRepository.findDefaultTimezoneName(empId);
+        if (timezoneName == null) {
+            throw new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + empId);
         }
 
         Employee employee = byemp.get();
@@ -55,10 +57,8 @@ public class MyPageService {
 
     // 기본 시간대 update
     public void updateEmployeeTimezone(MyPageUpdateDTO myPageUpdateDTO) {
-
         // 인증 정보를 통해 empId 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         Long empId = Long.valueOf(authentication.getName());
 
         // 기본 타임존 엔티티 조회
@@ -73,6 +73,4 @@ public class MyPageService {
         timezoneEmp.setTimezone(timezone);
         timezoneEmpRepository.save(timezoneEmp);
     }
-
-
 }
