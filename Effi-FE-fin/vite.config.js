@@ -12,6 +12,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+    build: {
+    outDir: "../../Effi-FE-fin/src/main/resources/static"
+  },
   server: {
     host: true,
     port: 5173 // 사용하고자 하는 포트 번호로 변경

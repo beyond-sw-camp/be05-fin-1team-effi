@@ -1,25 +1,28 @@
 <template>
   <div>
-    <AppHeader class="header"/>
+    <AppHeader class="header" />
     <div class="container">
-      <Navigation class="navigation"/>
+      <Navigation class="navigation" />
       <div class="content">
-        <!-- 여기에 다른 컨텐츠 추가 -->
+        <VCalendar />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Navigation from '@/components/LeftSidebar.vue'
-import AppHeader from '@/components/HomeHeader.vue'
+import { defineComponent } from 'vue';
+import Navigation from '@/components/LeftSidebar.vue';
+import AppHeader from '@/components/HomeHeader.vue';
+import VCalendar from '@/components/VCalendar.vue';
 
-export default {
+export default defineComponent({
   components: {
     Navigation,
-    AppHeader
-  }
-}
+    AppHeader,
+    VCalendar,
+  },
+});
 </script>
 
 <style>
@@ -48,6 +51,9 @@ export default {
   padding: 20px;
   flex-grow: 1; /* 남은 공간을 채우도록 설정 */
   width: calc(100% - 200px); /* 내비게이션을 제외한 너비 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* 반응형 스타일 */
