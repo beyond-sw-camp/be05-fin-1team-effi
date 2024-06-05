@@ -32,6 +32,7 @@ export default defineComponent({
   width: 200px; /* 네비게이션 너비 고정 */
   height: 100%; /* 전체 높이 사용 */
   padding: 20px;
+  margin-right: 20px;
   box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
 }
 

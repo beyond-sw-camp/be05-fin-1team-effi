@@ -1,33 +1,29 @@
 <template>
-  <div class="calendar-container">
-    <!-- View Mode and Weekdays -->
-    <v-sheet class="d-flex justify-space-between align-center mb-2" height="50" tile>
-      <div class="d-flex">
-        <v-select
-          v-model="type"
-          :items="types"
-          class="ma-1"
-          label="View Mode"
-          variant="outlined"
-          dense
-          hide-details
-          style="width: 120px;"
-        ></v-select>
-        <v-select
-          v-model="weekday"
-          :items="weekdays"
-          class="ma-1"
-          label="Weekdays"
-          variant="outlined"
-          dense
-          hide-details
-          style="width: 150px;"
-        ></v-select>
-      </div>
+  <div>
+    <v-sheet
+      class="d-flex"
+      height="54"
+      tile
+    >
+      <v-select
+        v-model="type"
+        :items="types"
+        class="ma-2"
+        label="View Mode"
+        variant="outlined"
+        dense
+        hide-details
+      ></v-select>
+      <v-select
+        v-model="weekday"
+        :items="weekdays"
+        class="ma-2"
+        label="weekdays"
+        variant="outlined"
+        dense
+        hide-details
+      ></v-select>
     </v-sheet>
-
-
-    <!-- Calendar -->
     <v-sheet>
       <v-calendar
         ref="calendar"
@@ -35,7 +31,6 @@
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
-        class="calendar"
       ></v-calendar>
     </v-sheet>
   </div>
@@ -43,13 +38,12 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue';
-import { useDate } from 'vuetify';
 import dayjs from 'dayjs';
 
 export default {
   setup() {
-    const type = ref('month');
     const types = ref(['month', 'week', 'day']);
+    const type = ref('month');
     const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
     const weekdays = ref([
       { title: 'Sun - Sat', value: [0, 1, 2, 3, 4, 5, 6] },
@@ -70,25 +64,23 @@ export default {
       return dayjs(value.value[0]).format('M');
     });
 
-    const adapter = useDate();
-
     onMounted(() => {
       getEvents({
-        start: adapter.startOfDay(adapter.startOfMonth(new Date())),
-        end: adapter.endOfDay(adapter.endOfMonth(new Date())),
+        start: dayjs().startOf('month').toDate(),
+        end: dayjs().endOf('month').toDate(),
       });
     });
 
     const getEvents = ({ start, end }) => {
       const eventsArray = [];
-      const min = start;
-      const max = end;
-      const days = (max.getTime() - min.getTime()) / 86400000;
+      const min = new Date(start).getTime();
+      const max = new Date(end).getTime();
+      const days = (max - min) / 86400000;
       const eventCount = rnd(days, days + 20);
 
       for (let i = 0; i < eventCount; i++) {
         const allDay = rnd(0, 3) === 0;
-        const firstTimestamp = rnd(min.getTime(), max.getTime());
+        const firstTimestamp = rnd(min, max);
         const first = new Date(firstTimestamp - (firstTimestamp % 900000));
         const secondTimestamp = rnd(2, allDay ? 288 : 8) * 900000;
         const second = new Date(first.getTime() + secondTimestamp);
@@ -141,18 +133,7 @@ export default {
 </script>
 
 <style>
-.calendar-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-}
 
-.calendar {
-  width: 100%;
-  max-width: 900px;
-}
 
 .date-display {
   margin: 0 10px;
@@ -166,7 +147,6 @@ export default {
   text-align: center;
   margin-bottom: 20px;
 }
-
 @media (max-width: 768px) {
   .calendar {
     max-width: 100%;
@@ -175,4 +155,5 @@ export default {
     font-size: 16px;
   }
 }
+
 </style>

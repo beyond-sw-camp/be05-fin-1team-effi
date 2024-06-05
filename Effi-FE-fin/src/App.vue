@@ -1,7 +1,10 @@
+<!-- app.vue -->
 <template>
-  <div>
-    <AppHeader v-if="showHeader" class="header" />
-    <router-view />
+  <div id="app">
+    <AppHeader v-if="showHeader" />
+    <div class="content">
+      <router-view />
+    </div>
   </div>
 </template>
 
@@ -16,7 +19,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const showHeader = computed(() => route.name !== 'login');
+    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test');
 
     return {
       showHeader,
@@ -25,15 +28,22 @@ export default defineComponent({
 });
 </script>
 
+
 <style>
 #app {
-  margin:0
+  margin: 0;
+  padding-top: 10px; /* 헤더의 높이만큼 패딩 추가 */
 }
+
 .header {
   width: 100%;
   position: fixed;
   top: 0;
   z-index: 1000; /* 헤더가 다른 요소 위에 위치하도록 설정 */
+}
+
+.content {
+  padding: 0;
 }
 
 body {
