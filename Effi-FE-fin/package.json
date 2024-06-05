@@ -12,12 +12,16 @@
   },
   "dependencies": {
     "@date-io/dayjs": "^3.0.0",
+    "@mdi/font": "^7.4.47",
     "@vuepic/vue-datepicker": "^8.7.0",
     "axios": "^1.7.2",
+    "bootstrap": "^5.3.3",
+    "bootstrap-vue": "^2.23.1",
+    "bootstrap-vue-3": "^0.5.1",
     "dayjs": "^1.11.11",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
+    "vue-router": "^4.3.2",
     "vuetify": "^3.6.0-beta.0.0",
     "webfontloader": "^1.6.28"
   },
