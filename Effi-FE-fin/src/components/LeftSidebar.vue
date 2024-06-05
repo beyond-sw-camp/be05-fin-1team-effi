@@ -1,11 +1,6 @@
 <template>
   <div class="left-sidebar">
     <button @click="$emit('showModal')">그룹 생성</button>
-    <b-row>
-      <b-col md="auto">
-        <b-calendar v-model="value" @context="onContext" locale="en-US"></b-calendar>
-      </b-col>
-    </b-row>
   </div>
 </template>
 
@@ -13,22 +8,15 @@
 export default {
   data() {
     return {
-      value: '',
-      context: null
-    }
+      showModal: false,
+    };
   },
-  methods: {
-    onContext(ctx) {
-      this.context = ctx
-    }
-  }
 }
 </script>
 
 <style scoped>
 .left-sidebar {
   background-color: #FBB584;
-  padding: 10px;
 }
 
 button {

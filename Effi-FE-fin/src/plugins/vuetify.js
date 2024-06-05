@@ -6,6 +6,7 @@ import * as directives from 'vuetify/directives';
 import { VCalendar } from 'vuetify/labs/VCalendar';
 import dayjs from './dayjs';
 import DayjsUtils from '@date-io/dayjs';
+import 'vuetify/styles';
 
 // dayjs 확장 추가
 import isToday from 'dayjs/plugin/isToday';

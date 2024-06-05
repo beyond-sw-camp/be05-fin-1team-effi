@@ -51,17 +51,17 @@ const logout = async () => {
 <style scoped>
 .header {
   display: flex;
-  justify-content: center; /* 헤더를 가운데 정렬 */
+  justify-content: space-between; /* 양쪽 끝에 배치 */
   align-items: center;
   padding: 10px;
   background-color: #f8f9fa;
   width: 100%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  position: fixed; /* 페이지 맨 위에 고정 */
+  position: fixed;
   top: 0;
-  left: 50%; /* 가운데 정렬을 위한 왼쪽 위치 설정 */
-  transform: translateX(-50%); /* 가운데 정렬을 위한 이동 */
+  left: 0; /* 화면 왼쪽에 고정 */
+  transform: none; /* 가운데 정렬 제거 */
 }
 
 .search-container {
@@ -75,28 +75,27 @@ const logout = async () => {
 }
 
 .planner-title {
-  margin-right: 20px; /* 여백 추가 */
-  font-weight: bold; /* 텍스트 강조 */
+  margin-right: 20px;
+  font-weight: bold;
 }
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .search-container {
-    flex-direction: column;
+  .header {
+    flex-direction: column; /* 작은 화면에서는 세로로 배치 */
     align-items: flex-start;
   }
-  .search-container select,
-  .search-container input {
-    margin-right: 0;
+  .search-container {
+    width: 100%; /* 전체 너비 차지 */
     margin-bottom: 10px;
   }
   .user-container {
-    flex-direction: column;
-    align-items: flex-start;
+    width: 100%; /* 전체 너비 차지 */
   }
   .planner-title {
     margin-right: 0;
     margin-bottom: 10px;
   }
 }
+
 </style>
