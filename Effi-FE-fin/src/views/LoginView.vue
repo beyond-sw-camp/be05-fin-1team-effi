@@ -20,89 +20,42 @@
   </div>
 </template>
 
-
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 import axiosInstance from '@/services/axios';
 
-export default {
-  setup() {
-    const loginData = ref({
-      empNo: '',
-      password: ''
+const loginData = ref({
+  empNo: '',
+  password: ''
+});
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const handleLogin = async () => {
+  try {
+    // 전송 전에 데이터 로그 출력
+    console.log('Login Data:', loginData.value);
+
+    const response = await axiosInstance.post('/api/auth/signin', {
+      empNo: loginData.value.empNo,
+      password: loginData.value.password,
     });
 
-    const authStore = useAuthStore();
+    // 응답 데이터 로그 출력
+    console.log('Response Data:', response.data);
 
-    const handleLogin = async () => {
-      try {
-        const response = await axiosInstance.post('/api/auth/signin', {
-          empNo: loginData.value.empNo,
-          password: loginData.value.password,
-        });
-        const { empNo, name, rank, accessToken, refreshToken } = response.data;
-        authStore.login(empNo, name, rank, accessToken, refreshToken);
-      } catch (error) {
-        console.error('Login error:', error);
-      }
-    };
-
-    return {
-      loginData,
-      handleLogin,
-    };
-  },
+    const { empNo, name, rank, accessToken, refreshToken } = response.data;
+    authStore.login(empNo, name, rank, accessToken, refreshToken);
+    router.push({ name: 'home' }); // 로그인 성공 시 Home으로 이동
+  } catch (error) {
+    // 오류 로그 출력
+    console.error('Login error:', error);
+    console.error('Response error data:', error.response.data); // 추가 오류 메시지 확인
+  }
 };
-// import { ref, onMounted } from 'vue'
-// import axios from 'axios'
-// import { useRouter } from 'vue-router'
-
-// const email = ref('')
-// const password = ref('')
-// const accessToken = ref('')
-// const refreshToken = ref('')
-// const router = useRouter()
-
-// // 페이지가 로드될 때 마다 확인하는 함수
-// onMounted( () => {
-//   //로컬 스토리지에서 accessToken 존재하는지 확인
-//   accessToken.value = localStorage.getItem('accessToken');
-
-//   // accessToken이 존재할 경우 리다이렉트
-//   if (accessToken.value) {
-//     router.push({ name: 'todo' })
-//   }
-// })
-
-// const login = async () => {
-//   try {
-//     const response = await axios.post("http://localhost:8080/api/auth/signin", {
-//       email: email.value,
-//       password: password.value
-//     })
-//     console.log(response.data)
-//     accessToken.value = response.data.token
-//     refreshToken.value = response.data.refreshToken
-
-//     localStorage.setItem('accessToken', accessToken.value)
-//     localStorage.setItem('email', email.value) // 이메일 저장
-//     localStorage.setItem('password', password.value) // 비밀번호 저장
-//     localStorage.setItem('userNickname', response.data.userNickname)
-//     localStorage.setItem('refreshToken', refreshToken.value)
-
-//     router.push({ name: "todo" })
-
-//   } catch (error) {
-//     console.error(error)
-//     alert("로그인에 실패하였습니다. 이메일과 비밀번호를 확인해주세요");
-//     localStorage.removeItem('accesstoken');  // 로그인 실패 시 토큰 삭제
-//     localStorage.removeItem('email');  // 로그인 실패 시 이메일 삭제
-//     localStorage.removeItem('password');  // 로그인 실패 시 비밀번호 삭제
-//     this.isLoggedIn = false;  // 로그인 상태를 false로 설정
-//   }
-// }
 </script>
 
 <style scoped>
