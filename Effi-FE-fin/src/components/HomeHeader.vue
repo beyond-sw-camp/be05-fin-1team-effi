@@ -19,10 +19,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import axiosInstance from '@/services/axios';
 
 const searchQuery = ref('');
 const searchCriterion = ref('title');
 const username = ref('');
+
+const authStore = useAuthStore();
 
 onMounted(async () => {
   try {
@@ -40,8 +44,9 @@ const search = () => {
 
 const logout = async () => {
   try {
-    await axios.post('/api/logout');
-    window.location.href = '/login';
+    const token = authStore.getRefreshToken();
+    await axiosInstance.post('/api/auth/logout', { refreshToken: token });
+    authStore.logout();
   } catch (error) {
     console.error('Error logging out:', error);
   }
