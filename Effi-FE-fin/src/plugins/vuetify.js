@@ -6,6 +6,7 @@ import * as directives from 'vuetify/directives';
 import { VCalendar } from 'vuetify/labs/VCalendar';
 import dayjs from './dayjs';
 import DayjsUtils from '@date-io/dayjs';
+import DayJsAdapter from '@date-io/dayjs'
 import 'vuetify/styles';
 
 // dayjs 확장 추가
@@ -39,6 +40,6 @@ export default createVuetify({
     defaultSet: 'mdi', // MDI 아이콘 세트 사용
   },
   date: {
-    adapter: dateAdapter,
+    adapter: DayJsAdapter, dateAdapter
   },
 });

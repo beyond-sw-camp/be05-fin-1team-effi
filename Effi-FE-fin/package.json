@@ -2,13 +2,13 @@
   "name": "effi-fe-fin",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "vite",
+    "serve": "vite preview",
     "build": "vite build",
-    "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "dev": "vite",
+    "format": "prettier --write src/",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@date-io/dayjs": "^3.0.0",
@@ -18,19 +18,24 @@
     "bootstrap-vue-3": "^0.3.12",
     "dayjs": "^1.11.11",
     "pinia": "^2.1.7",
+    "roboto-fontface": "*",
     "vue": "^3.4.21",
     "vue-router": "^4.3.2",
-    "vuetify": "^3.6.0-beta.0.0",
+    "vuetify": "^3.6.8",
+    "vuex": "^4.0.2",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
     "prettier": "^3.2.5",
-    "vite": "^5.2.8",
-    "vite-plugin-vue-devtools": "^7.0.25"
-  }
+    "vite": "^5.2.0",
+    "vite-plugin-vue-devtools": "^7.0.25",
+    "vite-plugin-vuetify": "^1.0.2",
+    "vue-cli-plugin-vuetify": "~2.5.8"
+  },
+  "type": "module"
 }
