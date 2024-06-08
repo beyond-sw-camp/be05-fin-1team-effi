@@ -8,6 +8,8 @@ import com.example.effi.service.ScheduleService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +24,12 @@ public class ScheduleController {
 
     // 추가
     @PostMapping("/add")
-    public ResponseEntity<?> addSchedule(@RequestBody ScheduleRequestDTO schedule,
-                                                           @RequestParam Long empNo) {
+    public ResponseEntity<?> addSchedule(@RequestBody ScheduleRequestDTO schedule) {
         try{
-            Long empId = employeeService.findEmpIdByEmpNo(empNo);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long creatorEmpNo = Long.valueOf(authentication.getName());
+            System.out.println("creatorEmpNo = " + creatorEmpNo);
+            Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
             participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
