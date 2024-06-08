@@ -1,10 +1,6 @@
 <template>
   <div>
-    <v-sheet
-      class="d-flex"
-      height="54"
-      tile
-    >
+    <v-sheet class="d-flex" height="54" tile>
       <v-select
         v-model="type"
         :items="types"
@@ -18,7 +14,7 @@
         v-model="weekday"
         :items="weekdays"
         class="ma-2"
-        label="weekdays"
+        label="Weekdays"
         variant="outlined"
         dense
         hide-details
@@ -31,16 +27,26 @@
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
+        @dblclick:event="openAddScheduleModal"
       ></v-calendar>
     </v-sheet>
+    <add-schedule-modal
+      v-model:dialog="dialog"
+      @schedule-saved="fetchSchedules"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import dayjs from 'dayjs';
+import AddScheduleModal from './AddScheduleModal.vue';
 
 export default {
+  components: {
+    AddScheduleModal,
+  },
   setup() {
     const types = ref(['month', 'week', 'day']);
     const type = ref('month');
@@ -53,8 +59,36 @@ export default {
     ]);
     const value = ref([new Date()]);
     const events = ref([]);
-    const colors = ref(['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1']);
-    const titles = ref(['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party']);
+    const dialog = ref(false);
+
+    const fetchSchedules = async () => {
+      try {
+        const response = await axios.get('/api/schedule/findAll');
+        const schedules = response.data;
+        console.log('Fetched schedules:', schedules);
+
+        if (Array.isArray(schedules)) {
+          events.value = schedules.map(schedule => ({
+            name: schedule.title,
+            start: new Date(schedule.startTime),
+            end: new Date(schedule.endTime),
+            color: 'blue',  // 임의로 색상 지정, 필요한 경우 서버에서 받아올 수 있음
+          }));
+        } else {
+          console.error('Expected an array but got:', schedules);
+        }
+      } catch (error) {
+        console.error('Failed to fetch schedules:', error);
+      }
+    };
+
+    const openAddScheduleModal = () => {
+      dialog.value = true;
+    };
+
+    const close = () => {
+      dialog.value = false;
+    };
 
     const currentYear = computed(() => {
       return dayjs(value.value[0]).year();
@@ -65,37 +99,8 @@ export default {
     });
 
     onMounted(() => {
-      getEvents({
-        start: dayjs().startOf('month').toDate(),
-        end: dayjs().endOf('month').toDate(),
-      });
+      fetchSchedules();
     });
-
-    const getEvents = ({ start, end }) => {
-      const eventsArray = [];
-      const min = new Date(start).getTime();
-      const max = new Date(end).getTime();
-      const days = (max - min) / 86400000;
-      const eventCount = rnd(days, days + 20);
-
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = rnd(0, 3) === 0;
-        const firstTimestamp = rnd(min, max);
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-        const secondTimestamp = rnd(2, allDay ? 288 : 8) * 900000;
-        const second = new Date(first.getTime() + secondTimestamp);
-
-        eventsArray.push({
-          title: titles.value[rnd(0, titles.value.length - 1)],
-          start: first,
-          end: second,
-          color: colors.value[rnd(0, colors.value.length - 1)],
-          allDay: !allDay,
-        });
-      }
-
-      events.value = eventsArray;
-    };
 
     const toToday = () => {
       value.value = [new Date()];
@@ -111,10 +116,6 @@ export default {
       value.value = [newDate];
     };
 
-    const rnd = (a, b) => {
-      return Math.floor((b - a + 1) * Math.random()) + a;
-    };
-
     return {
       type,
       types,
@@ -122,19 +123,21 @@ export default {
       weekdays,
       value,
       events,
+      dialog,
       currentYear,
       currentMonth,
       toToday,
       prevMonth,
       nextMonth,
+      openAddScheduleModal,
+      close,
+      fetchSchedules,
     };
   },
 };
 </script>
 
 <style>
-
-
 .date-display {
   margin: 0 10px;
   font-size: 18px;
@@ -147,6 +150,7 @@ export default {
   text-align: center;
   margin-bottom: 20px;
 }
+
 @media (max-width: 768px) {
   .calendar {
     max-width: 100%;
@@ -155,5 +159,4 @@ export default {
     font-size: 16px;
   }
 }
-
 </style>

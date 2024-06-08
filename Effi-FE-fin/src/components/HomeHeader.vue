@@ -10,8 +10,8 @@
       <input v-model="searchQuery" placeholder="검색어를 입력하세요" @input="search" />
     </div>
     <div class="user-container">
-      <span>{{ username }}</span>
-      <button @click="logout">로그아웃</button>
+      <span>{{ authStore.name }} 님 </span>
+      <button @click="logout"> 로그아웃</button>
     </div>
   </header>
 </template>
@@ -19,18 +19,19 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
 const searchQuery = ref('');
 const searchCriterion = ref('title');
-const username = ref('');
+const authStore = useAuthStore();
 
-onMounted(async () => {
-  try {
-    const response = await axios.get('/api/user');
-    username.value = response.data.username;
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
+onMounted(() => {
+  authStore.loadSession();
+  console.log('Loaded session:', {
+    name: authStore.name,
+    empNo: authStore.empNo,
+    rank: authStore.rank,
+  });
 });
 
 const search = () => {
@@ -40,8 +41,18 @@ const search = () => {
 
 const logout = async () => {
   try {
-    await axios.post('/api/logout');
-    window.location.href = '/login';
+    const token = authStore.accessToken;
+    if (token) {
+      await axios.post('/api/auth/signout', null, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      authStore.logout();
+      window.location.href = '/login';
+    } else {
+      console.error('No token found');
+    }
   } catch (error) {
     console.error('Error logging out:', error);
   }
@@ -97,5 +108,4 @@ const logout = async () => {
     margin-bottom: 10px;
   }
 }
-
 </style>
