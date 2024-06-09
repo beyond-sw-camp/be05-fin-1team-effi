@@ -10,8 +10,8 @@
       <input v-model="searchQuery" placeholder="검색어를 입력하세요" @input="search" />
     </div>
     <div class="user-container">
-      <span>{{ username }}</span>
-      <button @click="logout">로그아웃</button>
+      <span>{{ authStore.name }} 님 </span>
+      <button @click="logout"> 로그아웃</button>
     </div>
   </header>
 </template>
@@ -22,20 +22,19 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 
+
 const searchQuery = ref('');
 const searchCriterion = ref('title');
-const username = ref('');
-
 const authStore = useAuthStore();
 const accessToken = ref(authStore.accessToken);
 
-onMounted(async () => {
-  try {
-    const response = await axios.get('/api/user');
-    username.value = response.data.username;
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
+onMounted(() => {
+  authStore.loadSession();
+  console.log('Loaded session:', {
+    name: authStore.name,
+    empNo: authStore.empNo,
+    rank: authStore.rank,
+  });
 });
 
 const search = () => {
@@ -47,6 +46,7 @@ const logout = async () => {
   try {
     await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
     authStore.logout();
+
   } catch (error) {
     console.error('Error logging out:', error);
   }
@@ -103,5 +103,4 @@ const logout = async () => {
     margin-bottom: 10px;
   }
 }
-
 </style>

@@ -96,5 +96,11 @@ public class TagService {
         return tagResponseDTOS;
     }
 
+    //tagId -> tagDTO 리턴
+    public TagResponseDTO getTagById(Long tagId) {
+        Tag tag = tagRepository.findById(tagId).orElse(null);
+        return new TagResponseDTO(tag);
+    }
+
 
 }
