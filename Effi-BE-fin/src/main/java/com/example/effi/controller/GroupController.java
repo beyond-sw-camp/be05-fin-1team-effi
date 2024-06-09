@@ -1,15 +1,14 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupDTO;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.UpdateGroupNameRequest;
+import com.example.effi.domain.DTO.*;
+import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
+    private final EmployeeService employeeService;
 
     // 그룹 생성
     @PostMapping
@@ -62,7 +62,20 @@ public class GroupController {
         return ResponseEntity.ok(groupService.findAllGroups());
     }
 
-    // 직원 이름으로 검색
-
+    // 그룹 id로 그룹 구성원 찾기
+    @GetMapping("/find/{groupId}")
+    public ResponseEntity<List<EmployeeDTO>> findGroupById(@PathVariable Long groupId) {
+        try {
+            List<Long> empNolst = groupService.findEmployeeIdsByGroupId(groupId);
+            List<EmployeeDTO> emplist = new ArrayList<>();
+            for (Long empId : empNolst) {
+                emplist.add(employeeService.findById(empId));
+            }
+            return ResponseEntity.ok(emplist);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }

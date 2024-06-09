@@ -11,16 +11,16 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="item in schedule" :key="item.date">
-        <td>{{ item.date }}</td>
+      <tr v-for="item in schedule" :key="item.scheduleId">
+        <td>{{ formatDate(item.startTime) }}</td>
         <td>
-          <span :class="['category-dot', item.categoryColor]"></span>
-          {{ item.category }}
+          <span :class="['category-dot', getCategoryColor(item.categoryId)]"></span>
+          {{ getCategoryName(item.categoryId) }}
         </td>
-        <td>{{ item.status }}</td>
-        <td>{{ item.task }}</td>
+        <td>{{ getStatusName(item.status) }}</td>
+        <td>{{ item.context }}</td>
         <td>
-          <span v-for="tag in item.tags" :key="tag" :class="['tag', tagColor(tag)]">{{ tag }}</span>
+          <span v-for="tag in item.tags" :key="tag.id" :class="['tag', tagColor(tag.tagId)]">{{ tag.tagName }}</span>
         </td>
       </tr>
       </tbody>
@@ -29,52 +29,91 @@
 </template>
 
 <script>
+import axiosInstance from "@/services/axios.js";
+
 export default {
   data() {
     return {
-      schedule: [
-        {
-          date: '2024-05-16',
-          category: '진행중',
-          categoryColor: 'green',
-          status: '화면 설계도 완성하기',
-          task: '화면 설계도 완성하기',
-          tags: ['#프로젝트', '#figma']
-        },
-        {
-          date: '2024-05-16',
-          category: '예정됨',
-          categoryColor: 'green',
-          status: '한화시스템 파이널 2차 멘토링',
-          task: '한화시스템 파이널 2차 멘토링',
-          tags: ['#프로젝트']
-        },
-        {
-          date: '2024-05-17',
-          category: '예정됨',
-          categoryColor: 'green',
-          status: '한화시스템 파이널 1차 산출물 제출',
-          task: '한화시스템 파이널 1차 산출물 제출',
-          tags: ['#프로젝트']
-        },
-        {
-          date: '2024-05-17',
-          category: '예정됨',
-          categoryColor: 'blue',
-          status: '채원이랑 사당역',
-          task: '채원이랑 사당역',
-          tags: ['#저녁약속']
-        }
-      ]
+      schedule: [], // 서버에서 불러올 일정 목록
+      tagColors: {}, // 태그 ID와 색상을 매핑할 객체
+      colors: ['pink', 'orange', 'blue', 'green', 'red', 'purple', 'yellow'] // 사용할 색상 목록
     };
   },
   methods: {
-    tagColor(tag) {
-      if (tag === '#프로젝트') return 'pink';
-      if (tag === '#figma') return 'orange';
-      if (tag === '#저녁약속') return 'blue';
-      return '';
+    tagColor(id) {
+      if (!this.tagColors[id]) {
+        const randomColor = this.colors[id % this.colors.length];
+        this.tagColors[id] = randomColor;
+      }
+      console.log(`Tag ID: ${id}, Color: ${this.tagColors[id]}`); // 콘솔 로그 추가
+      return this.tagColors[id];
+    },
+    async fetchTagsForSchedule(scheduleId) {
+      try {
+        const response = await axiosInstance.get(`/api/tag/find/schedule/${scheduleId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching tags for scheduleId ${scheduleId}:`, error);
+        return [];
+      }
+    },
+    async fetchData() {
+      const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      try {
+        const response = await axiosInstance.get('/api/schedule/findAll', config);
+        console.log(response.data);
+        const data = response.data;
+        if (Array.isArray(data)) {
+          const scheduleWithTags = await Promise.all(data.map(async item => {
+            const tags = await this.fetchTagsForSchedule(item.scheduleId);
+            return {
+              ...item,
+              tags
+            };
+          }));
+          this.schedule = scheduleWithTags;
+          console.log(this.schedule); // 저장된 데이터 구조 확인
+        } else {
+          console.error('Expected an array but got an object:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        console.error('Error details:', error.response ? error.response.data : error.message);
+      }
+    },
+    getCategoryColor(categoryId) {
+      if (categoryId === 1) return 'green';
+      if (categoryId === 2) return 'blue';
+      if (categoryId === 3) return 'yellow';
+      return 'purple';
+    },
+    getCategoryName(categoryId) {
+      if (categoryId === 1) return '회사';
+      if (categoryId === 2) return '부서';
+      if (categoryId === 3) return '그룹';
+      return '개인';
+    },
+    getStatusName(status) {
+      if (status === 0) return '진행중';
+      if (status === 1) return '예정됨';
+      return '완료';
+    },
+    formatDate(date) {
+      const d = new Date(date);
+      return d.toLocaleDateString();
     }
+  },
+  mounted() {
+    this.fetchData();
   }
 };
 </script>
@@ -84,14 +123,17 @@ export default {
   width: 100%;
   border-collapse: collapse;
 }
+
 .schedule-table th, .schedule-table td {
   border: 1px solid #ddd;
   padding: 8px;
 }
+
 .schedule-table th {
   background-color: #f2f2f2;
   text-align: left;
 }
+
 .category-dot {
   display: inline-block;
   width: 10px;
@@ -99,12 +141,7 @@ export default {
   border-radius: 50%;
   margin-right: 8px;
 }
-.green {
-  background-color: green;
-}
-.blue {
-  background-color: blue;
-}
+
 .tag {
   display: inline-block;
   margin-right: 4px;
@@ -113,13 +150,32 @@ export default {
   color: white;
   font-size: 12px;
 }
+
 .pink {
   background-color: pink;
 }
+
 .orange {
   background-color: orange;
 }
+
 .blue {
   background-color: blue;
+}
+
+.red {
+  background-color: red;
+}
+
+.purple {
+  background-color: purple;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.green {
+  background-color: green;
 }
 </style>
