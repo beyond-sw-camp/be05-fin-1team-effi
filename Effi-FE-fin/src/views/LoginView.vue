@@ -40,12 +40,14 @@ const handleLogin = async () => {
       empNo: loginData.value.empNo,
       password: loginData.value.password,
     });
-    const { empNo, name, rank, accessToken, refreshToken } = response.data;
+    const { empNo, name, rank, accessToken, refreshToken } = response.data.data;
     authStore.login(empNo, name, rank, accessToken, refreshToken);
-    router.push({ name: 'home' }); // 로그인 성공 시 Home으로 이동
+    router.push({ name: 'home' });
   } catch (error) {
     console.error('Login error:', error);
-    console.error('Response error data:', error.response.data);
+    if (error.response && error.response.data) {
+      console.error('Response error data:', error.response.data);
+    }
   }
 };
 </script>
