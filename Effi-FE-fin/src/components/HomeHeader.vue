@@ -20,10 +20,13 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import axiosInstance from '@/services/axios';
+
 
 const searchQuery = ref('');
 const searchCriterion = ref('title');
 const authStore = useAuthStore();
+const accessToken = ref(authStore.accessToken);
 
 onMounted(() => {
   authStore.loadSession();
@@ -41,22 +44,14 @@ const search = () => {
 
 const logout = async () => {
   try {
-    const token = authStore.accessToken;
-    if (token) {
-      await axios.post('/api/auth/signout', null, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      authStore.logout();
-      window.location.href = '/login';
-    } else {
-      console.error('No token found');
-    }
+    await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
+    authStore.logout();
+
   } catch (error) {
     console.error('Error logging out:', error);
   }
 };
+
 </script>
 
 <style scoped>

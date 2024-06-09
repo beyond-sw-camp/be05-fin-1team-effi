@@ -36,24 +36,18 @@ const router = useRouter();
 
 const handleLogin = async () => {
   try {
-    // 전송 전에 데이터 로그 출력
-    console.log('Login Data:', loginData.value);
-
     const response = await axiosInstance.post('/api/auth/signin', {
       empNo: loginData.value.empNo,
       password: loginData.value.password,
     });
-
-    // 응답 데이터 로그 출력
-    console.log('Response Data:', response.data);
-
-    const { empNo, name, rank, accessToken, refreshToken } = response.data;
+    const { empNo, name, rank, accessToken, refreshToken } = response.data.data;
     authStore.login(empNo, name, rank, accessToken, refreshToken);
-    router.push({ name: 'home' }); // 로그인 성공 시 Home으로 이동
+    router.push({ name: 'home' });
   } catch (error) {
-    // 오류 로그 출력
     console.error('Login error:', error);
-    console.error('Response error data:', error.response.data); // 추가 오류 메시지 확인
+    if (error.response && error.response.data) {
+      console.error('Response error data:', error.response.data);
+    }
   }
 };
 </script>
