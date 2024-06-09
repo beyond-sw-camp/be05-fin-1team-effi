@@ -27,6 +27,7 @@ const searchCriterion = ref('title');
 const username = ref('');
 
 const authStore = useAuthStore();
+const accessToken = ref(authStore.accessToken);
 
 onMounted(async () => {
   try {
@@ -44,13 +45,13 @@ const search = () => {
 
 const logout = async () => {
   try {
-    const token = authStore.getRefreshToken();
-    await axiosInstance.post('/api/auth/logout', { refreshToken: token });
+    await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
     authStore.logout();
   } catch (error) {
     console.error('Error logging out:', error);
   }
 };
+
 </script>
 
 <style scoped>
