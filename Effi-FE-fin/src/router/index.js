@@ -29,15 +29,14 @@ const router = createRouter({
       path: '/mypage',
       name: 'mypage',
 
-      component: MyPageView
+      component: MyPageView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/modaltest',
       name: 'modaltest',
       component: ModalTest
 
-      component: MyPageView,
-      meta: { requiresAuth: true }
     },
     {
       path: '/category',
