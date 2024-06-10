@@ -21,7 +21,9 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 
 const searchQuery = ref('');
 const searchCriterion = ref('title');
@@ -46,7 +48,7 @@ const logout = async () => {
   try {
     await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
     authStore.logout();
-
+    router.push({ name: 'login' });
   } catch (error) {
     console.error('Error logging out:', error);
   }
