@@ -11,7 +11,6 @@
       <p><strong>직급:</strong> {{ mypage.rank }}</p>
       <p><strong>부서 이름:</strong> {{ mypage.deptName }}</p>
       <p><strong>시간대:</strong> {{ mypage.timezoneName }}</p>
-      <p><strong>메시지:</strong> {{ mypage.msg }}</p>
     </div>
     <MyPageUpdate :onSubmit="updateTimezone" />
     <p v-if="message">{{ message }}</p>
@@ -31,7 +30,7 @@ export default {
   data() {
     return {
       mypage: null,
-      message: '', // 추가
+      message: '',
     };
   },
   async created() {
@@ -49,12 +48,7 @@ export default {
       try {
         await this.fetchMyPage();
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          console.warn('Token expired, refreshing token...');
-          await this.refreshToken();
-        } else {
-          console.error('mypage data 불러오기 오류:', error.response ? error.response.data : error.message);
-        }
+        console.error('mypage data 불러오기 오류:', error.response ? error.response.data : error.message);
       }
     },
     async fetchMyPage() {
@@ -71,19 +65,6 @@ export default {
       } catch (error) {
         console.error('Error fetching my page:', error.response ? error.response.data : error.message);
         throw error;
-      }
-    },
-    async refreshToken() {
-      try {
-        const refreshToken = sessionStorage.getItem('refreshToken');
-        console.log('Refresh token retrieved:', refreshToken);
-        const response = await axios.post('http://localhost:8080/api/auth/refresh', { refreshToken });
-        sessionStorage.setItem('accessToken', response.data.accessToken);
-        console.log('New token saved:', response.data.accessToken);
-        await this.fetchMyPage();
-      } catch (error) {
-        console.error('토큰 갱신 오류:', error.response ? error.response.data : error.message);
-        // 필요시 여기에서 로그인 페이지로 리다이렉트 또는 다른 처리
       }
     },
     async updateTimezone(timezoneId) {
@@ -113,10 +94,7 @@ export default {
 .container {
   display: flex;
   margin-top: 60px;
-  /* 헤더 높이만큼의 여백을 추가 */
   height: calc(100vh - 60px);
-  /* 전체 높이에서 헤더 높이를 뺀 높이 */
   width: 100%;
-  /* 전체 너비 사용 */
 }
 </style>
