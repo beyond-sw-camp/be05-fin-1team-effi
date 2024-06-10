@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
     const empNo = ref(null);
@@ -45,6 +45,8 @@ export const useAuthStore = defineStore('auth', () => {
         }
     };
 
+    const isLoggedIn = computed(() => !!accessToken.value);
+
     return {
         empNo,
         name,
@@ -53,6 +55,7 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken,
         login,
         logout,
-        loadSession
+        loadSession,
+        isLoggedIn
     };
 });
