@@ -4,6 +4,8 @@ import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
 import { useAuthStore } from '../stores/auth';
 
+import CategoryScheduleView from '../views/CategoryScheduleView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -21,7 +23,14 @@ const router = createRouter({
     {
       path: '/mypage',
       name: 'mypage',
-      component: MyPageView
+      component: MyPageView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/category',
+      name: 'category',
+      component: CategoryScheduleView,
+      meta: { requiresAuth: true }
     }
   ]
 });
