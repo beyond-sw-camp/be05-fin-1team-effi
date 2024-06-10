@@ -39,9 +39,9 @@ public class GroupController {
     }
 
     // 그룹 탈퇴
-    @DeleteMapping("/{groupId}/employees/{empId}")
-    public ResponseEntity<GlobalResponse> leaveGroup(@PathVariable Long groupId, @PathVariable Long empId) {
-        return groupService.withdrawGroup(groupId, empId);
+    @DeleteMapping("/{groupId}/employees")
+    public ResponseEntity<GlobalResponse> leaveGroup(@PathVariable Long groupId) {
+        return groupService.withdrawGroup(groupId);
     }
 
     // 그룹 이름 변경
@@ -76,6 +76,13 @@ public class GroupController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    // 내가 속한 그룹 찾기
+    @GetMapping("/find/myGroup")
+    public ResponseEntity<List<GroupNameDTO>> findMyGroups() {
+        List<GroupNameDTO> myGroup = groupService.findMyGroup();
+        return ResponseEntity.ok(myGroup);
     }
 
 }

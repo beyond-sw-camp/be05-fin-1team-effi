@@ -218,7 +218,7 @@ class GroupControllerTest {
         .status(200)
         .build();
 
-    when(groupService.withdrawGroup(anyLong(), anyLong())).thenReturn(ResponseEntity.ok(globalResponse));
+    when(groupService.withdrawGroup(anyLong())).thenReturn(ResponseEntity.ok(globalResponse));
 
     mockMvc.perform(delete("/api/groups/1/employees/2")
         .header(HttpHeaders.AUTHORIZATION, jwtToken))
@@ -236,7 +236,7 @@ class GroupControllerTest {
         .status(400)
         .build();
 
-    when(groupService.withdrawGroup(anyLong(), anyLong()))
+    when(groupService.withdrawGroup(anyLong()))
         .thenReturn(ResponseEntity.badRequest().body(globalResponse));
 
     mockMvc.perform(delete("/api/groups/1/employees/2")
