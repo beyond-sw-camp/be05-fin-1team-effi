@@ -7,21 +7,22 @@
         <option value="tag">태그</option>
         <option value="category">카테고리</option>
       </select>
-      <input v-model="searchQuery" placeholder="검색어를 입력하세요" @input="search" />
+      <input v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="search" />
     </div>
     <div class="user-container">
-      <span>{{ authStore.name }} 님 </span>
+      <span @click="goToMyPage" style="cursor: pointer;">{{ authStore.name }} 님 </span>
       <button @click="logout"> 로그아웃</button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, defineEmits } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+
 
 const router = useRouter();
 
@@ -29,6 +30,8 @@ const searchQuery = ref('');
 const searchCriterion = ref('title');
 const authStore = useAuthStore();
 const accessToken = ref(authStore.accessToken);
+const emit = defineEmits(['search-results']);
+
 
 onMounted(() => {
   authStore.loadSession();
@@ -39,9 +42,34 @@ onMounted(() => {
   });
 });
 
-const search = () => {
+const goToMyPage = () => {
+  router.push({ name: 'mypage' });
+};
+
+const search = async () => {
   console.log(`Searching for ${searchQuery.value} by ${searchCriterion.value}`);
-  // 여기에 검색 로직을 추가하세요
+  let url = `/api/search/${searchCriterion.value}?${searchCriterion.value}=${encodeURIComponent(searchQuery.value)}`;
+  if (searchCriterion.value === 'title') {
+    url = `/api/search/title?title=${encodeURIComponent(searchQuery.value)}`;
+  } else if (searchCriterion.value === 'tag') {
+    url = `/api/search/tag?tagName=${encodeURIComponent(searchQuery.value)}`;
+  } else if (searchCriterion.value === 'category') {
+    url = `/api/search/category?categoryName=${encodeURIComponent(searchQuery.value)}`;
+  }
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+    const searches = response.data;
+    console.log('Search results:', searches);
+    emit('search-results', searches);
+    router.push({ path: '/search', query: { criterion: searchCriterion.value, query: searchQuery.value } });
+  } catch (error) {
+    console.error('Error during search:', error);
+  }
 };
 
 const logout = async () => {

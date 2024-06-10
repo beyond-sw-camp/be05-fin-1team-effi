@@ -19,6 +19,13 @@ export const useAuthStore = defineStore('auth', () => {
         sessionStorage.setItem('rank', rankValue);
         sessionStorage.setItem('accessToken', accessTokenValue);
         sessionStorage.setItem('refreshToken', refreshTokenValue);
+        console.log('Session stored:', {
+            empNo: empNoValue,
+            name: nameValue,
+            rank: rankValue,
+            accessToken: accessTokenValue,
+            refreshToken: refreshTokenValue
+        });
     };
 
     const logout = () => {
@@ -40,8 +47,17 @@ export const useAuthStore = defineStore('auth', () => {
         const rankValue = sessionStorage.getItem('rank');
         const accessTokenValue = sessionStorage.getItem('accessToken');
         const refreshTokenValue = sessionStorage.getItem('refreshToken');
+        console.log('Values loaded from sessionStorage:', {
+            empNo: empNoValue,
+            name: nameValue,
+            rank: rankValue,
+            accessToken: accessTokenValue,
+            refreshToken: refreshTokenValue
+        });
         if (accessTokenValue && refreshTokenValue && empNoValue && nameValue && rankValue) {
             login(empNoValue, nameValue, rankValue, accessTokenValue, refreshTokenValue);
+        } else {
+            console.log('No valid session found');
         }
     };
 
