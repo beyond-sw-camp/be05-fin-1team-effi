@@ -20,7 +20,7 @@ const router = createRouter({
     }
   ]
 });
-
+//커밋을 위한 주석
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
