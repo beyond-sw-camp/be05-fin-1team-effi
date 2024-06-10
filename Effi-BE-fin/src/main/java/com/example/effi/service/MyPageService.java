@@ -1,6 +1,7 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.MyPageResponseDTO;
+import com.example.effi.domain.DTO.MyPageTimezoneDTO;
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Timezone;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,5 +74,10 @@ public class MyPageService {
         // 타임존 업데이트 및 저장
         timezoneEmp.setTimezone(timezone);
         timezoneEmpRepository.save(timezoneEmp);
+    }
+
+    // 타임존 리스트
+    public List<MyPageTimezoneDTO> getTimezones() {
+        return myPageRepository.findAllTimezonesGroupedByName();
     }
 }
