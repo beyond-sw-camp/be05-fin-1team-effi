@@ -9,6 +9,7 @@
         variant="outlined"
         dense
         hide-details
+        @change="onViewModeChange"
       ></v-select>
       <v-select
         v-model="weekday"
@@ -18,16 +19,16 @@
         variant="outlined"
         dense
         hide-details
+        @change="onWeekdayChange"
       ></v-select>
     </v-sheet>
     <v-sheet>
       <v-calendar
         ref="calendar"
-        v-model="value"
+        v-model="calendarValue"
         :events="events"
-        :type="type"
+        :view-mode="type"
         :weekdays="weekday"
-        :timezones="timezonesSelected"
         @dblclick:event="openAddScheduleModal"
       >
         <template v-slot:event="{ event }">
@@ -66,7 +67,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -81,6 +82,8 @@ export default {
   },
   setup() {
     const authStore = useAuthStore();
+    authStore.loadSession(); // Ensure session is loaded
+
     const types = ref(['month', 'week', 'day']);
     const type = ref('month');
     const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
@@ -90,7 +93,7 @@ export default {
       { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
       { title: 'Mon, Wed, Fri', value: [1, 3, 5] },
     ]);
-    const value = ref([dayjs()]);
+    const calendarValue = ref([dayjs()]);
     const events = ref([]);
     const dialog = ref(false);
     const timezoneMenu = ref(false);
@@ -115,11 +118,12 @@ export default {
 
         if (Array.isArray(schedules)) {
           events.value = schedules.map(schedule => ({
-            title: schedule.title,  // title로 변경
+            title: schedule.title,
             start: dayjs(schedule.startTime),
             end: dayjs(schedule.endTime),
             color: 'blue',
           }));
+          console.log('Events:', events.value);
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -150,7 +154,11 @@ export default {
 
     const fetchUserTimezones = async () => {
       try {
-        const empId = authStore.session.empNo;
+        const empId = authStore.empNo;
+        console.log('Employee ID:', empId);
+        if (!empId) {
+          throw new Error('No employee ID found');
+        }
         const response = await axios.get(`/api/timezone-emp/${empId}`);
         const userTimezones = response.data.data.timezones;
         timezonesSelected.value = userTimezones.map(tz => tz.timezoneName);
@@ -161,48 +169,77 @@ export default {
     };
 
     const openAddScheduleModal = () => {
+      console.log('Opening add schedule modal');
       dialog.value = true;
     };
 
     const close = () => {
+      console.log('Closing modal');
       dialog.value = false;
     };
 
     const currentYear = computed(() => {
-      return dayjs(value.value[0]).year();
+      return dayjs(calendarValue.value[0]).year();
     });
 
     const currentMonth = computed(() => {
-      return dayjs(value.value[0]).format('M');
+      return dayjs(calendarValue.value[0]).format('M');
     });
 
     onMounted(() => {
+      console.log('Component mounted');
       fetchSchedules();
       fetchTimezones();
       fetchUserTimezones();
     });
 
     const toToday = () => {
-      value.value = [dayjs()];
+      console.log('Setting date to today');
+      calendarValue.value = [dayjs()];
     };
 
-    const prevMonth = () => {
-      const newDate = dayjs(value.value[0]).subtract(1, 'month');
-      value.value = [newDate];
+    const prevPeriod = () => {
+      console.log('Setting date to previous period:', type.value);
+      switch (type.value) {
+        case 'month':
+          calendarValue.value = [dayjs(calendarValue.value[0]).subtract(1, 'month')];
+          break;
+        case 'week':
+          calendarValue.value = [dayjs(calendarValue.value[0]).subtract(1, 'week')];
+          break;
+        case 'day':
+          calendarValue.value = [dayjs(calendarValue.value[0]).subtract(1, 'day')];
+          break;
+      }
     };
 
-    const nextMonth = () => {
-      const newDate = dayjs(value.value[0]).add(1, 'month');
-      value.value = [newDate];
+    const nextPeriod = () => {
+      console.log('Setting date to next period:', type.value);
+      switch (type.value) {
+        case 'month':
+          calendarValue.value = [dayjs(calendarValue.value[0]).add(1, 'month')];
+          break;
+        case 'week':
+          calendarValue.value = [dayjs(calendarValue.value[0]).add(1, 'week')];
+          break;
+        case 'day':
+          calendarValue.value = [dayjs(calendarValue.value[0]).add(1, 'day')];
+          break;
+      }
     };
 
     const showTimezoneMenu = () => {
+      console.log('Showing timezone menu');
       timezoneMenu.value = true;
     };
 
     const addTimezone = async (timezone) => {
       try {
-        const empId = authStore.session.empNo;
+        const empId = authStore.session?.empNo;
+        console.log('Adding timezone for employee ID:', empId);
+        if (!empId) {
+          throw new Error('No employee ID found');
+        }
         await axios.post(`/api/timezone-emp/${empId}/add`, null, {
           params: {
             timezoneId: timezone.timezoneId,
@@ -213,6 +250,7 @@ export default {
           timezonesSelected.value.push(timezone.timezoneName);
         }
         timezoneMenu.value = false;
+        console.log('Timezone added:', timezone);
       } catch (error) {
         console.error('Failed to add timezone:', error);
       }
@@ -222,19 +260,43 @@ export default {
       console.log('Adding timezone at index:', index);
     };
 
+    const onViewModeChange = () => {
+      console.log('View mode changed to:', type.value);
+    };
+
+    const onWeekdayChange = () => {
+      console.log('Weekday changed to:', weekday.value);
+    };
+
+    watch(type, (newType) => {
+      console.log('Type changed to:', newType);
+      switch (newType) {
+        case 'month':
+          calendarValue.value = [calendarValue.value[0].startOf('month')];
+          break;
+        case 'week':
+          calendarValue.value = [calendarValue.value[0].startOf('week')];
+          break;
+        case 'day':
+          calendarValue.value = [calendarValue.value[0].startOf('day')];
+          break;
+      }
+      console.log('calendarValue:', calendarValue.value);
+    });
+
     return {
       type,
       types,
       weekday,
       weekdays,
-      value,
+      calendarValue,
       events,
       dialog,
       currentYear,
       currentMonth,
       toToday,
-      prevMonth,
-      nextMonth,
+      prevPeriod,
+      nextPeriod,
       openAddScheduleModal,
       close,
       fetchSchedules,
@@ -244,6 +306,8 @@ export default {
       showTimezoneMenu,
       addTimezone,
       addTimeZone,
+      onViewModeChange,
+      onWeekdayChange,
     };
   },
 };
@@ -286,10 +350,12 @@ export default {
     font-size: 16px;
   }
 }
+
 .time-gutter {
   display: flex;
   align-items: center;
 }
+
 .time-gutter span {
   margin-left: 8px;
 }
