@@ -1,87 +1,128 @@
 <template>
   <div class="container">
     <Navigation class="navigation" />
-    <div v-if="mypage">
-      <p><strong>사원 번호:</strong> {{ mypage.empNo }}</p>
-      <p><strong>이름:</strong> {{ mypage.name }}</p>
-      <p><strong>회사:</strong> {{ mypage.company }}</p>
-      <p><strong>이메일:</strong> {{ mypage.email }}</p>
-      <p><strong>전화번호:</strong> {{ mypage.phoneNum }}</p>
-      <p><strong>내선 번호:</strong> {{ mypage.extensionNum }}</p>
-      <p><strong>직급:</strong> {{ mypage.rank }}</p>
-      <p><strong>부서 이름:</strong> {{ mypage.deptName }}</p>
-      <p><strong>시간대:</strong> {{ mypage.timezoneName }}</p>
+    <div class="content">
+      <div class="profile-container" v-if="mypage">
+        <div class="profile-row">
+          <div class="profile-label">사번</div>
+          <div class="profile-value">{{ mypage.empNo }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">이름</div>
+          <div class="profile-value">{{ mypage.name }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">회사</div>
+          <div class="profile-value">{{ mypage.company }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">이메일</div>
+          <div class="profile-value">{{ mypage.email }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">모바일</div>
+          <div class="profile-value">{{ mypage.phoneNum }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">내선번호</div>
+          <div class="profile-value">{{ mypage.extensionNum }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">부서</div>
+          <div class="profile-value">{{ mypage.deptName }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">직위</div>
+          <div class="profile-value">{{ mypage.rank }}</div>
+        </div>
+        <div class="profile-row">
+          <div class="profile-label">시간대</div>
+          <div class="profile-value">
+            <div v-if="!isEditingTimezone">
+              {{ mypage.timezoneName }}
+              <button class="update-button" @click="isEditingTimezone = true">변경</button>
+            </div>
+            <div v-else>
+              <select v-model="timezoneId" required>
+                <option v-for="timezone in timezones" :key="timezone.timezoneId" :value="timezone.timezoneId">
+                  {{ timezone.timezoneName }}
+                </option>
+              </select>
+              <button class="update-button" @click="updateTimezone">변경</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p v-if="message">{{ message }}</p>
     </div>
-    <MyPageUpdate :onSubmit="updateTimezone" />
-    <p v-if="message">{{ message }}</p>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Navigation from '@/components/LeftSidebar.vue';
-import MyPageUpdate from '@/components/MyPageUpdate.vue';
 
 export default {
   components: {
-    MyPageUpdate,
     Navigation
   },
   data() {
     return {
       mypage: null,
       message: '',
+      isEditingTimezone: false,
+      timezoneId: null,
+      timezones: []
     };
   },
   async created() {
-    console.log('Component created');
     await this.checkTokenAndFetchMyPage();
+    await this.fetchTimezones();
   },
   methods: {
     async checkTokenAndFetchMyPage() {
       const accessToken = sessionStorage.getItem('accessToken');
-      console.log('Token found:', accessToken);
       if (!accessToken) {
         console.error('Token not found');
         return;
       }
-      try {
-        await this.fetchMyPage();
-      } catch (error) {
-        console.error('mypage data 불러오기 오류:', error.response ? error.response.data : error.message);
-      }
+      await this.fetchMyPage();
     },
     async fetchMyPage() {
       const accessToken = sessionStorage.getItem('accessToken');
-      console.log('Fetching my page with token:', accessToken);
       try {
         const response = await axios.get('http://localhost:8080/api/mypage/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        console.log('MyPage data fetched:', response.data);
         this.mypage = response.data;
+        this.timezoneId = this.mypage.timezoneId; // Initialize timezoneId
       } catch (error) {
         console.error('Error fetching my page:', error.response ? error.response.data : error.message);
-        throw error;
       }
     },
-    async updateTimezone(timezoneId) {
+    async fetchTimezones() {
       try {
-        const accessToken = sessionStorage.getItem('accessToken');
-        console.log('Token retrieved:', accessToken);
-        console.log('Updating timezone with ID:', timezoneId); // 로그 추가
+        const response = await axios.get('http://localhost:8080/api/mypage/timezones');
+        this.timezones = response.data;
+      } catch (error) {
+        console.error('시간대 목록을 불러오는 중 오류가 발생했습니다:', error);
+      }
+    },
+    async updateTimezone() {
+      const accessToken = sessionStorage.getItem('accessToken');
+      try {
         const response = await axios.put('http://localhost:8080/api/mypage/update', {
-          timezoneId: timezoneId, // 명시적으로 필드 이름 지정
+          timezoneId: this.timezoneId,
         }, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        console.log('Timezone updated:', response.data);
-        this.message = response.data.message; // 수정
+        this.message = response.data.message;
         await this.fetchMyPage();
+        this.isEditingTimezone = false;
       } catch (error) {
         console.error('오류가 발생했습니다:', error.response ? error.response.data : error.message);
       }
@@ -96,5 +137,51 @@ export default {
   margin-top: 60px;
   height: calc(100vh - 60px);
   width: 100%;
+}
+
+.navigation {
+  flex: 0 0 250px;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.profile-label {
+  font-weight: bold;
+  width: 30%;
+}
+
+.profile-value {
+  width: 70%;
+  text-align: left;
+}
+
+.update-button {
+  background-color: #ffcc99;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
 }
 </style>

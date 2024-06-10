@@ -1,14 +1,13 @@
 <template>
   <form @submit.prevent="handleSubmit">
     <div>
-      <label for="timezoneId">내 기본 시간대</label>
-      <select v-model="timezoneId" id="timezoneId" required>
+      <select v-model="timezoneId" required>
         <option v-for="timezone in timezones" :key="timezone.timezoneId" :value="timezone.timezoneId">
           {{ timezone.timezoneName }}
         </option>
       </select>
+      <button class="update-button" type="submit">변경</button>
     </div>
-    <button type="submit">업데이트</button>
   </form>
 </template>
 
@@ -17,14 +16,14 @@ import axios from 'axios';
 
 export default {
   props: {
-    onSubmit: {
-      type: Function,
-      required: true,
+    initialTimezoneId: {
+      type: Number,
+      required: true
     },
   },
   data() {
     return {
-      timezoneId: null,
+      timezoneId: this.initialTimezoneId,
       timezones: [],
     };
   },
@@ -46,7 +45,7 @@ export default {
     handleSubmit() {
       console.log('Submitting timezone update with timezoneId:', this.timezoneId);
       if (this.timezoneId) {
-        this.onSubmit(this.timezoneId);
+        this.$emit('submit', this.timezoneId);
       } else {
         console.error('Timezone ID is required');
       }
@@ -54,3 +53,14 @@ export default {
   },
 };
 </script>
+
+<style>
+.update-button {
+  background-color: #ffcc99;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+</style>
