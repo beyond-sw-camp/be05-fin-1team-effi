@@ -5,10 +5,10 @@
         <p class="logo_txt">Effi Planner</p>
       </a>
       <div class="login-container">
-        <form class="login-form" @submit.prevent="login">
-          <input type="text" v-model="email" placeholder="아이디 입력">
+        <form class="login-form" @submit.prevent="handleLogin">
+          <input type="text" v-model="loginData.empNo" placeholder="사원번호 입력">
           <br>
-          <input type="password" v-model="password" placeholder="비밀번호 입력">
+          <input type="password" v-model="loginData.password" placeholder="비밀번호 입력">
           <br>
           <button type="submit">로그인</button>
         </form>
@@ -20,59 +20,36 @@
   </div>
 </template>
 
-
-
-
-
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import axiosInstance from '@/services/axios';
 
-const email = ref('')
-const password = ref('')
-const accessToken = ref('')
-const refreshToken = ref('')
-const router = useRouter()
+const loginData = ref({
+  empNo: '',
+  password: ''
+});
 
-// 페이지가 로드될 때 마다 확인하는 함수
-onMounted( () => {
-  //로컬 스토리지에서 accessToken 존재하는지 확인
-  accessToken.value = localStorage.getItem('accessToken');
+const authStore = useAuthStore();
+const router = useRouter();
 
-  // accessToken이 존재할 경우 리다이렉트
-  if (accessToken.value) {
-    router.push({ name: 'todo' })
-  }
-})
-
-const login = async () => {
+const handleLogin = async () => {
   try {
-    const response = await axios.post("http://localhost:8080/api/auth/signin", {
-      email: email.value,
-      password: password.value
-    })
-    console.log(response.data)
-    accessToken.value = response.data.token
-    refreshToken.value = response.data.refreshToken
-
-    localStorage.setItem('accessToken', accessToken.value)
-    localStorage.setItem('email', email.value) // 이메일 저장
-    localStorage.setItem('password', password.value) // 비밀번호 저장
-    localStorage.setItem('userNickname', response.data.userNickname)
-    localStorage.setItem('refreshToken', refreshToken.value)
-
-    router.push({ name: "todo" })
-
+    const response = await axiosInstance.post('/api/auth/signin', {
+      empNo: loginData.value.empNo,
+      password: loginData.value.password,
+    });
+    const { empNo, name, rank, accessToken, refreshToken } = response.data.data;
+    authStore.login(empNo, name, rank, accessToken, refreshToken);
+    router.push({ name: 'home' });
   } catch (error) {
-    console.error(error)
-    alert("로그인에 실패하였습니다. 이메일과 비밀번호를 확인해주세요");
-    localStorage.removeItem('accesstoken');  // 로그인 실패 시 토큰 삭제
-    localStorage.removeItem('email');  // 로그인 실패 시 이메일 삭제
-    localStorage.removeItem('password');  // 로그인 실패 시 비밀번호 삭제
-    this.isLoggedIn = false;  // 로그인 상태를 false로 설정
+    console.error('Login error:', error);
+    if (error.response && error.response.data) {
+      console.error('Response error data:', error.response.data);
+    }
   }
-}
+};
 </script>
 
 <style scoped>

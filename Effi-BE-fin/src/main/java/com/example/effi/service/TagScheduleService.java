@@ -97,4 +97,14 @@ public class TagScheduleService {
         return null;
     }
 
+    // scheduleId로 tagId List 찾기
+    public List<Long> findTagIdList(Long scheduleId){
+        List<TagSchedule> allByScheduleScheduleId = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
+        List<Long> tagIdList = new ArrayList<>();
+        for (TagSchedule tagSchedule : allByScheduleScheduleId) {
+            tagIdList.add(tagSchedule.getTag().getTagId());
+        }
+        return tagIdList;
+    }
+
 }

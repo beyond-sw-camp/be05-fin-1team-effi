@@ -1,10 +1,6 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupDTO;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
+import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Group;
@@ -20,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -36,6 +33,7 @@ public class GroupService {
     private final EmployeeRepository employeeRepository;
     private final GroupEmpRepository groupEmpRepository;
     private final CategoryRepository categoryRepository;
+    private final EmployeeService employeeService;
 
     @Transactional
     public ResponseEntity<GlobalResponse> createGroup(GroupRequestDTO groupRequestDTO) {
@@ -126,26 +124,35 @@ public class GroupService {
                 .build());
     }
 
+    // 그룹 이름 변경
     @Transactional
     public ResponseEntity<GlobalResponse> updateGroupName(Long groupId, String newGroupName) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
+      Group group = groupRepository.findById(groupId)
+          .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
 
-        Group updatedGroup = group.updateGroupName(newGroupName);
-        Group savedGroup = groupRepository.save(updatedGroup);
+      if (groupRepository.findByGroupName(newGroupName).isPresent()) {
+        throw new IllegalArgumentException("이미 존재하는 그룹 이름입니다.");
+      }
 
-        return ResponseEntity.ok().body(GlobalResponse.builder()
-                .message("그룹 이름 변경 성공")
-                .status(HttpStatus.OK.value())
-                .data(GroupResponseDTO.builder()
-                        .groupName(savedGroup.getGroupName())
-                        .build())
-                .build());
+      Group updatedGroup = group.updateGroupName(newGroupName);
+      Group savedGroup = groupRepository.save(updatedGroup);
+
+      return ResponseEntity.ok().body(GlobalResponse.builder()
+          .message("그룹 이름 변경 성공")
+          .status(HttpStatus.OK.value())
+          .data(GroupResponseDTO.builder()
+              .groupName(savedGroup.getGroupName())
+              .build())
+          .build());
     }
 
     @Transactional
-    public ResponseEntity<GlobalResponse> withdrawGroup(Long groupId, Long empId) {
-      Group group = groupRepository.findById(groupId)
+    public ResponseEntity<GlobalResponse> withdrawGroup(Long groupId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+
+        Group group = groupRepository.findById(groupId)
           .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 ID: " + groupId));
 
       groupEmpRepository.updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
@@ -268,5 +275,22 @@ public class GroupService {
         return false;
     }
 
-    
+    // 내 그룹 찾기\
+    @Transactional
+    public List<GroupNameDTO> findMyGroup(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+
+        List<GroupEmp> allByEmployeeId = groupEmpRepository.findAllByEmployee_Id(empId);
+        List<GroupNameDTO> groupNameDTOS = new ArrayList<>();
+        for (GroupEmp groupEmp : allByEmployeeId) {
+            if (groupEmp.getDeleteYn() == false) {
+                GroupDTO groupById = findGroupById(groupEmp.getGroup().getGroupId());
+                groupNameDTOS.add(new GroupNameDTO(groupById.getGroupId(), groupById.getGroupName()));
+            }
+        }
+        return groupNameDTOS;
+    }
+
 }

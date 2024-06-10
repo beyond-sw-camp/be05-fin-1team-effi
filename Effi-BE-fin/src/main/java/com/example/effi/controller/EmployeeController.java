@@ -27,13 +27,13 @@ public class EmployeeController {
         SignInResponse response = employeeService.signIn(request);
         if(response.getMsg().equals("로그인 성공")) {
             return ResponseEntity.ok().body(GlobalResponse.builder()
-                                            .message(response.getMsg())
+                                            .message(HttpStatus.OK.getReasonPhrase())
                                             .status(HttpStatus.OK.value())
                                             .data(response)
                                             .build());
         }
         return ResponseEntity.badRequest().body(GlobalResponse.builder()
-                                            .message(response.getMsg())
+                                            .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
                                             .status(HttpStatus.BAD_REQUEST.value())
                                             .build());
     }
@@ -58,7 +58,6 @@ public class EmployeeController {
     @PreAuthorize("hasAuthority('사원')")
     @PostMapping("/test")
     public ResponseEntity<String> test() {
-   
         return ResponseEntity.ok("test");
     }
 

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -48,7 +49,6 @@ public class TagScheduleServiceTest {
     private TagSchedule sampleTagSchedule;
     private Category sampleCategory;
 
-    // 각 테스트 실행 전에 샘플 데이터를 설정합니다.
     @BeforeEach
     void setUp() {
         sampleCategory = Category.builder()
@@ -70,7 +70,7 @@ public class TagScheduleServiceTest {
                 .status(1)
                 .notificationYn(true)
                 .deleteYn(false)
-                .category(sampleCategory)  // Category 설정
+                .category(sampleCategory)
                 .build();
 
         setScheduleId(sampleSchedule, 1L);
@@ -114,59 +114,86 @@ public class TagScheduleServiceTest {
         }
     }
 
-    // Tag ID로 태그 스케줄을 찾는 테스트입니다.
     @Test
     void testFindByTagId() {
         when(tagScheduleRepository.findAllByTag_TagId(anyLong())).thenReturn(Collections.singletonList(sampleTagSchedule));
 
         var result = tagScheduleService.findByTagId(1L);
 
-        System.out.println("Result of findByTagId: " + result);
-
         assertThat(result).isNotEmpty();
         verify(tagScheduleRepository).findAllByTag_TagId(1L);
     }
 
-    // 스케줄 ID와 태그 ID로 태그 스케줄을 찾는 테스트입니다.
+    @Test
+    void testFindByTagIdFailure() {
+        when(tagScheduleRepository.findAllByTag_TagId(anyLong())).thenReturn(Collections.emptyList());
+
+        var result = tagScheduleService.findByTagId(1L);
+
+        assertThat(result).isEmpty();
+        verify(tagScheduleRepository).findAllByTag_TagId(1L);
+    }
+
     @Test
     void testFindByScheduleIdAndTagId() {
         when(tagScheduleRepository.findAllBySchedule_ScheduleId(anyLong())).thenReturn(Collections.singletonList(sampleTagSchedule));
 
         var result = tagScheduleService.findByScheduleIdAndTagId(1L, 1L);
 
-        System.out.println("Result of findByScheduleIdAndTagId: " + result);
-
         assertThat(result).isNotNull();
         verify(tagScheduleRepository).findAllBySchedule_ScheduleId(1L);
     }
 
-    // 태그 스케줄 ID로 태그를 찾는 테스트입니다.
+    @Test
+    void testFindByScheduleIdAndTagIdFailure() {
+        when(tagScheduleRepository.findAllBySchedule_ScheduleId(anyLong())).thenReturn(Collections.emptyList());
+
+        var result = tagScheduleService.findByScheduleIdAndTagId(1L, 1L);
+
+        assertThat(result).isNull();
+        verify(tagScheduleRepository).findAllBySchedule_ScheduleId(1L);
+    }
+
     @Test
     void testFindTag() {
         when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.of(sampleTagSchedule));
 
         TagResponseDTO result = tagScheduleService.findTag(1L);
 
-        System.out.println("Result of findTag: " + result);
-
         assertThat(result).isNotNull();
         verify(tagScheduleRepository).findById(1L);
     }
 
-    // 태그 스케줄 ID로 태그 스케줄을 찾는 테스트입니다.
+    @Test
+    void testFindTagFailure() {
+        when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        var result = tagScheduleService.findTag(1L);
+
+        assertThat(result).isNull();
+        verify(tagScheduleRepository).findById(1L);
+    }
+
     @Test
     void testFindTagSchedule() {
         when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.of(sampleTagSchedule));
 
         TagScheduleResponseDTO result = tagScheduleService.findTagSchedule(1L);
 
-        System.out.println("Result of findTagSchedule: " + result);
-
         assertThat(result).isNotNull();
         verify(tagScheduleRepository).findById(1L);
     }
 
-    // 스케줄에 태그를 추가하는 테스트입니다.
+    @Test
+    void testFindTagScheduleFailure() {
+        when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        var result = tagScheduleService.findTagSchedule(1L);
+
+        assertThat(result).isNull();
+        verify(tagScheduleRepository).findById(1L);
+    }
+
     @Test
     void testAddTagSchedule() {
         when(tagService.getTagId(anyString())).thenReturn(1L);
@@ -176,22 +203,41 @@ public class TagScheduleServiceTest {
 
         Long result = tagScheduleService.addTagSchedule(1L, "Sample Tag");
 
-        System.out.println("Result of addTagSchedule: " + result);
-
         assertThat(result).isNotNull();
         verify(tagScheduleRepository).save(any(TagSchedule.class));
     }
 
-    // 태그 스케줄을 삭제하는 테스트입니다.
+    @Test
+    void testAddTagScheduleFailure() {
+        when(tagService.getTagId(anyString())).thenReturn(1L);
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(scheduleRepository.findById(anyLong())).thenReturn(Optional.of(sampleSchedule));
+
+        var result = tagScheduleService.addTagSchedule(1L, "Sample Tag");
+
+        assertThat(result).isNull();
+        verify(tagRepository).findById(anyLong());
+        verify(scheduleRepository).findById(anyLong());
+        verify(tagScheduleRepository, never()).save(any(TagSchedule.class));
+    }
+
     @Test
     void testDeleteTag() {
         when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.of(sampleTagSchedule));
 
         Long result = tagScheduleService.deleteTag(1L);
 
-        System.out.println("Result of deleteTag: " + result);
-
         assertThat(result).isNotNull();
+        verify(tagScheduleRepository).findById(1L);
+    }
+
+    @Test
+    void testDeleteTagFailure() {
+        when(tagScheduleRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        var result = tagScheduleService.deleteTag(1L);
+
+        assertThat(result).isNull();
         verify(tagScheduleRepository).findById(1L);
     }
 }

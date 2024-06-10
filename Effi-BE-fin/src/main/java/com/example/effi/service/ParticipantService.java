@@ -7,6 +7,7 @@ import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,10 @@ public class ParticipantService {
 
     // add - schedule && user가 있다는 가정
     public ParticipantResponseDTO addParticipant(Long scheduleId, Long empId) {
+        Participant check = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
+        if (check != null && check.getDeleteYn() == false) {
+            throw new RuntimeException("Participant already exists");
+        }
         return new ParticipantResponseDTO(participantRepository.save(
                 Participant.builder()
                         .employee(employeeRepository.findById(empId).orElse(null))
@@ -46,6 +51,8 @@ public class ParticipantService {
         for (Participant participant : lst) {
             lstDto.add(new ParticipantResponseDTO(participant));
         }
+        if (lstDto == null)
+            throw new NotFoundException("Nothing to show");
         return lstDto;
     }
 

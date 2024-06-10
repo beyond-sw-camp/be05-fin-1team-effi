@@ -262,23 +262,24 @@ class GroupServiceTest {
         Long groupId = 1L;
         String newGroupName = "Updated Group Name";
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(1L).groupName("Old Group Name").category(category).build();
-        Group groupWithSameName = Group.builder().groupId(2L).groupName("Updated Group Name").category(category).build();
+        Group group = Group.builder().groupId(groupId).groupName("Old Group Name").category(category).deleteYn(false)
+                .build();
+        Group groupWithSameName = Group.builder().groupId(2L).groupName(newGroupName).category(category).deleteYn(false)
+                .build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
         when(groupRepository.findByGroupName(newGroupName)).thenReturn(Optional.of(groupWithSameName));
 
-        // When
-        ResponseEntity<GlobalResponse> responseEntity = groupService.updateGroupName(groupId, newGroupName);
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            groupService.updateGroupName(groupId, newGroupName);
+        });
 
-        // Then
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals("이미 존재하는 그룹 이름입니다.", responseEntity.getBody().getMessage());
+        assertEquals("이미 존재하는 그룹 이름입니다.", exception.getMessage());
 
         verify(groupRepository, never()).save(any(Group.class));
     }
-
 
     @DisplayName("그룹 이름 변경 테스트 - 그룹이 존재하지 않는 경우 - 실패")
     @Test
@@ -315,7 +316,7 @@ class GroupServiceTest {
         when(groupEmpRepository.countActiveMembersInGroup(groupId)).thenReturn(1L);
 
         // When
-        ResponseEntity<GlobalResponse> responseEntity = groupService.withdrawGroup(groupId, empId);
+        ResponseEntity<GlobalResponse> responseEntity = groupService.withdrawGroup(groupId);
 
         // Then
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -339,7 +340,7 @@ class GroupServiceTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            groupService.withdrawGroup(groupId, empId);
+            groupService.withdrawGroup(groupId);
         });
 
         assertEquals("유효하지 않은 그룹 ID: " + groupId, exception.getMessage());
@@ -363,7 +364,7 @@ class GroupServiceTest {
         when(groupRepository.save(any(Group.class))).thenReturn(group);
 
         // When
-        ResponseEntity<GlobalResponse> responseEntity = groupService.withdrawGroup(groupId, empId);
+        ResponseEntity<GlobalResponse> responseEntity = groupService.withdrawGroup(groupId);
 
         // Then
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());

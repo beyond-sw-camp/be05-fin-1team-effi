@@ -35,7 +35,8 @@ public class Timezone {
     private String dst;
 
     @Builder(toBuilder = true)
-    public Timezone(String timezoneName, String countryCode, String abbreviation, Long timeStart, Integer gmtOffset, String dst) {
+    public Timezone(Long timezoneId, String timezoneName, String countryCode, String abbreviation, Long timeStart, Integer gmtOffset, String dst) {
+        this.timezoneId = timezoneId;
         this.timezoneName = timezoneName;
         this.countryCode = countryCode;
         this.abbreviation = abbreviation;
