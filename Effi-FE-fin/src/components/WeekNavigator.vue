@@ -1,41 +1,45 @@
 <template>
   <div class="week-navigator">
     <button @click="prevWeek">&lt;</button>
-    <span>{{ formattedDateRange }}</span>
+    <span>{{ formattedWeek }}</span>
     <button @click="nextWeek">&gt;</button>
   </div>
 </template>
 
-<script setup>
-import { computed, toRefs } from 'vue';
+<script>
+import { format } from 'date-fns';
 
-const props = defineProps({
-  startDate: {
-    type: Date,
-    required: true
+export default {
+  props: {
+    currentWeek: {
+      type: Date,
+      required: true
+    }
+  },
+  computed: {
+    formattedWeek() {
+      const startOfWeek = this.startOfWeek(this.currentWeek);
+      const endOfWeek = this.endOfWeek(this.currentWeek);
+      return `${format(startOfWeek, 'yyyy년 MM월 dd일')} ~ ${format(endOfWeek, 'yyyy년 MM월 dd일')}`;
+    }
+  },
+  methods: {
+    startOfWeek(date) {
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(date.setDate(diff));
+    },
+    endOfWeek(date) {
+      const start = this.startOfWeek(date);
+      return new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    },
+    prevWeek() {
+      this.$emit('change-week', -1);
+    },
+    nextWeek() {
+      this.$emit('change-week', 1);
+    }
   }
-});
-
-const emit = defineEmits(['update-date']);
-
-const { startDate } = toRefs(props);
-
-const formattedDateRange = computed(() => {
-  const endDate = new Date(startDate.value);
-  endDate.setDate(startDate.value.getDate() + 6);
-  return `${startDate.value.toLocaleDateString('ko-KR')} ~ ${endDate.toLocaleDateString('ko-KR')}`;
-});
-
-const prevWeek = () => {
-  const newStartDate = new Date(startDate.value);
-  newStartDate.setDate(startDate.value.getDate() - 7);
-  emit('update-date', newStartDate);
-};
-
-const nextWeek = () => {
-  const newStartDate = new Date(startDate.value);
-  newStartDate.setDate(startDate.value.getDate() + 7);
-  emit('update-date', newStartDate);
 };
 </script>
 
@@ -43,20 +47,9 @@ const nextWeek = () => {
 .week-navigator {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
 }
 
 button {
-  background-color: #f0f0f0;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-span {
   margin: 0 10px;
-  font-size: 1.2em;
 }
 </style>

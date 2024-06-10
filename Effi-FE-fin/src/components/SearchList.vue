@@ -1,6 +1,6 @@
 <template>
   <div>
-    <table v-if="!grouped">
+    <table class="search-table">
       <thead>
         <tr>
           <th>날짜</th>
@@ -11,35 +11,17 @@
         </tr>
       </thead>
       <tbody>
-        <SearchItem v-for="search in searches" :key="search.scheduleId" :search="search" />
+        <tr v-for="search in searches" :key="search.scheduleId">
+          <td>{{ new Date(search.startTime).toLocaleDateString() }}</td>
+          <td>{{ search.categoryName }}</td>
+          <td>{{ search.status }}</td>
+          <td>{{ search.title }}</td>
+          <td>
+            <span v-for="tag in search.tagNames" :key="tag" class="tag">{{ tag }}</span>
+          </td>
+        </tr>
       </tbody>
     </table>
-    <div v-else>
-      <div v-if="grouped['예정됨'].length">
-        <h2>예정됨</h2>
-        <table>
-          <tbody>
-            <SearchItem v-for="search in grouped['예정됨']" :key="search.scheduleId" :search="search" />
-          </tbody>
-        </table>
-      </div>
-      <div v-if="grouped['진행중'].length">
-        <h2>진행중</h2>
-        <table>
-          <tbody>
-            <SearchItem v-for="search in grouped['진행중']" :key="search.scheduleId" :search="search" />
-          </tbody>
-        </table>
-      </div>
-      <div v-if="grouped['완료됨'].length">
-        <h2>완료됨</h2>
-        <table>
-          <tbody>
-            <SearchItem v-for="search in grouped['완료됨']" :key="search.scheduleId" :search="search" />
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -47,9 +29,35 @@
 import SearchItem from './SearchItem.vue';
 
 export default {
-  props: ['searches', 'grouped'],
+  props: ['searches'],
   components: {
     SearchItem
   }
 };
 </script>
+
+<style scoped>
+.search-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.search-table th,
+.search-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.search-table th {
+  background-color: #f4f4f4;
+}
+
+.tag {
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-right: 5px;
+  display: inline-block;
+}
+</style>
