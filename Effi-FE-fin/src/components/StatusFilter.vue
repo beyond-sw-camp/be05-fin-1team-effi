@@ -1,33 +1,43 @@
 <template>
   <div class="status-filter">
-    <button @click="setStatus(null)">전체</button>
-    <button @click="setStatus(0)">예정됨</button>
-    <button @click="setStatus(1)">진행중</button>
-    <button @click="setStatus(2)">완료됨</button>
+    <button @click="filterByStatus(null)" :class="{ active: currentStatus === null }">전체</button>
+    <button @click="filterByStatus('예정됨')" :class="{ active: currentStatus === '예정됨' }">예정됨</button>
+    <button @click="filterByStatus('진행중')" :class="{ active: currentStatus === '진행중' }">진행중</button>
+    <button @click="filterByStatus('완료됨')" :class="{ active: currentStatus === '완료됨' }">완료됨</button>
   </div>
 </template>
 
-<script setup>
-const emit = defineEmits(['filter-status']);
-
-const setStatus = (status) => {
-  emit('filter-status', status);
+<script>
+export default {
+  props: ['searches'],
+  data() {
+    return {
+      currentStatus: null
+    };
+  },
+  methods: {
+    filterByStatus(status) {
+      this.currentStatus = status;
+      this.$emit('filter-status', status);
+    }
+  }
 };
 </script>
 
 <style scoped>
 .status-filter {
   display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
+  gap: 10px;
 }
 
-button {
-  background-color: #f0f0f0;
+.status-filter button {
+  padding: 5px 10px;
   border: none;
-  padding: 8px;
+  background-color: #f0f0f0;
   cursor: pointer;
-  margin: 0 5px;
-  border-radius: 4px;
+}
+
+.status-filter button.active {
+  background-color: #ccc;
 }
 </style>

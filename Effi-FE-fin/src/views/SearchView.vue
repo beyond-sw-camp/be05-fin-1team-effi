@@ -1,21 +1,14 @@
-<!-- src/views/SearchView.vue -->
 <template>
   <div>
     <HomeHeader @search-results="updateSearches" />
-    <StatusFilter @filter-status="updateStatusFilter" />
-    <WeekNavigator :startDate="startDate" @update-date="updateDate" />
-    <div v-if="showGrouped">
-      <div v-if="groupedSearches['예정됨'].length">
-        <h2>예정됨</h2>
-        <SearchList :searches="groupedSearches['예정됨']" />
-      </div>
-      <div v-if="groupedSearches['진행중'].length">
-        <h2>진행중</h2>
-        <SearchList :searches="groupedSearches['진행중']" />
-      </div>
-      <div v-if="groupedSearches['완료됨'].length">
-        <h2>완료됨</h2>
-        <SearchList :searches="groupedSearches['완료됨']" />
+    <div class="controls">
+      <button @click="toggleStatusSort" class="status-sort">status</button>
+      <WeekNavigator :currentWeek="currentWeek" @change-week="changeWeek" />
+    </div>
+    <div v-if="sortedByStatus">
+      <div v-for="status in allStatuses" :key="status">
+        <h2 class="status-title">{{ statusLabels[status] }}</h2>
+        <SearchList :searches="sortedSearchesByStatus(status)" />
       </div>
     </div>
     <div v-else>
@@ -24,66 +17,87 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script>
 import HomeHeader from '../components/HomeHeader.vue';
-import SearchList from '../components/SearchList.vue';
 import WeekNavigator from '../components/WeekNavigator.vue';
-import StatusFilter from '../components/StatusFilter.vue';
-import { sortSchedulesByStartDate } from '../filters/filters';
+import SearchList from '../components/SearchList.vue';
+import { ref, computed } from 'vue';
+import { startOfWeek, endOfWeek, addWeeks } from 'date-fns';
 
-const searches = ref([]);
-const startDate = ref(new Date());
-const statusFilter = ref(null);
-const showGrouped = ref(false);
+export default {
+  components: {
+    HomeHeader,
+    WeekNavigator,
+    SearchList
+  },
+  setup() {
+    const searches = ref([]);
+    const currentWeek = ref(new Date());
+    const sortedByStatus = ref(false);
 
-const updateSearches = (newSearches) => {
-  searches.value = sortSchedulesByStartDate(newSearches);
-  showGrouped.value = false;
+    const statusLabels = {
+      '0': '예정됨',
+      '1': '진행중',
+      '2': '완료됨'
+    };
+
+    const allStatuses = ['0', '1', '2'];
+
+    const filteredSearches = computed(() => {
+      const start = startOfWeek(currentWeek.value, { weekStartsOn: 1 });
+      const end = endOfWeek(currentWeek.value, { weekStartsOn: 1 });
+      return searches.value.filter(schedule => {
+        const startTime = new Date(schedule.startTime);
+        return startTime >= start && startTime <= end;
+      });
+    });
+
+    const sortedSearchesByStatus = (status) => {
+      return filteredSearches.value.filter(schedule => schedule.status == status);
+    };
+
+    const updateSearches = (newSearches) => {
+      searches.value = newSearches;
+    };
+
+    const changeWeek = (weeks) => {
+      currentWeek.value = addWeeks(currentWeek.value, weeks);
+    };
+
+    const toggleStatusSort = () => {
+      sortedByStatus.value = !sortedByStatus.value;
+    };
+
+    return {
+      searches,
+      currentWeek,
+      sortedByStatus,
+      filteredSearches,
+      sortedSearchesByStatus,
+      statusLabels,
+      allStatuses,
+      updateSearches,
+      changeWeek,
+      toggleStatusSort
+    };
+  }
 };
-
-const updateDate = (date) => {
-  startDate.value = date;
-};
-
-const updateStatusFilter = (status) => {
-  statusFilter.value = status;
-  showGrouped.value = true;
-};
-
-const filteredSearches = computed(() => {
-  const endDate = new Date(startDate.value);
-  endDate.setDate(startDate.value.getDate() + 6);
-
-  return searches.value.filter(search => {
-    const searchStartDate = new Date(search.startTime);
-    const matchesDate = searchStartDate >= startDate.value && searchStartDate <= endDate;
-    const matchesStatus = statusFilter.value === null || search.status === statusFilter.value;
-    return matchesDate && matchesStatus;
-  });
-});
-
-const groupedSearches = computed(() => {
-  const groups = {
-    '예정됨': [],
-    '진행중': [],
-    '완료됨': []
-  };
-
-  filteredSearches.value.forEach(search => {
-    switch (search.status) {
-      case 0:
-        groups['예정됨'].push(search);
-        break;
-      case 1:
-        groups['진행중'].push(search);
-        break;
-      case 2:
-        groups['완료됨'].push(search);
-        break;
-    }
-  });
-
-  return groups;
-});
 </script>
+
+<style scoped>
+.controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.status-sort {
+  margin-left: auto;
+}
+
+.status-title {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+</style>
