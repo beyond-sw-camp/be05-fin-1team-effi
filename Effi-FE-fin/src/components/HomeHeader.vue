@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <span class="planner-title">Effi Planner</span>
+    <span class="planner-title" @click="goToHome" style="cursor: pointer;">Effi Planner</span>
     <div class="search-container">
       <select v-model="searchCriterion">
         <option value="title">제목</option>
@@ -42,10 +42,6 @@ onMounted(() => {
   });
 });
 
-const goToMyPage = () => {
-  router.push({ name: 'mypage' });
-};
-
 const search = async () => {
   console.log(`Searching for ${searchQuery.value} by ${searchCriterion.value}`);
   let url = `/api/search/${searchCriterion.value}?${searchCriterion.value}=${encodeURIComponent(searchQuery.value)}`;
@@ -82,12 +78,21 @@ const logout = async () => {
   }
 };
 
+const goToMyPage = () => {
+  router.push({ name: 'mypage' });
+};
+
+const goToHome = () => {
+  router.push({ name: 'home' });
+};
+
 </script>
 
 <style scoped>
 .header {
   display: flex;
-  justify-content: space-between; /* 양쪽 끝에 배치 */
+  justify-content: space-between;
+  /* 양쪽 끝에 배치 */
   align-items: center;
   padding: 10px;
   background-color: #f8f9fa;
@@ -96,8 +101,10 @@ const logout = async () => {
   z-index: 1000;
   position: fixed;
   top: 0;
-  left: 0; /* 화면 왼쪽에 고정 */
-  transform: none; /* 가운데 정렬 제거 */
+  left: 0;
+  /* 화면 왼쪽에 고정 */
+  transform: none;
+  /* 가운데 정렬 제거 */
 }
 
 .search-container {
@@ -118,16 +125,22 @@ const logout = async () => {
 /* 반응형 스타일 */
 @media (max-width: 768px) {
   .header {
-    flex-direction: column; /* 작은 화면에서는 세로로 배치 */
+    flex-direction: column;
+    /* 작은 화면에서는 세로로 배치 */
     align-items: flex-start;
   }
+
   .search-container {
-    width: 100%; /* 전체 너비 차지 */
+    width: 100%;
+    /* 전체 너비 차지 */
     margin-bottom: 10px;
   }
+
   .user-container {
-    width: 100%; /* 전체 너비 차지 */
+    width: 100%;
+    /* 전체 너비 차지 */
   }
+
   .planner-title {
     margin-right: 0;
     margin-bottom: 10px;
