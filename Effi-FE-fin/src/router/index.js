@@ -50,7 +50,7 @@ const router = createRouter({
       component: SearchView,
       meta: { requiresAuth: true }
 
-    }
+    },
   ]
 });
 
