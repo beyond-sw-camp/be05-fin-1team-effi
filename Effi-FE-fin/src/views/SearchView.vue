@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import HomeHeader from '../components/HomeHeader.vue';
 import WeekNavigator from '../components/WeekNavigator.vue';
 import SearchList from '../components/SearchList.vue';
 import { ref, computed } from 'vue';
@@ -26,7 +25,6 @@ import { startOfWeek, endOfWeek, addWeeks } from 'date-fns';
 
 export default {
   components: {
-    HomeHeader,
     WeekNavigator,
     SearchList
   },
@@ -89,6 +87,7 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+
 }
 
 .status-sort {
