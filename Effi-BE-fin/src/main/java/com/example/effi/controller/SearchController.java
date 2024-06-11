@@ -1,5 +1,6 @@
 package com.example.effi.controller;
 
+import com.example.effi.domain.DTO.DeptDTO;
 import com.example.effi.domain.DTO.SearchResponseDTO;
 import com.example.effi.domain.Entity.Dept;
 import com.example.effi.repository.DeptRepository;
@@ -47,11 +48,11 @@ public class SearchController {
     }
 
     @GetMapping("/dept")
-    public ResponseEntity<List<String>> searchAlldept(){
+    public ResponseEntity<List<DeptDTO>> searchAlldept(){
         List<Dept> deptRepositoryAll = deptRepository.findAll();
-        List<String> deptList = new ArrayList<>();
+        List<DeptDTO> deptList = new ArrayList<>();
         for (Dept dept : deptRepositoryAll) {
-            deptList.add(dept.getDeptName());
+            deptList.add(new DeptDTO(dept.getDeptId(), dept.getDeptName()));
         }
         return ResponseEntity.ok(deptList);
     }

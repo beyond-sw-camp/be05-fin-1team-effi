@@ -2,7 +2,6 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
-<!--      <h2>카테고리 선택</h2>-->
       <ul>
         <li @click="openModal('company')">회사</li>
         <li @click="openModal('department')">부서</li>
@@ -10,8 +9,17 @@
         <li @click="openModal('individual')">개인</li>
       </ul>
     </div>
-    <DepartmentModal v-if="showDepartmentModal" @close="closeModal('department')" />
-    <GroupModal v-if="showGroupModal" @close="closeModal('group')" />
+    <DepartmentModal
+      v-if="showDepartmentModal"
+      :show="showDepartmentModal"
+      @close="closeModal('department')"
+      @select-dept="handleSelectDept"
+    />
+    <GroupModal
+      v-if="showGroupModal"
+      :show="showGroupModal"
+      @close="closeModal('group')"
+      @select-group="handleSelectGroup" />
   </div>
 </template>
 
@@ -20,11 +28,14 @@ import DepartmentModal from './DeptModal.vue';
 import GroupModal from './GroupModal.vue';
 
 export default {
-  components : {DepartmentModal, GroupModal},
+  components: { DepartmentModal, GroupModal },
   data() {
     return {
       showDepartmentModal: false,
       showGroupModal: false,
+      selectedDeptId: null,
+      selectedGroupId: null,
+      selectedOption: null
     };
   },
   props: {
@@ -37,8 +48,16 @@ export default {
     openModal(type) {
       if (type === 'department') {
         this.showDepartmentModal = true;
+        this.selectedOption = 2;
       } else if (type === 'group') {
         this.showGroupModal = true;
+        this.selectedOption = 3;
+      } else if (type === 'individual') {
+        this.selectedOption = 4;
+        this.returnSelection();
+      } else {
+        this.selectedOption = 1;
+        this.returnSelection();
       }
     },
     closeModal(type) {
@@ -47,6 +66,30 @@ export default {
       } else if (type === 'group') {
         this.showGroupModal = false;
       }
+    },
+    handleSelectDept(deptId) {
+      this.selectedDeptId = deptId;
+      console.log('Selected deptId:', deptId); // 선택된 부서 ID를 확인하는 로그
+      this.showDepartmentModal = false; // 모달 닫기
+      this.returnSelection();
+    },
+    handleSelectGroup(groupId) {
+      this.selectedGroupId = groupId;
+      console.log('Selected groupId:', groupId); // 선택된 부서 ID를 확인하는 로그
+      this.showGroupModal = false; // 모달 닫기
+      this.returnSelection();
+    },
+    handleClose() {
+      this.$emit('close');
+    },
+    returnSelection() {
+      const selectedResult = {
+        selectedOption: this.selectedOption,
+        selectedDeptId: this.selectedDeptId,
+        selectedGroupId: this.selectedGroupId
+      };
+      this.$emit('select', selectedResult);
+      this.handleClose();
     }
   }
 }

@@ -1,20 +1,17 @@
 <template>
-  <div class="modal-overlay">
+  <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
-<!--      <h2>부서 선택</h2>-->
-      <ul>
-        <li>마케팅팀</li>
-        <li>영업팀</li>
-        <li>인사팀</li>
-        <li>연구개발팀</li>
+      <h2>부서</h2>
+      <ul class="scrollable-list">
+        <li v-for="dept in departments" :key="dept.deptId" @click="selectDept(dept.deptId)">{{ dept.deptName }}</li>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
   props: {
@@ -23,6 +20,11 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      departments: []
+    };
+  },
   created() {
     this.fetchFindDept();
   },
@@ -30,16 +32,16 @@ export default {
     async fetchFindDept() {
       try {
         const response = await axios.get('http://localhost:8080/api/search/dept');
-
-        // 부서 전체 출력 필요 (화면상)
-
-        this.$emit('close');
+        this.departments = response.data;
       } catch (error) {
-        console.error('그룹 생성 오류:', error.response ? error.response.data : error.message);
+        console.error('부서 검색 오류:', error.response ? error.response.data : error.message);
       }
+    },
+    selectDept(deptId) {
+      this.$emit('select-dept', deptId); // 선택한 부서의 ID를 상위 컴포넌트로 전달
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -74,6 +76,10 @@ export default {
   right: 10px;
 }
 
+h2, p {
+  text-align: center; /* 텍스트 가운데 정렬 */
+}
+
 ul {
   list-style: none;
   padding: 0;
@@ -82,5 +88,10 @@ ul {
 li {
   margin: 10px 0;
   cursor: pointer;
+}
+
+.scrollable-list {
+  max-height: 150px; /* 스크롤이 나타나는 최대 높이 설정 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
 }
 </style>
