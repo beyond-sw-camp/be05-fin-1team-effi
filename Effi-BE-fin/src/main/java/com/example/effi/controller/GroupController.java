@@ -21,7 +21,10 @@ public class GroupController {
 
     // 그룹 생성
     @PostMapping
-    public ResponseEntity<GlobalResponse> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
+    public ResponseEntity<?> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
+        if (groupRequestDTO.getEmployeeIds() == null || groupRequestDTO.getEmployeeIds().isEmpty()) {
+            return ResponseEntity.badRequest().body("Employee list cannot be null or empty");
+        }
         return groupService.createGroup(groupRequestDTO);
     }
 
