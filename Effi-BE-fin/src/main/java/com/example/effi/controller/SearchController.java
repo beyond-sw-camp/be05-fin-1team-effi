@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -43,6 +44,16 @@ public class SearchController {
     public ResponseEntity<String> searchSchedulesByDept(@PathVariable Long deptId){
         Dept byDeptId = deptRepository.findByDeptId(deptId);
         return ResponseEntity.ok(byDeptId.getDeptName());
+    }
+
+    @GetMapping("/dept")
+    public ResponseEntity<List<String>> searchAlldept(){
+        List<Dept> deptRepositoryAll = deptRepository.findAll();
+        List<String> deptList = new ArrayList<>();
+        for (Dept dept : deptRepositoryAll) {
+            deptList.add(dept.getDeptName());
+        }
+        return ResponseEntity.ok(deptList);
     }
 
 }

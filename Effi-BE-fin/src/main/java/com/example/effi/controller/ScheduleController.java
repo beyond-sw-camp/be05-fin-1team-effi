@@ -2,7 +2,12 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.domain.Entity.Employee;
+import com.example.effi.domain.Entity.GroupEmp;
+import com.example.effi.repository.EmployeeRepository;
+import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.service.EmployeeService;
+import com.example.effi.service.GroupService;
 import com.example.effi.service.ParticipantService;
 import com.example.effi.service.ScheduleService;
 import lombok.AllArgsConstructor;
@@ -12,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,8 +27,11 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final EmployeeService employeeService;
     private final ParticipantService participantService;
+    private final EmployeeRepository employeeRepository;
+    private final GroupService groupService;
+    private final GroupEmpRepository groupEmpRepository;
 
-    // 추가
+    // 추가 - 개인
     @PostMapping("/add")
     public ResponseEntity<?> addSchedule(@RequestBody ScheduleRequestDTO schedule) {
         try{
@@ -32,6 +41,61 @@ public class ScheduleController {
             Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
             participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
+        }
+    }
+
+    // 추가 - 회사
+    @PostMapping("/add/company")
+    public ResponseEntity<?> addScheduleCompany(@RequestBody ScheduleRequestDTO schedule) {
+        try{
+            ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
+            List<Employee> all = employeeRepository.findAll();
+            for (Employee e : all)
+                participantService.addParticipant(rtn.getScheduleId(), e.getId()); // 참여자 tbl에 추가
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
+        }
+    }
+
+    // 추가 - 부서
+    @PostMapping("/add/dept/{deptId}")
+    public ResponseEntity<?> addScheduleDept(@RequestBody ScheduleRequestDTO schedule, @PathVariable Long deptId) {
+        try{
+            ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
+            List<Employee> all = employeeRepository.findAllByDept_DeptId(deptId);
+            for (Employee e : all)
+                participantService.addParticipant(rtn.getScheduleId(), e.getId()); // 참여자 tbl에 추가
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
+        }
+    }
+
+
+    // 추가 - 그룹
+    @PostMapping("/add/group/{groupId}")
+    public ResponseEntity<?> addScheduleGroup(@RequestBody ScheduleRequestDTO schedule, @PathVariable Long groupId) {
+        try{
+            ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
+            List<GroupEmp> allByGroupGroupId = groupEmpRepository.findAllByGroup_GroupId(groupId);
+            for (GroupEmp e : allByGroupGroupId)
+                participantService.addParticipant(rtn.getScheduleId(), e.getEmployee().getId()); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
