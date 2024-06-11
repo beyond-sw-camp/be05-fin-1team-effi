@@ -3,11 +3,11 @@
     <table class="search-table">
       <thead>
         <tr>
-          <th>날짜</th>
-          <th>카테고리</th>
-          <th>상태</th>
-          <th>일정</th>
-          <th>태그</th>
+          <th class="date">날짜</th>
+          <th class="category">카테고리</th>
+          <th class="status">상태</th>
+          <th class="title">일정</th>
+          <th class="tags">태그</th>
         </tr>
       </thead>
       <tbody>
@@ -85,6 +85,8 @@ export default {
 <style scoped>
 .search-table {
   width: 100%;
+  table-layout: fixed;
+  /* 테이블 너비 고정 */
   border-collapse: collapse;
 }
 
@@ -92,13 +94,39 @@ export default {
 .search-table td {
   border: 1px solid #ddd;
   padding: 8px;
-  text-align: left;
+  text-align: center;
 }
 
 .search-table th {
   background-color: #f4f4f4;
   color: #333399;
   text-align: center;
+}
+
+/* 열 너비 조정 */
+.search-table th.date,
+.search-table td.date {
+  width: 15%;
+}
+
+.search-table th.category,
+.search-table td.category {
+  width: 10%;
+}
+
+.search-table th.status,
+.search-table td.status {
+  width: 10%;
+}
+
+.search-table th.title,
+.search-table td.title {
+  width: 35%;
+}
+
+.search-table th.tags,
+.search-table td.tags {
+  width: 30%;
 }
 
 .tag {

@@ -19,7 +19,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test');
+    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test' && route.name != 'search');
 
     return {
       showHeader,
