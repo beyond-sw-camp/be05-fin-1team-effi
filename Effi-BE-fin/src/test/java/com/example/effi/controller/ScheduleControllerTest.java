@@ -3,12 +3,18 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.repository.EmployeeRepository;
+import com.example.effi.repository.GroupEmpRepository;
+import com.example.effi.repository.GroupRepository;
+import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.service.EmployeeService;
+import com.example.effi.service.GroupService;
 import com.example.effi.service.ParticipantService;
 import com.example.effi.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -41,12 +47,18 @@ public class ScheduleControllerTest {
 
     @InjectMocks
     private ScheduleController scheduleController;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
+    private GroupEmpRepository groupEmpRepository;
 
     @BeforeEach
     void setUp() {
         employeeService = mock(EmployeeService.class);
         participantService = mock(ParticipantService.class);
-        scheduleController = new ScheduleController(scheduleService, employeeService, participantService);
+        scheduleController = new ScheduleController(scheduleService, employeeService, participantService,employeeRepository, groupService, groupEmpRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(scheduleController).build();
     }
 
