@@ -12,6 +12,7 @@
           <br>
           <button type="submit">로그인</button>
         </form>
+        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
       </div>
     </div>
     <div class="logo">
@@ -33,8 +34,10 @@ const loginData = ref({
 
 const authStore = useAuthStore();
 const router = useRouter();
+const errorMessage = ref('');
 
 const handleLogin = async () => {
+  errorMessage.value = '';
   try {
     const response = await axiosInstance.post('/api/auth/signin', {
       empNo: loginData.value.empNo,
@@ -44,8 +47,8 @@ const handleLogin = async () => {
     authStore.login(empNo, name, rank, accessToken, refreshToken);
     router.push({ name: 'home' });
   } catch (error) {
+    errorMessage.value = error.response.data.data.msg || '로그인 중 오류가 발생했습니다.';
     console.error('Login error:', error.response.data.data.msg);
-    
   }
 };
 </script>
@@ -119,5 +122,10 @@ const handleLogin = async () => {
   font-weight: bold; /* 폰트를 굵게 설정합니다. */
   text-align: center; /* 가운데 정렬합니다. */
   margin-bottom: 20px; /* 아래 여백 추가 */
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>
