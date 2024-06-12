@@ -1,5 +1,7 @@
 package com.example.effi.controller;
 
+import com.example.effi.domain.DTO.GroupDTO;
+import com.example.effi.domain.DTO.ParticipantResponseDTO;
 import com.example.effi.domain.DTO.ScheduleRequestDTO;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
 import com.example.effi.domain.Entity.Employee;
@@ -149,6 +151,52 @@ public class ScheduleController {
                     .body("Failed to find schedule: " + e.getMessage());
         }
     }
+
+    // 조회 그룹 별..
+    @GetMapping("find/group/{groupId}")
+    public ResponseEntity<?> findByGroup(@PathVariable("groupId") Long groupId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+        Boolean check = true;
+
+        try {
+            List<GroupEmp> allByGroupGroupId = groupEmpRepository.findAllByGroup_GroupId(groupId);
+            List<Long> empIdlist = new ArrayList<>();
+            for (GroupEmp e : allByGroupGroupId){
+                empIdlist.add(e.getEmployee().getId());
+            }
+
+            List<ScheduleResponseDTO> scheduleResponseDTO = scheduleService.getSchedulesByCategory(3L);
+            List<Long> scheduleIds = new ArrayList<>();
+            for (ScheduleResponseDTO s: scheduleResponseDTO){
+                Long scheduleId = s.getScheduleId();
+                check = true;
+                for (Long id : empIdlist){
+                    ParticipantResponseDTO byEmpIdAndScheduleId = participantService.findByEmpIdAndScheduleId(id, scheduleId);
+                    if (byEmpIdAndScheduleId == null || byEmpIdAndScheduleId.getDeleteYn() ){
+                        check = false;
+                        break;
+                    }
+                }
+                if (check)
+                    scheduleIds.add(s.getScheduleId());
+            }
+            List<ScheduleResponseDTO> scheduleResponseDTOS = new ArrayList<>();
+            for (Long id : scheduleIds){
+                ScheduleResponseDTO schedule = scheduleService.getSchedule(id);
+                scheduleResponseDTOS.add(schedule);
+            }
+
+            return ResponseEntity.ok(scheduleResponseDTOS);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find schedule: " + e.getMessage());
+        }
+    }
+
 
     // 조회 (1개 scheduleId)
     @GetMapping("/find/{scheduleId}")

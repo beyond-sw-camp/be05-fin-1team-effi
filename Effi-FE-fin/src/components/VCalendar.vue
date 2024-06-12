@@ -90,6 +90,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    selectedGroupId:{
+      type: Array,
+      default: () => [],
+    }
   },
   setup(props) {
     const authStore = useAuthStore();
@@ -128,18 +132,34 @@ export default {
         }
 
         let schedules = [];
-        if (props.selectedCategories.length === 0) {
+        if (props.selectedCategories.length === 0 && props.selectedGroupId.length === 0) {
           const response = await axios.get('/api/schedule/findAll', {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
           schedules = response.data;
-        } else {
+        } else if (props.selectedGroupId.length === 0) {
           const scheduleResults = [];
           for (const categoryId of props.selectedCategories) {
             try {
               const response = await axios.get(`/api/schedule/find/category/${categoryId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              scheduleResults.push(...response.data);
+            } catch (error) {
+              console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
+            }
+          }
+          schedules = scheduleResults;
+        } else {
+          const scheduleResults = [];
+          for (const groupId of props.selectedGroupId) {
+            try {
+              // uri 수정하기
+              const response = await axios.get(`/api/schedule/find/category/${groupId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
