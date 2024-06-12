@@ -2,8 +2,12 @@
   <div class="container">
     <Navigation class="navigation" />
     <div class="content">
-      <div class="controls d-flex align-items-center mb-3">
-        <button @click="toggleStatusSort" class="btn btn-outline-primary me-3">status</button>
+      <div class="controls d-flex align-items-center mb-3 flex-wrap">
+        <div class="timezone-container d-flex align-items-center me-auto mb-2 mb-md-0">
+          <i class="bi bi-globe me-2"></i>
+          <span>{{ timezoneName }}</span>
+        </div>
+        <button @click="toggleStatusSort" class="btn btn-outline-primary me-3 mb-2 mb-md-0">status</button>
         <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
           @change-view-mode="changeViewMode" />
       </div>
@@ -19,6 +23,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
@@ -37,6 +42,7 @@ const viewMode = ref('week');
 const route = useRoute();
 const authStore = useAuthStore();
 const sortStatus = ref(0); // 정렬 상태 변수: 0 = 원래 상태, 1 = 오름차순, 2 = 내림차순
+const timezoneName = ref('');
 
 const statusLabels = {
   '0': '예정됨',
@@ -77,9 +83,28 @@ const updateSearches = (newSearches) => {
   searches.value = newSearches;
 };
 
+const fetchTimezone = async () => {
+  const accessToken = sessionStorage.getItem('accessToken');
+  if (!accessToken) {
+    console.error('Token not found');
+    return;
+  }
+  try {
+    const response = await axios.get('http://localhost:8080/api/mypage/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    timezoneName.value = response.data.timezoneName;
+  } catch (error) {
+    console.error('Error fetching timezone:', error.response ? error.response.data : error.message);
+  }
+};
+
 onMounted(() => {
   if (route.query.criterion && route.query.query) {
     search(route.query.criterion, route.query.query);
+    fetchTimezone(); 
   }
 });
 
@@ -163,6 +188,8 @@ const toggleStatusSort = () => {
   align-items: center;
   margin-top: 20px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+  /* 컨트롤을 줄바꿈할 수 있도록 수정 */
 }
 
 .status-sort {
@@ -174,7 +201,6 @@ const toggleStatusSort = () => {
   font-size: 0.9rem;
   transition: background-color 0.3s, border-color 0.3s;
   margin-right: 10px;
-  /* 간격 추가 */
 }
 
 .status-sort:hover {
@@ -187,10 +213,20 @@ const toggleStatusSort = () => {
   font-size: 1.2rem;
   margin: 20px 0;
   font-weight: bold;
-  /* 글자 진하게 */
 }
 
-/* 테이블 스타일 수정 */
+.timezone-container {
+  margin-right: 10px;
+}
+
+.timezone-container i {
+  font-size: 1.5rem;
+}
+
+.timezone-container span {
+  margin-right: 10px;
+}
+
 .search-table th {
   background-color: #f4f4f4;
   color: #333399;
@@ -225,5 +261,25 @@ const toggleStatusSort = () => {
 
 .search-table tbody tr td {
   border-top: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+  .navigation {
+    display: none;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls>* {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .status-sort {
+    margin-right: 0;
+  }
 }
 </style>
