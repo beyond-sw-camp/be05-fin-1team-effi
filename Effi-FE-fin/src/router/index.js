@@ -6,9 +6,11 @@ import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
 
 import ModalTest from '@/views/ModalTest.vue';
-
+import ScheduleTestView from '../views/ScheduleTestView.vue'
 import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
+
+import test from '../views/test.vue'
 
 
 const router = createRouter({
@@ -51,6 +53,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
 
     },
+    {
+      path: '/test',
+      name: 'test',
+      component: test,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/schedule',
+      name: 'schedule',
+      component: ScheduleTestView,
+      meta: { requiresAuth: true }
+    }
   ]
 });
 

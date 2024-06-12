@@ -9,8 +9,8 @@
 
     <div class="content">
       <div v-if="!isMyPage" class="content">
-          <SelectCategory/>
-          <GroupNameList/>
+        <SelectCategory @update-categories="handleUpdateCategories"/>
+        <GroupNameList/>
       </div>
     </div>
 
@@ -39,6 +39,10 @@ const isMyPage = computed(() => route.path === '/mypage');
 
 const closeModal = () => {
   showModal.value = false;
+};
+
+const handleUpdateCategories = (categories) => {
+  console.log('Selected categories:', categories);
 };
 
 const logout = async () => {

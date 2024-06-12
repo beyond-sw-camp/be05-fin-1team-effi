@@ -16,7 +16,6 @@ export function filterSchedulesByWeek(schedules, currentWeek) {
     const scheduleDate = new Date(schedule.startTime);
     return scheduleDate >= startOfWeek && scheduleDate < endOfWeek;
   });
-  
 }
 
 // 스케줄을 상태별로 정렬하는 함수

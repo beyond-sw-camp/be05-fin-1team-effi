@@ -2,6 +2,7 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneEmpDTO;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.domain.Entity.TimezoneEmp;
@@ -134,5 +135,12 @@ public class TimezoneEmpService {
         if (employeeCount != defaultTimezoneCount) {
             throw new IllegalStateException("모든 직원은 하나의 기본 타임존을 가져야 합니다.");
         }
+    }
+    // 기본 시간대 조회
+    public TimezoneEmpDTO getDefaultTimezoneForEmployee(Long empId) {
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(empId)
+                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + empId));
+
+        return new TimezoneEmpDTO(timezoneEmp.getTimezoneEmpId(), timezoneEmp.getTimezone(), timezoneEmp.getEmployee(), timezoneEmp.getDefaultTimezone());
     }
 }

@@ -2,6 +2,7 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.GlobalResponse;
 import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneEmpDTO;
 import com.example.effi.service.TimezoneEmpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -103,5 +104,21 @@ public class TimezoneEmpController {
                     .message(e.getMessage())
                     .build());
         }
+    }
+
+    // 본인의 기본 타임존 조회
+    @GetMapping("/{empId}/default")
+    public ResponseEntity<GlobalResponse<Map<String, Object>>> getDefaultTimezoneForEmployee(
+            @PathVariable Long empId) {
+        TimezoneEmpDTO timezone = timezoneEmpService.getDefaultTimezoneForEmployee(empId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("timezone", timezone);
+
+        return ResponseEntity.ok(GlobalResponse.<Map<String, Object>>builder()
+                .status(200)
+                .message("기본 타임존 조회에 성공했습니다")
+                .data(data)
+                .build());
     }
 }

@@ -29,13 +29,14 @@
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
-        @dblclick:event="openAddScheduleModal"
+        @dblclick:date="openAddScheduleModal"
+        @click:event="openEditScheduleModal"
       >
         <template v-slot:event="{ event }">
           <div class="event" :style="{ backgroundColor: event.color }">
             <strong>{{ event.title }}</strong>
             <br>
-            {{ event.start.format('YYYY-MM-DD HH:mm') }} - {{ event.end.format('YYYY-MM-DD HH:mm') }}
+            {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD HH:mm') : '' }}
           </div>
         </template>
         <template v-slot:timeGutter="{ time, index }">
@@ -48,9 +49,13 @@
         </template>
       </v-calendar>
     </v-sheet>
-    <add-schedule-modal
-      v-model:dialog="dialog"
-      @schedule-saved="fetchSchedules"
+    <schedule-modal
+      v-if="dialog"
+      :dialog="dialog"
+      :event="selectedEvent"
+      :is-edit-mode="isEditMode"
+      @update:dialog="updateDialog"
+      @submit-event="handleEventSubmit"
     />
     <v-menu v-model="timezoneMenu" bottom right>
       <v-list>
@@ -67,20 +72,26 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
-import AddScheduleModal from './AddScheduleModal.vue';
+import ScheduleModal from './ScheduleModal.vue'; // ScheduleModal을 가져옵니다.
 import { useAuthStore } from '@/stores/auth';
 
 dayjs.extend(isBetween);
 
 export default {
   components: {
-    AddScheduleModal,
+    ScheduleModal, // ScheduleModal을 등록합니다.
   },
-  setup() {
+  props: {
+    selectedCategories: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  setup(props) {
     const authStore = useAuthStore();
     authStore.loadSession(); // Ensure session is loaded
 
@@ -96,29 +107,59 @@ export default {
     const calendarValue = ref([dayjs()]);
     const events = ref([]);
     const dialog = ref(false);
+    const isEditMode = ref(false);
+    const selectedEvent = ref({
+      title: '',
+      content: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+    });
     const timezoneMenu = ref(false);
     const availableTimezones = ref([]);
     const timezonesSelected = ref([]);
 
     const fetchSchedules = async () => {
       try {
+        console.log('Fetching schedules');
         const token = authStore.accessToken;
         if (!token) {
           throw new Error('No access token found');
         }
 
-        const response = await axios.get('/api/schedule/findAll', {
-          headers: {
-            Authorization: `Bearer ${token}`
+        console.log('props', props.selectedCategories);
+        let schedules = [];
+        if (props.selectedCategories.length === 0) {
+          const response = await axios.get('/api/schedule/findAll', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          schedules = response.data;
+        } else {
+          const scheduleResults = [];
+          for (const categoryId of props.selectedCategories) {
+            try {
+              const response = await axios.get(`/api/schedule/find/category/${categoryId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              console.log(`Schedules for category ${categoryId}:`, response.data);
+              scheduleResults.push(...response.data);
+            } catch (error) {
+              console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
+            }
           }
-        });
-
-        const schedules = response.data;
-        console.log('Fetched schedules:', schedules);
+          schedules = scheduleResults;
+        }
 
         if (Array.isArray(schedules)) {
           events.value = schedules.map(schedule => ({
+            id: schedule.id,
             title: schedule.title,
+            content: schedule.context,
             start: dayjs(schedule.startTime),
             end: dayjs(schedule.endTime),
             color: 'blue',
@@ -141,16 +182,6 @@ export default {
       }
     };
 
-    const fetchTimezones = async () => {
-      try {
-        const response = await axios.get('/api/timezones');
-        const timezones = response.data.data;
-        availableTimezones.value = timezones;
-        console.log('Fetched timezones:', timezones);
-      } catch (error) {
-        console.error('Failed to fetch timezones:', error);
-      }
-    };
 
     const fetchUserTimezones = async () => {
       try {
@@ -168,19 +199,37 @@ export default {
       }
     };
 
-    const openAddScheduleModal = () => {
+    const openAddScheduleModal = ({ date }) => {
       console.log('Opening add schedule modal');
+      selectedEvent.value = {
+        title: '',
+        content: '',
+        startDate: dayjs(date).format('YYYY-MM-DD'),
+        startTime: '',
+        endDate: dayjs(date).format('YYYY-MM-DD'),
+        endTime: '',
+      };
+      isEditMode.value = false;
       dialog.value = true;
     };
 
-    const close = () => {
-      console.log('Closing modal');
-      dialog.value = false;
+    const openEditScheduleModal = ({ event }) => {
+      console.log('Opening edit schedule modal:', event);
+      selectedEvent.value = {
+        title: event.title,
+        content: event.content,
+        startDate: event.start ? event.start.format('YYYY-MM-DD') : '',
+        startTime: event.start ? event.start.format('HH:mm') : '',
+        endDate: event.end ? event.end.format('YYYY-MM-DD') : '',
+        endTime: event.end ? event.end.format('HH:mm') : '',
+      };
+      isEditMode.value = true;
+      dialog.value = true;
     };
 
-    const currentYear = computed(() => {
-      return dayjs(calendarValue.value[0]).year();
-    });
+    const updateDialog = (newVal) => {
+      dialog.value = newVal;
+    };
 
     const currentMonth = computed(() => {
       return dayjs(calendarValue.value[0]).format('M');
@@ -189,7 +238,6 @@ export default {
     onMounted(() => {
       console.log('Component mounted');
       fetchSchedules();
-      fetchTimezones();
       fetchUserTimezones();
     });
 
@@ -284,6 +332,12 @@ export default {
       console.log('calendarValue:', calendarValue.value);
     });
 
+    onMounted(() => {
+      console.log('Component mounted');
+      fetchSchedules();
+      fetchUserTimezones();
+    });
+
     return {
       type,
       types,
@@ -292,14 +346,15 @@ export default {
       calendarValue,
       events,
       dialog,
-      currentYear,
+      isEditMode,
+      selectedEvent,
       currentMonth,
       toToday,
       prevPeriod,
       nextPeriod,
       openAddScheduleModal,
-      close,
-      fetchSchedules,
+      openEditScheduleModal,
+      updateDialog,
       timezoneMenu,
       availableTimezones,
       timezonesSelected,
@@ -308,6 +363,7 @@ export default {
       addTimeZone,
       onViewModeChange,
       onWeekdayChange,
+      computed,
     };
   },
 };
@@ -346,6 +402,7 @@ export default {
   .calendar {
     max-width: 100%;
   }
+
   .date-display {
     font-size: 16px;
   }

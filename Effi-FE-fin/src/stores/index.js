@@ -31,6 +31,9 @@ const mutations = {
   SET_DIALOG(state, value) {
     state.dialog = value;
   },
+  SET_EVENT(state, event) {
+    state.event = event;
+  },
   SET_SNACKBAR(state, { message, color, position }) {
     state.snackbar.visible = true;
     state.snackbar.message = message;
