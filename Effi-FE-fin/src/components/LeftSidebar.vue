@@ -68,9 +68,12 @@ const logout = async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100vh; /* 전체 높이 사용 */
+  height: 100vh;
+  /* 전체 높이 사용 */
   background-color: #FBB584;
   padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* 그림자 추가 */
 }
 
 .create-group-button {
@@ -81,11 +84,15 @@ const logout = async () => {
   background-color: white;
   color: #333;
   border: none;
-  border-radius: 50px; /* 원형 모양 */
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  border-radius: 50px;
+  /* 원형 모양 */
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  /* 그림자 효과 */
   cursor: pointer;
-  width: 200px; /* 버튼의 너비 설정 */
-  margin-bottom: 20px; /* 아래쪽 여백 추가 */
+  width: 200px;
+  /* 버튼의 너비 설정 */
+  margin-bottom: 20px;
+  /* 아래쪽 여백 추가 */
 }
 
 .create-group-button:hover {
@@ -120,7 +127,8 @@ const logout = async () => {
 .bottom-content {
   display: flex;
   align-items: center;
-  margin-top: auto; /* 상단 여백을 자동으로 설정하여 하단에 위치 */
+  margin-top: auto;
+  /* 상단 여백을 자동으로 설정하여 하단에 위치 */
 }
 
 .logout-button {
@@ -131,7 +139,8 @@ const logout = async () => {
   border-radius: 10px;
   cursor: pointer;
   margin-left: 10px;
-  margin-right: 20px; /* 오른쪽 여백 추가 */
+  margin-right: 20px;
+  /* 오른쪽 여백 추가 */
 }
 
 .rabbit-image {
