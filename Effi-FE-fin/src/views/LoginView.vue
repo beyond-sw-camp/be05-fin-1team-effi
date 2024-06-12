@@ -44,10 +44,8 @@ const handleLogin = async () => {
     authStore.login(empNo, name, rank, accessToken, refreshToken);
     router.push({ name: 'home' });
   } catch (error) {
-    console.error('Login error:', error);
-    if (error.response && error.response.data) {
-      console.error('Response error data:', error.response.data);
-    }
+    console.error('Login error:', error.response.data.data.msg);
+    
   }
 };
 </script>
