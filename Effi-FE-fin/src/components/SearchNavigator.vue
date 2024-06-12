@@ -95,10 +95,10 @@ const next = () => {
   }
 };
 
-const router = useRouter(); // 추가된 부분
+const router = useRouter(); 
 
-const goToHome = () => { // 추가된 부분
-  router.push({ name: 'home' }); // 추가된 부분
+const goToHome = () => { 
+  router.push({ name: 'home' }); 
 };
 </script>
 
@@ -109,7 +109,7 @@ const goToHome = () => { // 추가된 부분
 }
 
 .form-select.short-select {
-  width: auto;
+  width: 50px;
   padding: 5px;
   margin: 0 10px;
 }
@@ -125,8 +125,6 @@ button.active {
 
 .formatted-period {
   font-size: 1.1rem;
-  /* 글자 크기 확대 */
   font-weight: bold;
-  /* 글자 진하게 */
 }
 </style>

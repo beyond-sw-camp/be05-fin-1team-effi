@@ -21,7 +21,7 @@
           <td>{{ search.title }}</td>
           <td>
             <span v-for="tag in search.tagNames" :key="tag" :style="{ backgroundColor: randomColor() }"
-              class="badge bg-primary me-1">#{{ tag }}</span>
+              class="badge me-1">#{{ tag }}</span>
           </td>
         </tr>
       </tbody>
@@ -108,5 +108,10 @@ export default {
   border-radius: 50%;
   display: inline-block;
   margin-right: 5px;
+}
+
+.badge {
+  color: #000;
+  /* 태그의 글자 색상을 흰색으로 설정 */
 }
 </style>
