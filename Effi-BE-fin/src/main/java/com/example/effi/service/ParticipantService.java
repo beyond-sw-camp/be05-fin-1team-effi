@@ -62,6 +62,12 @@ public class ParticipantService {
         return new ParticipantResponseDTO(parti);
     }
 
+    //select empId && scheduleId
+    public ParticipantResponseDTO findByEmpIdAndScheduleId(Long empId, Long scheduleId) {
+        Participant byEmployeeIdAndScheduleScheduleId = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
+        return new ParticipantResponseDTO(byEmployeeIdAndScheduleScheduleId);
+    }
+
     // delete
     public Long delete(Long participantId){
         Participant participant = participantRepository.findById(participantId).get();
