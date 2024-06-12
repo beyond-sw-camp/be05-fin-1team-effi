@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth.js';
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:8080',
@@ -69,11 +70,9 @@ axiosInstance.interceptors.response.use(
                 }
               })
               .then(response => {
-                console.log(response.headers);
-                console.log('New access token:', response.headers['new-access-token']);
                 const accessToken = response.headers['new-access-token'];
                 sessionStorage.setItem('accessToken', accessToken);
-                console.log('New access token:', accessToken);
+                useAuthStore.accessToken = accessToken;
                 originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
 
                 processQueue(null, accessToken);
