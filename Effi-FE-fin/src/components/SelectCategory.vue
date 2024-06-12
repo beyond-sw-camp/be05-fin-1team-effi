@@ -57,6 +57,7 @@ export default {
         // 선택된 카테고리가 없으면 전체 스케줄을 조회합니다.
         await this.fetchAllSchedules();
       }
+      this.$emit('selectCategory', selectedCategories); // id만 넘겨주기
     },
     async fetchSchedulesForSelectedCategories(categories) {
       const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
@@ -145,6 +146,7 @@ export default {
 
 <style scoped>
 .category-container {
+  background-color: #f7d6c3;
   padding: 10px;
   border-radius: 5px;
   width: 200px;

@@ -9,8 +9,8 @@
 
     <div class="content">
       <div v-if="!isMyPage" class="content">
-          <SelectCategory/>
-          <GroupNameList/>
+        <SelectCategory @update-categories="handleUpdateCategories"/>
+        <GroupNameList/>
       </div>
     </div>
 
@@ -36,6 +36,22 @@ const router = useRouter();
 const authStore = useAuthStore();
 const accessToken = ref(authStore.accessToken);
 const isMyPage = computed(() => route.path === '/mypage');
+export default {
+  components: { CreateGroupModal, SelectCategory, GroupNameList },
+  props: {
+    selectedCategories: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  data() {
+    return {
+      showModal: false,
+    };
+  },
+  setup() {
+    const route = useRoute();
+    const isMyPage = computed(() => route.path === '/mypage');
 
 const closeModal = () => {
   showModal.value = false;
@@ -48,6 +64,15 @@ const logout = async () => {
     router.push({ name: 'login' });
   } catch (error) {
     console.error('Error logging out:', error);
+    return { isMyPage };
+  },
+  methods: {
+    closeModal() {
+      this.showModal = false;
+    },
+    handleUpdateCategories(categories) {
+      this.$emit('update-categories', categories); // 부모 컴포넌트로 선택된 카테고리 ID들을 전달
+    }
   }
 };
 </script>

@@ -80,7 +80,13 @@ export default {
   components: {
     AddScheduleModal,
   },
-  setup() {
+  props: {
+    selectedCategories: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  setup(props) {
     const authStore = useAuthStore();
     authStore.loadSession(); // Ensure session is loaded
 
@@ -107,14 +113,32 @@ export default {
           throw new Error('No access token found');
         }
 
-        const response = await axios.get('/api/schedule/findAll', {
-          headers: {
-            Authorization: `Bearer ${token}`
+        console.log('props', props.selectedCategories);
+        let schedules = [];
+        if (props.selectedCategories.length === 0) {
+          const response = await axios.get('/api/schedule/findAll', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          schedules = response.data;
+        } else {
+          const scheduleResults = [];
+          for (const categoryId of props.selectedCategories) {
+            try {
+              const response = await axios.get(`/api/schedule/find/category/${categoryId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              console.log(`Schedules for category ${categoryId}:`, response.data);
+              scheduleResults.push(...response.data);
+            } catch (error) {
+              console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
+            }
           }
-        });
-
-        const schedules = response.data;
-        console.log('Fetched schedules:', schedules);
+          schedules = scheduleResults;
+        }
 
         if (Array.isArray(schedules)) {
           events.value = schedules.map(schedule => ({
@@ -140,6 +164,7 @@ export default {
         }
       }
     };
+
 
     const fetchTimezones = async () => {
       try {
@@ -191,6 +216,11 @@ export default {
       fetchSchedules();
       fetchTimezones();
       fetchUserTimezones();
+    });
+
+    watch(() => props.selectedCategories, (newCategories) => {
+      console.log('Selected categories changed:', newCategories);
+      fetchSchedules();
     });
 
     const toToday = () => {
@@ -346,6 +376,7 @@ export default {
   .calendar {
     max-width: 100%;
   }
+
   .date-display {
     font-size: 16px;
   }
