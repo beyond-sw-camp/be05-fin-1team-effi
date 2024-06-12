@@ -145,7 +145,6 @@ export default {
 
 <style scoped>
 .category-container {
-  background-color: #f7d6c3;
   padding: 10px;
   border-radius: 5px;
   width: 200px;
