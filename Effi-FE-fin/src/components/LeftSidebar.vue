@@ -9,7 +9,7 @@
 
     <div class="content">
       <div v-if="!isMyPage" class="content">
-        <SelectCategory @update-categories="handleUpdateCategories"/>
+        <SelectCategory @selectCategory="handleUpdateCategories"/>
         <GroupNameList/>
       </div>
     </div>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, defineEmits } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
@@ -30,6 +30,7 @@ import GroupNameList from '@/components/GroupNameList.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 
+const emit = defineEmits(['update-categories']);
 const showModal = ref(false);
 const route = useRoute();
 const router = useRouter();
@@ -43,6 +44,7 @@ const closeModal = () => {
 
 const handleUpdateCategories = (categories) => {
   console.log('Selected categories:', categories);
+  emit('update-categories', categories);
 };
 
 const logout = async () => {

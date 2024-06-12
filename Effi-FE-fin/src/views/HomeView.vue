@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <Navigation class="navigation" />
+    <Navigation @update-categories="handleUpdateCategories" class="navigation" />
     <div class="content">
-      <VCalendar :selectedCategories="selectedCategories" class="calendar" />
+      <VCalendar class="calendar" :selectedCategories="selectedCategories" />
     </div>
   </div>
 </template>
@@ -68,10 +68,12 @@ export default defineComponent({
   .navigation {
     display: none; /* 작은 화면에서는 네비게이션 숨김 */
   }
+
   .content {
     width: 100%;
     padding: 10px;
   }
+
   .calendar {
     width: 100%;
     height: auto;

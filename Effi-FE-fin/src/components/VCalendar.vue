@@ -76,14 +76,14 @@ import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
-import ScheduleModal from './ScheduleModal.vue'; // ScheduleModal을 가져옵니다.
+import ScheduleModal from './ScheduleModal.vue';
 import { useAuthStore } from '@/stores/auth';
 
 dayjs.extend(isBetween);
 
 export default {
   components: {
-    ScheduleModal, // ScheduleModal을 등록합니다.
+    ScheduleModal,
   },
   props: {
     selectedCategories: {
@@ -93,7 +93,7 @@ export default {
   },
   setup(props) {
     const authStore = useAuthStore();
-    authStore.loadSession(); // Ensure session is loaded
+    authStore.loadSession();
 
     const types = ref(['month', 'week', 'day']);
     const type = ref('month');
@@ -122,19 +122,17 @@ export default {
 
     const fetchSchedules = async () => {
       try {
-        console.log('Fetching schedules');
         const token = authStore.accessToken;
         if (!token) {
           throw new Error('No access token found');
         }
 
-        console.log('props', props.selectedCategories);
         let schedules = [];
         if (props.selectedCategories.length === 0) {
           const response = await axios.get('/api/schedule/findAll', {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
           schedules = response.data;
         } else {
@@ -143,10 +141,9 @@ export default {
             try {
               const response = await axios.get(`/api/schedule/find/category/${categoryId}`, {
                 headers: {
-                  Authorization: `Bearer ${token}`
-                }
+                  Authorization: `Bearer ${token}`,
+                },
               });
-              console.log(`Schedules for category ${categoryId}:`, response.data);
               scheduleResults.push(...response.data);
             } catch (error) {
               console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
@@ -156,7 +153,7 @@ export default {
         }
 
         if (Array.isArray(schedules)) {
-          events.value = schedules.map(schedule => ({
+          events.value = schedules.map((schedule) => ({
             id: schedule.id,
             title: schedule.title,
             content: schedule.context,
@@ -164,7 +161,6 @@ export default {
             end: dayjs(schedule.endTime),
             color: 'blue',
           }));
-          console.log('Events:', events.value);
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -182,25 +178,21 @@ export default {
       }
     };
 
-
     const fetchUserTimezones = async () => {
       try {
         const empId = authStore.empNo;
-        console.log('Employee ID:', empId);
         if (!empId) {
           throw new Error('No employee ID found');
         }
         const response = await axios.get(`/api/timezone-emp/${empId}`);
         const userTimezones = response.data.data.timezones;
-        timezonesSelected.value = userTimezones.map(tz => tz.timezoneName);
-        console.log('Fetched user timezones:', userTimezones);
+        timezonesSelected.value = userTimezones.map((tz) => tz.timezoneName);
       } catch (error) {
         console.error('Failed to fetch user timezones:', error);
       }
     };
 
     const openAddScheduleModal = ({ date }) => {
-      console.log('Opening add schedule modal');
       selectedEvent.value = {
         title: '',
         content: '',
@@ -214,7 +206,6 @@ export default {
     };
 
     const openEditScheduleModal = ({ event }) => {
-      console.log('Opening edit schedule modal:', event);
       selectedEvent.value = {
         title: event.title,
         content: event.content,
@@ -231,23 +222,25 @@ export default {
       dialog.value = newVal;
     };
 
-    const currentMonth = computed(() => {
-      return dayjs(calendarValue.value[0]).format('M');
-    });
+    const currentMonth = computed(() => dayjs(calendarValue.value[0]).format('M'));
 
     onMounted(() => {
-      console.log('Component mounted');
       fetchSchedules();
       fetchUserTimezones();
     });
 
+    watch(
+      () => props.selectedCategories,
+      (newCategories) => {
+        fetchSchedules();
+      }
+    );
+
     const toToday = () => {
-      console.log('Setting date to today');
       calendarValue.value = [dayjs()];
     };
 
     const prevPeriod = () => {
-      console.log('Setting date to previous period:', type.value);
       switch (type.value) {
         case 'month':
           calendarValue.value = [dayjs(calendarValue.value[0]).subtract(1, 'month')];
@@ -262,7 +255,6 @@ export default {
     };
 
     const nextPeriod = () => {
-      console.log('Setting date to next period:', type.value);
       switch (type.value) {
         case 'month':
           calendarValue.value = [dayjs(calendarValue.value[0]).add(1, 'month')];
@@ -277,14 +269,12 @@ export default {
     };
 
     const showTimezoneMenu = () => {
-      console.log('Showing timezone menu');
       timezoneMenu.value = true;
     };
 
     const addTimezone = async (timezone) => {
       try {
         const empId = authStore.session?.empNo;
-        console.log('Adding timezone for employee ID:', empId);
         if (!empId) {
           throw new Error('No employee ID found');
         }
@@ -298,7 +288,6 @@ export default {
           timezonesSelected.value.push(timezone.timezoneName);
         }
         timezoneMenu.value = false;
-        console.log('Timezone added:', timezone);
       } catch (error) {
         console.error('Failed to add timezone:', error);
       }
@@ -317,7 +306,6 @@ export default {
     };
 
     watch(type, (newType) => {
-      console.log('Type changed to:', newType);
       switch (newType) {
         case 'month':
           calendarValue.value = [calendarValue.value[0].startOf('month')];
@@ -329,13 +317,6 @@ export default {
           calendarValue.value = [calendarValue.value[0].startOf('day')];
           break;
       }
-      console.log('calendarValue:', calendarValue.value);
-    });
-
-    onMounted(() => {
-      console.log('Component mounted');
-      fetchSchedules();
-      fetchUserTimezones();
     });
 
     return {
@@ -363,7 +344,6 @@ export default {
       addTimeZone,
       onViewModeChange,
       onWeekdayChange,
-      computed,
     };
   },
 };
