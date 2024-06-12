@@ -2,10 +2,12 @@
     <div class="pa-4 text-center">
       <v-dialog v-model="dialog" max-width="600">
         <template v-slot:activator="{ props: activatorProps }">
-          <button
-          class="update-button"
-          v-bind="activatorProps"
-        >태그 추가하기</button>
+          <v-btn
+            class="text-none font-weight-regular"
+            text="Tags"
+            variant="tonal"
+            v-bind="activatorProps"
+          ></v-btn>
         </template>
   
         <v-card>
@@ -29,7 +31,6 @@
                     </v-text-field>
                   </v-col>
                 </v-row>
-                <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
                 <v-row>
                   <v-col>
                     <div class="chip-wrapper">
@@ -37,10 +38,9 @@
                         v-for="(tag, index) in tags"
                         :key="index"
                         close
-                        :style="{ backgroundColor: tag.color }"
-                        @click="removeTag(index)"
+                        @click:close="removeTag(index)"
                       >
-                        {{ tag.name }}
+                        {{ tag }}
                       </v-chip>
                     </div>
                   </v-col>
@@ -59,7 +59,6 @@
                       <v-chip
                         v-for="(tag, index) in aiResponseTags"
                         :key="index"
-                        :style="{ backgroundColor: getRandomColor() }"
                         @click="addTagFromAi(tag)"
                       >
                         {{ tag }}
@@ -97,32 +96,18 @@
       const newTag = ref('');
       const tags = ref([]);
       const aiResponseTags = ref([]);
-      const errorMessage = ref('');
   
       const addTag = () => {
-        errorMessage.value = '';
-        const trimmedTag = newTag.value.trim();
-        if (trimmedTag !== '' && !tags.value.some(tag => tag.name === trimmedTag)) {
-          tags.value.push({ name: trimmedTag, color: getRandomFluorescentColor() });
+        if (newTag.value.trim() !== '') {
+          tags.value.push(newTag.value.trim());
           newTag.value = '';
           emitTags();
-        } else {
-          errorMessage.value = '중복된 태그입니다';
-          newTag.value = '';
         }
       };
-        
+  
       const removeTag = (index) => {
         tags.value.splice(index, 1);
         emitTags();
-      };
-
-      const removeTagByName = (tag) => {
-        const index = tags.value.indexOf(tag);
-        if (index !== -1) {
-          tags.value.splice(index, 1);
-          emitTags();
-        }
       };
   
       const addTagFromAi = (tag) => {
@@ -150,33 +135,6 @@
           console.error('Error fetching AI tags:', error);
         }
       };
-
-      const getRandomFluorescentColor = () => {
-        const fluorescentColors = [
-          '#CCFF00', // Fluorescent Chartreuse
-          '#FFFF00', // Fluorescent Yellow
-          '#00FF00', // Fluorescent Green
-          '#00FFFF', // Fluorescent Cyan
-          '#FF00FF', // Fluorescent Magenta
-          '#FF1493', // Deep Pink
-          '#FF4500', // Orange Red
-          '#FF6347', // Tomato
-          '#FFD700', // Gold
-          '#ADFF2F', // Green Yellow
-          '#7CFC00', // Lawn Green
-          '#32CD32', // Lime Green
-          '#98FB98', // Pale Green
-          '#00FF7F', // Spring Green
-          '#00FA9A', // Medium Spring Green
-          '#40E0D0', // Turquoise
-          '#20B2AA', // Light Sea Green
-          '#00CED1', // Dark Turquoise
-          '#1E90FF', // Dodger Blue
-          '#FF69B4', // Hot Pink
-          '#FFB6C1', // Light Pink
-        ];
-        return fluorescentColors[Math.floor(Math.random() * fluorescentColors.length)];
-      };
   
       return {
         dialog,
@@ -187,8 +145,6 @@
         aiTags,
         aiResponseTags,
         addTagFromAi,
-        errorMessage,
-        getRandomFluorescentColor,
       };
     }
   };
@@ -205,20 +161,4 @@
     box-sizing: border-box;
     cursor: pointer; /* 클릭 가능한 요소로 변경 */
   }
-  .update-button {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #FBB584;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-
-  .error-message {
-    color: red;
-    margin-top: 10px;
-  }
 </style>
-  
