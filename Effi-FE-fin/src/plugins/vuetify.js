@@ -4,6 +4,10 @@ import '@mdi/font/css/materialdesignicons.css'; // MDI 아이콘 CSS 포함
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import { VCalendar } from 'vuetify/labs/VCalendar';
+import { VTimePicker } from 'vuetify/labs/VTimePicker'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'; // MDI 아이콘 세트를 가져옵니다.
+
+
 import dayjs from './dayjs';
 import DayjsUtils from '@date-io/dayjs';
 import DayJsAdapter from '@date-io/dayjs'
@@ -34,12 +38,18 @@ export default createVuetify({
   components: {
     ...components,
     VCalendar,
+    VTimePicker
   },
   directives,
   icons: {
     defaultSet: 'mdi', // MDI 아이콘 세트 사용
+    aliases,
+    sets: {
+      mdi,
+    },
   },
   date: {
     adapter: DayJsAdapter, dateAdapter
   },
+  
 });
