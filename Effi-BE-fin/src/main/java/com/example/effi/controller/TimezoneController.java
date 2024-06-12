@@ -78,5 +78,6 @@ public class TimezoneController {
         GlobalResponse<?> response = timezoneService.deleteTimezone(timezoneId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
 
 }
