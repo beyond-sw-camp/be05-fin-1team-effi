@@ -15,38 +15,41 @@
     </div>
 
     <div class="bottom-content">
-      <button class="logout-button">Logout</button>
+      <button class="logout-button" @click="logout">Logout</button>
       <img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image">
     </div>
   </div>
 </template>
 
-<script>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup>
+import { ref, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList.vue';
+import { useAuthStore } from '@/stores/auth';
+import axiosInstance from '@/services/axios';
 
-export default {
-  components: { CreateGroupModal, SelectCategory, GroupNameList },
-  data() {
-    return {
-      showModal: false,
-    };
-  },
-  setup() {
-    const route = useRoute();
-    const isMyPage = computed(() => route.path === '/mypage');
+const showModal = ref(false);
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const accessToken = ref(authStore.accessToken);
+const isMyPage = computed(() => route.path === '/mypage');
 
-    return { isMyPage };
-  },
-  methods: {
-    closeModal() {
-      this.showModal = false;
-    }
+const closeModal = () => {
+  showModal.value = false;
+};
+
+const logout = async () => {
+  try {
+    await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
+    authStore.logout();
+    router.push({ name: 'login' });
+  } catch (error) {
+    console.error('Error logging out:', error);
   }
-}
+};
 </script>
 
 <style scoped>
