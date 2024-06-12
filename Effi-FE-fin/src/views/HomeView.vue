@@ -2,20 +2,32 @@
   <div class="container">
     <Navigation class="navigation" />
     <div class="content">
-      <VCalendar class="calendar" />
+      <VCalendar :selectedCategories="selectedCategories" class="calendar" />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import Navigation from '@/components/LeftSidebar.vue';
 import VCalendar from '@/components/VCalendar.vue';
 
 export default defineComponent({
   components: {
     Navigation,
-    VCalendar,
+    VCalendar
+  },
+  setup() {
+    const selectedCategories = ref([]);
+
+    const handleUpdateCategories = (categories) => {
+      selectedCategories.value = categories;
+    };
+
+    return {
+      selectedCategories,
+      handleUpdateCategories,
+    };
   },
 });
 </script>
