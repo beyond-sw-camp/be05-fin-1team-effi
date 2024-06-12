@@ -15,19 +15,27 @@
     </div>
 
     <div class="bottom-content">
-      <button class="logout-button">Logout</button>
+      <button class="logout-button" @click="logout">Logout</button>
       <img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image">
     </div>
   </div>
 </template>
 
-<script>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup>
+import { ref, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList.vue';
+import { useAuthStore } from '@/stores/auth';
+import axiosInstance from '@/services/axios';
 
+const showModal = ref(false);
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const accessToken = ref(authStore.accessToken);
+const isMyPage = computed(() => route.path === '/mypage');
 export default {
   components: { CreateGroupModal, SelectCategory, GroupNameList },
   props: {
@@ -45,6 +53,17 @@ export default {
     const route = useRoute();
     const isMyPage = computed(() => route.path === '/mypage');
 
+const closeModal = () => {
+  showModal.value = false;
+};
+
+const logout = async () => {
+  try {
+    await axiosInstance.post('/api/auth/signout', { token: accessToken.value });
+    authStore.logout();
+    router.push({ name: 'login' });
+  } catch (error) {
+    console.error('Error logging out:', error);
     return { isMyPage };
   },
   methods: {
@@ -55,7 +74,7 @@ export default {
       this.$emit('update-categories', categories); // 부모 컴포넌트로 선택된 카테고리 ID들을 전달
     }
   }
-}
+};
 </script>
 
 <style scoped>

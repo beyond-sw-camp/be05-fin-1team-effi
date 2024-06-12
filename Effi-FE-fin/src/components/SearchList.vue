@@ -1,7 +1,7 @@
 <template>
   <div>
-    <table class="search-table">
-      <thead>
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
         <tr>
           <th class="date">날짜</th>
           <th class="category">카테고리</th>
@@ -20,8 +20,8 @@
           <td><span :class="getStatusClass(search.status)">{{ getStatus(search.status) }}</span></td>
           <td>{{ search.title }}</td>
           <td>
-            <span v-for="tag in search.tagNames" :key="tag" :style="{ backgroundColor: randomColor() }" class="tag">{{
-              '#' + tag }}</span>
+            <span v-for="tag in search.tagNames" :key="tag" :style="{ backgroundColor: randomColor() }"
+              class="badge bg-primary me-1">#{{ tag }}</span>
           </td>
         </tr>
       </tbody>
@@ -51,13 +51,13 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 0:
-          return 'status-planned';
+          return 'badge bg-info text-dark';
         case 1:
-          return 'status-in-progress';
+          return 'badge bg-warning text-dark';
         case 2:
-          return 'status-completed';
+          return 'badge bg-success';
         default:
-          return '';
+          return 'badge bg-secondary';
       }
     },
     randomColor() {
@@ -83,84 +83,26 @@ export default {
 </script>
 
 <style scoped>
-.search-table {
+.table {
   width: 100%;
   table-layout: fixed;
   /* 테이블 너비 고정 */
-  border-collapse: collapse;
 }
 
-.search-table th,
-.search-table td {
+.table th,
+.table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
 }
 
-.search-table th {
+.table th {
   background-color: #f4f4f4;
   color: #333399;
   text-align: center;
 }
 
-/* 열 너비 조정 */
-.search-table th.date,
-.search-table td.date {
-  width: 15%;
-}
-
-.search-table th.category,
-.search-table td.category {
-  width: 10%;
-}
-
-.search-table th.status,
-.search-table td.status {
-  width: 10%;
-}
-
-.search-table th.title,
-.search-table td.title {
-  width: 35%;
-}
-
-.search-table th.tags,
-.search-table td.tags {
-  width: 30%;
-}
-
-.tag {
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin-right: 5px;
-  display: inline-block;
-}
-
-.status-planned {
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin-right: 5px;
-  background-color: #b3e5fc;
-  display: inline-block;
-}
-
-.status-in-progress {
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin-right: 5px;
-  background-color: #ccff90;
-  display: inline-block;
-}
-
-.status-completed {
-  border-radius: 3px;
-  padding: 2px 5px;
-  margin-right: 5px;
-  background-color: #ffab91;
-  display: inline-block;
-}
-
-.category-dot {
+.table .category-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;

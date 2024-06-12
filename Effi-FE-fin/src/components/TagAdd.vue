@@ -15,7 +15,7 @@
             <v-row>
               <v-col>
                 <v-row dense>
-                  <v-col cols="12" md="4" sm="12">
+                  <v-col sm="12">
                     <v-text-field
                       v-model="newTag"
                       label="태그를 입력하세요"

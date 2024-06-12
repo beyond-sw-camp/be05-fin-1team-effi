@@ -1,15 +1,15 @@
 <!-- app.vue -->
 <template>
   <div id="app">
-    <AppHeader v-if="showHeader" />
-    <div class="content">
+    <AppHeader v-if="showHeader" @search-results="handleSearchResults" />
+    <div class="content" :search-results="searchResults">
       <router-view />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { ref, defineComponent, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppHeader from '@/components/HomeHeader.vue';
 
@@ -19,10 +19,17 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test' && route.name != 'search');
+    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test');
+    const searchResults = ref([]);
+
+    const handleSearchResults = (results) => { 
+      searchResults.value = results;
+    };
 
     return {
       showHeader,
+      searchResults, 
+      handleSearchResults,
     };
   },
 });
