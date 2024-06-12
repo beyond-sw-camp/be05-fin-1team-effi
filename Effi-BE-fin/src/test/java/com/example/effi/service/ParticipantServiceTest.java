@@ -89,7 +89,7 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
-        scheduleRequest.setCategoryId(categoryId);
+    
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
@@ -147,7 +147,7 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
-        scheduleRequest.setCategoryId(1L);
+ 
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
@@ -185,7 +185,6 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
-        scheduleRequest.setCategoryId(categoryId);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();

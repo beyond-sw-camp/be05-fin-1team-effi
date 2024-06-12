@@ -48,7 +48,6 @@ public class GroupEmpRepositoryTest {
         testGroup = Group.builder()
                 .groupName("Test Group")
                 .deleteYn(false)
-                .category(category)
                 .build();
         entityManager.persist(testGroup);
 

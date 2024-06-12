@@ -79,14 +79,13 @@ class GroupServiceTest {
         Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder()
                 .groupName("Example Group")
-                .category(category)
                 .deleteYn(false)
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .build();
         Employee creator = Employee.builder().empNo(1L).build();
         Employee employee2 = Employee.builder().empNo(2L).build();
         Employee employee3 = Employee.builder().empNo(3L).build();
-        Group savedGroup = Group.builder().groupId(1L).groupName("Example Group").category(category).build();
+        Group savedGroup = Group.builder().groupId(1L).groupName("Example Group").build();
 
         // Mock behavior
         when(authentication.getName()).thenReturn("1");
@@ -166,7 +165,7 @@ class GroupServiceTest {
         Long groupId = 1L;
         List<Long> employeeIds = Arrays.asList(2L, 3L);
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).category(category).build();
+        Group group = Group.builder().groupId(groupId).build();
         Employee employee1 = Employee.builder().empNo(2L).build();
         Employee employee2 = Employee.builder().empNo(3L).build();
 
@@ -192,7 +191,7 @@ class GroupServiceTest {
         Long groupId = 1L;
         List<Long> employeeIds = Arrays.asList(2L, 2L);
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).category(category).build();
+        Group group = Group.builder().groupId(groupId).build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
@@ -235,8 +234,8 @@ class GroupServiceTest {
         Long groupId = 1L;
         String newGroupName = "Updated Group Name";
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).groupName("Old Group Name").category(category).build();
-        Group updatedGroup = Group.builder().groupId(groupId).groupName(newGroupName).category(category).build();
+        Group group = Group.builder().groupId(groupId).groupName("Old Group Name").build();
+        Group updatedGroup = Group.builder().groupId(groupId).groupName(newGroupName).build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
@@ -262,9 +261,9 @@ class GroupServiceTest {
         Long groupId = 1L;
         String newGroupName = "Updated Group Name";
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).groupName("Old Group Name").category(category).deleteYn(false)
+        Group group = Group.builder().groupId(groupId).groupName("Old Group Name").deleteYn(false)
                 .build();
-        Group groupWithSameName = Group.builder().groupId(2L).groupName(newGroupName).category(category).deleteYn(false)
+        Group groupWithSameName = Group.builder().groupId(2L).groupName(newGroupName).deleteYn(false)
                 .build();
 
         // Mock behavior
@@ -308,7 +307,7 @@ class GroupServiceTest {
         Long groupId = 1L;
         Long empId = 2L;
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).groupName("Example Group").category(category).build();
+        Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
@@ -355,7 +354,7 @@ class GroupServiceTest {
         Long groupId = 1L;
         Long empId = 2L;
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).groupName("Example Group").category(category).build();
+        Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
@@ -383,7 +382,7 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).category(category).build();
+        Group group = Group.builder().groupId(groupId).build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
@@ -517,8 +516,8 @@ class GroupServiceTest {
     void findAllGroups_success() {
         // Given
         Category category = Category.builder().categoryName("그룹").build();
-        Group group1 = Group.builder().groupId(1L).groupName("Example Group 1").category(category).build();
-        Group group2 = Group.builder().groupId(2L).groupName("Example Group 2").category(category).build();
+        Group group1 = Group.builder().groupId(1L).groupName("Example Group 1").build();
+        Group group2 = Group.builder().groupId(2L).groupName("Example Group 2").build();
 
         // Mock behavior
         when(groupRepository.findAll()).thenReturn(Arrays.asList(group1, group2));
@@ -542,7 +541,7 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Category category = Category.builder().categoryName("그룹").build();
-        Group group = Group.builder().groupId(groupId).groupName("Example Group").category(category).build();
+        Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));

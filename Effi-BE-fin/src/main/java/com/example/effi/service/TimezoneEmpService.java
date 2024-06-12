@@ -2,7 +2,7 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.domain.DTO.TimezoneDTO;
-import com.example.effi.domain.DTO.TimezoneEmpDTO;
+import com.example.effi.domain.DTO.DefaultTimezoneDTO;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.domain.Entity.TimezoneEmp;
@@ -136,11 +136,16 @@ public class TimezoneEmpService {
             throw new IllegalStateException("모든 직원은 하나의 기본 타임존을 가져야 합니다.");
         }
     }
-    // 기본 시간대 조회
-    public TimezoneEmpDTO getDefaultTimezoneForEmployee(Long empId) {
-        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmpIdAndDefaultTimezone(empId)
-                .orElseThrow(() -> new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + empId));
+    // defaulttimezonedto를 사용해서기본 타임존 이름까지 함께 리턴
+    @Transactional(readOnly = true)
+    public DefaultTimezoneDTO getDefaultTimezoneForEmployee(Long empId) {
+        TimezoneEmp timezoneEmp = timezoneEmpRepository.findByEmployeeIdAndDefaultTimezone(empId, true)
+                .orElseThrow(() -> new IllegalArgumentException("직원에게 기본 타임존이 존재하지 않습니다."));
 
-        return new TimezoneEmpDTO(timezoneEmp.getTimezoneEmpId(), timezoneEmp.getTimezone(), timezoneEmp.getEmployee(), timezoneEmp.getDefaultTimezone());
+        return DefaultTimezoneDTO.builder()
+                .timezoneId(timezoneEmp.getTimezone().getTimezoneId())
+                .timezoneName(timezoneEmp.getTimezone().getTimezoneName())
+                .build();
     }
+    
 }
