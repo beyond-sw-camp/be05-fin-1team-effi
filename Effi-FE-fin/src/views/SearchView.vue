@@ -167,7 +167,6 @@ const toggleStatusSort = () => {
 
 .navigation {
   flex: 0 0 250px;
-  background-color: #FBB584;
 }
 
 .content {
