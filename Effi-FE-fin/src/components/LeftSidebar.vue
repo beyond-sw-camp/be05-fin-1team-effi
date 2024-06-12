@@ -6,18 +6,40 @@
       <span class="dropdown-icon">▼</span>
     </button>
     <CreateGroupModal :show="showModal" @close="closeModal" />
+
+    <div class="content">
+      <div v-if="!isMyPage" class="content">
+          <SelectCategory/>
+          <GroupNameList/>
+      </div>
+    </div>
+
+    <div class="bottom-content">
+      <button class="logout-button">Logout</button>
+      <img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image">
+    </div>
   </div>
 </template>
 
 <script>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
+import SelectCategory from '@/components/SelectCategory.vue';
+import GroupNameList from '@/components/GroupNameList.vue';
 
 export default {
-  components: { CreateGroupModal },
+  components: { CreateGroupModal, SelectCategory, GroupNameList },
   data() {
     return {
       showModal: false,
     };
+  },
+  setup() {
+    const route = useRoute();
+    const isMyPage = computed(() => route.path === '/mypage');
+
+    return { isMyPage };
   },
   methods: {
     closeModal() {
@@ -29,6 +51,10 @@ export default {
 
 <style scoped>
 .left-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh; /* 전체 높이 사용 */
   background-color: #FBB584;
   padding: 20px;
 }
@@ -45,6 +71,7 @@ export default {
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
   cursor: pointer;
   width: 200px; /* 버튼의 너비 설정 */
+  margin-bottom: 20px; /* 아래쪽 여백 추가 */
 }
 
 .create-group-button:hover {
@@ -67,5 +94,34 @@ export default {
 .dropdown-icon {
   font-size: 12px;
   margin-left: 10px;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.bottom-content {
+  display: flex;
+  align-items: center;
+  margin-top: auto; /* 상단 여백을 자동으로 설정하여 하단에 위치 */
+}
+
+.logout-button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: 10px;
+  margin-right: 20px; /* 오른쪽 여백 추가 */
+}
+
+.rabbit-image {
+  width: 100px;
+  height: auto;
 }
 </style>

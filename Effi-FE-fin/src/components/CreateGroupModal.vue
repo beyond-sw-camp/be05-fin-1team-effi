@@ -21,9 +21,9 @@
       <div v-if="selectedEmployees.length" class="selected-employees">
         <p>선택된 사원:</p>
         <ul>
-          <li v-for="emp in selectedEmployees" :key="emp.empNo">
-            {{ emp.name }}
-            <button @click="removeEmployee(emp.empNo)" class="remove-button">×</button>
+          <li v-for="employee in selectedEmployees" :key="employee.empNo">
+            {{ employee.name }}/{{ employee.deptName }}/{{ employee.rank }}
+            <button @click="removeEmployee(employee.empNo)" class="remove-button">×</button>
           </li>
         </ul>
       </div>
