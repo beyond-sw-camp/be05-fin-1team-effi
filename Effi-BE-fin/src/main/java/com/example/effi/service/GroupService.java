@@ -54,7 +54,6 @@ public class GroupService {
 
         Group group = Group.builder()
                 .groupName(groupRequestDTO.getGroupName())
-                .category(category)
                 .deleteYn(false)
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .build();
