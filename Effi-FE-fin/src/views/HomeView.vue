@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <Navigation @update-categories="handleUpdateCategories" class="navigation" />
+    <Navigation @update-categories="handleUpdateCategories"  @update-groups="handleUpdateGroups" class="navigation" />
     <div class="content">
-      <VCalendar class="calendar" :selectedCategories="selectedCategories" />
+      <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId" />
     </div>
   </div>
 </template>
@@ -19,14 +19,21 @@ export default defineComponent({
   },
   setup() {
     const selectedCategories = ref([]);
+    const selectedGroupId = ref([]);
 
     const handleUpdateCategories = (categories) => {
       selectedCategories.value = categories;
     };
 
+    const handleUpdateGroups = (groups) => {
+      selectedGroupId.value = groups;
+    }
+
     return {
       selectedCategories,
       handleUpdateCategories,
+      selectedGroupId,
+      handleUpdateGroups
     };
   },
 });

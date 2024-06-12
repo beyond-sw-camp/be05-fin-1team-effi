@@ -61,7 +61,7 @@ public class ScheduleService {
         return schedules;
     }
 
-    // empId & categoryId로 조회
+    // empId & categoryId로 조회 - 기존 categoryId
     public List<ScheduleResponseDTO> getSchedulesByCategory(Long categoryId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long creatorEmpNo = Long.valueOf(authentication.getName());
@@ -77,9 +77,19 @@ public class ScheduleService {
         return res;
     }
 
+    // categoryNo로 조회 (category pk)
+    public List<ScheduleResponseDTO> getSchedulesByCategoryNo(Long categoryNo) {
+        List<Schedule> allByCategoryCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+        List<ScheduleResponseDTO> res = new ArrayList<>();
+        for (Schedule sch : allByCategoryCategoryNo) {
+            res.add(new ScheduleResponseDTO(sch));
+        }
+        return res;
+    }
+
     // add schedule
     public ScheduleResponseDTO addSchedule(ScheduleRequestDTO scheduleRequestDTO) {
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).orElse(null);
+        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryNo()).orElse(null);
         if (scheduleRequestDTO.getRoutineId() != null){
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
@@ -94,7 +104,7 @@ public class ScheduleService {
         Long creatorEmpNo = Long.valueOf(authentication.getName());
         Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
 
-        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryId()).orElse(null);
+        Category category = categoryRepository.findById(scheduleResponseDTO.getCategoryNo()).orElse(null);
         Schedule schedule = scheduleRepository.findById(scheduleResponseDTO.getScheduleId()).orElse(null);
         Routine routine = null;
 
@@ -157,7 +167,7 @@ public class ScheduleService {
             newScheduleRequest.setDeleteYn(scheduleResponseDTO.getDeleteYn());
             newScheduleRequest.setCreatedAt(scheduleResponseDTO.getCreatedAt());
             newScheduleRequest.setUpdatedAt(scheduleResponseDTO.getUpdatedAt());
-            newScheduleRequest.setCategoryId(scheduleResponseDTO.getCategoryId());
+            newScheduleRequest.setCategoryNo(scheduleResponseDTO.getCategoryNo());
             newScheduleRequest.setRoutineId(scheduleResponseDTO.getRoutineId());
 
             Schedule scheduleTmp = newScheduleRequest.toEntity(category, routine);
@@ -177,7 +187,7 @@ public class ScheduleService {
     // update schedule
     public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryId()).get();
+        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryNo()).get();
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
@@ -213,7 +223,6 @@ public class ScheduleService {
     // delete schedule
     public void deleteSchedule(Long scheduleId) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
-//        Schedule sch = scheduleRepository.findById(scheduleId).get();
         if (sch == null || sch.getDeleteYn() == true) {
             throw new IllegalArgumentException("Schedule not found with ID: " + scheduleId);
         }

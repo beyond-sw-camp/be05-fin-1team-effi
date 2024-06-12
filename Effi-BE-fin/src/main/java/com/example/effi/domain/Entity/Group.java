@@ -22,10 +22,6 @@ public class Group {
     @Column(name = "group_name", nullable = false)
     private String groupName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
     @Column(name = "delete_yn", nullable = false)
     private Boolean deleteYn;
 
@@ -36,11 +32,10 @@ public class Group {
     private Date updatedAt;
 
     @Builder(toBuilder = true)
-    public Group(Long groupId, String groupName, Boolean deleteYn, Category category, Date createdAt, Date updatedAt) {
+    public Group(Long groupId, String groupName, Boolean deleteYn, Date createdAt, Date updatedAt) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.deleteYn = deleteYn;
-        this.category = category;
         this.createdAt = createdAt != null ? createdAt : Date.valueOf(LocalDate.now());
         this.updatedAt = updatedAt;
     }

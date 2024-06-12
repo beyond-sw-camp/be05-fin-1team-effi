@@ -74,6 +74,7 @@
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
+import axiosInstance from '@/services/axios';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import ScheduleModal from './ScheduleModal.vue';
@@ -131,9 +132,11 @@ export default {
           throw new Error('No access token found');
         }
 
+        console.log('in vcalendar', props.selectedGroupId);
+
         let schedules = [];
         if (props.selectedCategories.length === 0 && props.selectedGroupId.length === 0) {
-          const response = await axios.get('/api/schedule/findAll', {
+          const response = await axiosInstance.get('/api/schedule/findAll', {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -143,7 +146,7 @@ export default {
           const scheduleResults = [];
           for (const categoryId of props.selectedCategories) {
             try {
-              const response = await axios.get(`/api/schedule/find/category/${categoryId}`, {
+              const response = await axiosInstance.get(`/api/schedule/find/category/${categoryId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -158,15 +161,14 @@ export default {
           const scheduleResults = [];
           for (const groupId of props.selectedGroupId) {
             try {
-              // uri 수정하기
-              const response = await axios.get(`/api/schedule/find/category/${groupId}`, {
+              const response = await axiosInstance.get(`/api/schedule/find/group/${groupId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
               });
               scheduleResults.push(...response.data);
             } catch (error) {
-              console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
+              console.error(`Error fetching schedules for groupId ${groupId}:`, error);
             }
           }
           schedules = scheduleResults;
@@ -250,10 +252,11 @@ export default {
     });
 
     watch(
-      () => props.selectedCategories,
-      (newCategories) => {
+      () => [props.selectedCategories, props.selectedGroupId],
+      (newValues) => {
         fetchSchedules();
-      }
+      },
+      { deep: true }
     );
 
     const toToday = () => {
