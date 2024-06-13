@@ -33,6 +33,7 @@ public class ScheduleService {
     private final ParticipantRepository participantRepository;
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
+    private final CategoryService categoryService;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -228,6 +229,21 @@ public class ScheduleService {
         }
         sch.delete();
         scheduleRepository.save(sch);
+    }
+
+    // group나갔을때 그 그룹에 해당하는 스케줄 삭제
+    public List<ScheduleResponseDTO> deleteGroupSchedule(Long groupId){
+        CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+        Long categoryNo = byGroupId.getCategoryNo();
+        List<Schedule> allByCategortyCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+
+        List<ScheduleResponseDTO> res = new ArrayList<>();
+        for (Schedule sch : allByCategortyCategoryNo) {
+            sch.delete();
+            scheduleRepository.save(sch);
+            res.add(new ScheduleResponseDTO(sch));
+        }
+        return res;
     }
 
 }

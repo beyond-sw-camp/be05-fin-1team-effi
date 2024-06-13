@@ -208,4 +208,11 @@ public class ScheduleController {
         }
     }
 
+    //그룹 탈퇴시 그룹 스케줄 삭제
+    @PutMapping("/delete/groupSchedule/{groupId}")
+    public ResponseEntity<?> deleteGroupSchedule(@PathVariable("groupId") Long groupId){
+        List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.deleteGroupSchedule(groupId);
+        return ResponseEntity.ok(scheduleResponseDTOS);
+    }
+
 }
