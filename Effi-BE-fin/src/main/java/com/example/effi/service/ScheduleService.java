@@ -33,6 +33,8 @@ public class ScheduleService {
     private final ParticipantRepository participantRepository;
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
+    private final CategoryService categoryService;
+    private final RoutineService routineService;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -209,6 +211,7 @@ public class ScheduleService {
         }
         Routine routine = routineRepository.findById(routineId).orElse(null);
         if (routine == null || routine.getDeleteYn() == true) {
+            // 루틴 삭제시 하나만 스케줄 하나에 해당하는 루틴만 삭제
             sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                     sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
                     sch.getCategory(), null);
@@ -217,7 +220,9 @@ public class ScheduleService {
         sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                 sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
                 sch.getCategory(), routine);
-        return new ScheduleResponseDTO(scheduleRepository.save(sch));
+        ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(scheduleRepository.save(sch));
+        addRoutineSchedule(scheduleResponseDTO);
+        return scheduleResponseDTO;
     }
 
     // delete schedule
@@ -228,6 +233,21 @@ public class ScheduleService {
         }
         sch.delete();
         scheduleRepository.save(sch);
+    }
+
+    // group나갔을때 그 그룹에 해당하는 스케줄 삭제
+    public List<ScheduleResponseDTO> deleteGroupSchedule(Long groupId){
+        CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+        Long categoryNo = byGroupId.getCategoryNo();
+        List<Schedule> allByCategortyCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+
+        List<ScheduleResponseDTO> res = new ArrayList<>();
+        for (Schedule sch : allByCategortyCategoryNo) {
+            sch.delete();
+            scheduleRepository.save(sch);
+            res.add(new ScheduleResponseDTO(sch));
+        }
+        return res;
     }
 
 }
