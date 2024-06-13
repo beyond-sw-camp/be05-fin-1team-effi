@@ -26,7 +26,7 @@
 import { ref, onMounted, defineEmits } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 
 const router = useRouter();
 
@@ -56,7 +56,7 @@ const search = async () => {
   }
 
   try {
-    const response = await axios.get(url, {
+    const response = await axiosInstance.get(url, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
