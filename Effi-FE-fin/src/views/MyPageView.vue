@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 import Navigation from '@/components/LeftSidebar.vue';
 
 export default {
@@ -91,7 +91,7 @@ export default {
     async fetchMyPage() {
       const accessToken = sessionStorage.getItem('accessToken');
       try {
-        const response = await axios.get('http://localhost:8080/api/mypage/me', {
+        const response = await axiosInstance.get('/api/mypage/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -104,7 +104,7 @@ export default {
     },
     async fetchTimezones() {
       try {
-        const response = await axios.get('http://localhost:8080/api/mypage/timezones');
+        const response = await axiosInstance.get('/api/mypage/timezones');
         this.timezones = response.data;
       } catch (error) {
         console.error('시간대 목록을 불러오는 중 오류가 발생했습니다:', error);
@@ -113,7 +113,7 @@ export default {
     async updateTimezone() {
       const accessToken = sessionStorage.getItem('accessToken');
       try {
-        const response = await axios.put('http://localhost:8080/api/mypage/update', {
+        const response = await axiosInstance.put('/api/mypage/update', {
           timezoneId: this.timezoneId,
         }, {
           headers: {
@@ -182,9 +182,7 @@ export default {
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-  margin-left:
-  
-  10px;
+  margin-left: 10px;
 }
 
 @media (max-width: 768px) {

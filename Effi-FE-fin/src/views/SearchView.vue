@@ -24,7 +24,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import Navigation from '@/components/LeftSidebar.vue';
@@ -32,7 +31,7 @@ import SearchNavigator from '../components/SearchNavigator.vue';
 import SearchList from '../components/SearchList.vue';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 import { useAuthStore } from '@/stores/auth';
 
 const searches = ref([]);
@@ -90,7 +89,7 @@ const fetchTimezone = async () => {
     return;
   }
   try {
-    const response = await axios.get('http://localhost:8080/api/mypage/me', {
+    const response = await axiosInstance.get('/api/mypage/me', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -104,7 +103,7 @@ const fetchTimezone = async () => {
 onMounted(() => {
   if (route.query.criterion && route.query.query) {
     search(route.query.criterion, route.query.query);
-    fetchTimezone(); 
+    fetchTimezone();
   }
 });
 
@@ -119,7 +118,7 @@ const search = async (criterion, query) => {
   }
 
   try {
-    const response = await axios.get(url, {
+    const response = await axiosInstance.get(url, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }

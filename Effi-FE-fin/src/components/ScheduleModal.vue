@@ -103,8 +103,8 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from 'vue';
+import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
 import TagApp from './TagAdd.vue';
 import RoutineModal from './RoutineModal.vue';
@@ -175,7 +175,7 @@ export default {
 
     const fetchDefaultTimezone = async (empId) => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/timezone-emp/${empId}/default`);
+        const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
         console.log('API response:', response.data); // 전체 응답 데이터 로깅
         const defaultTimezone = response.data.data;
         if (defaultTimezone) {
@@ -284,10 +284,10 @@ export default {
         }
       };
       try {
-        const response = await axios.get(`http://localhost:8080/api/groups/search?name=${searchQuery.value}`, config);
+        const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
         const employees = response.data;
         for (let employee of employees) {
-          const deptResponse = await axios.get(`http://localhost:8080/api/search/dept/${employee.deptId}`, config);
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
           employee.deptName = deptResponse.data;
         }
         searchResults.value = employees;

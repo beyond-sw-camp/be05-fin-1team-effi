@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 import { ref } from 'vue';
 
 export default {
@@ -52,7 +52,7 @@ export default {
 
     const submitRoutine = async () => {
       try {
-        const response = await axios.post('http://localhost:8080/api/routine/add', {
+        const response = await axiosInstance.post('/api/routine/add', {
           routineStart: routineStart.value,
           routineEnd: routineEnd.value,
           routineCycle: routineCycle.value

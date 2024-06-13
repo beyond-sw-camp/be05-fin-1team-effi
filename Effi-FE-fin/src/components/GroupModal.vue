@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axiosInstance from '@/services/axios';
 
 export default {
   props: {
@@ -41,7 +41,7 @@ export default {
         }
       };
       try {
-        const response = await axios.get('http://localhost:8080/api/groups/find/myGroup', config);
+        const response = await axiosInstance.get('/api/groups/find/myGroup', config);
         this.groups = response.data;
       } catch (error) {
         console.error('부서 검색 오류:', error.response ? error.response.data : error.message);
