@@ -37,10 +37,9 @@
                         v-for="(tag, index) in tags"
                         :key="index"
                         close
-                        :style="{ backgroundColor: tag.color }"
                         @click="removeTag(index)"
                       >
-                        {{ tag.name }}
+                        {{ tag }}
                       </v-chip>
                     </div>
                   </v-col>
@@ -84,7 +83,7 @@
 </template>
   
 <script>
-  import { ref } from 'vue';
+  import { TrackOpTypes, ref } from 'vue';
   import axiosInstance from '@/services/axios';
   
   export default {
@@ -102,8 +101,8 @@
       const addTag = () => {
         errorMessage.value = '';
         const trimmedTag = newTag.value.trim();
-        if (trimmedTag !== '' && !tags.value.some(tag => tag.name === trimmedTag)) {
-          tags.value.push({ name: trimmedTag, color: getRandomFluorescentColor() });
+        if (trimmedTag !== '' && !tags.value.includes(trimmedTag)) {
+          tags.value.push(trimmedTag);
           newTag.value = '';
           emitTags();
         } else {
