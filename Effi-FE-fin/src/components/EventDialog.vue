@@ -5,6 +5,7 @@
       <h2>일정 상세 보기</h2>
       <div class="modal-body">
         <form @submit.prevent="submit">
+          <!-- Form Fields -->
           <div class="form-group">
             <label for="title">제목:</label>
             <input type="text" id="title" v-model="internalEvent.title" required>
@@ -72,14 +73,7 @@
             <div>
               <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule"/>
               <div class="tag-list">
-                <span
-                  v-for="tag in internalEvent.tags"
-                  :key="tag"
-                  class="tag-item"
-                  :style="{ backgroundColor: tagColors[tag] }"
-                >
-                  {{ tag }}
-                </span>
+                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
               </div>
             </div>
           </div>
@@ -110,7 +104,7 @@
 </template>
 
 <script>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
 import TagAdd from './TagAdd.vue';
@@ -154,12 +148,12 @@ export default {
       tags: []
     });
 
-    const tagColors = reactive({});
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
     const showCategoryModal = ref(false);
     const showRoutineModal = ref(false);
+    const tagColors = reactive({});
 
     onMounted(() => {
       const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
@@ -176,13 +170,10 @@ export default {
     const fetchDefaultTimezone = async (empId) => {
       try {
         const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
-        console.log('API response:', response.data); // 전체 응답 데이터 로깅
         const defaultTimezone = response.data.data;
         if (defaultTimezone) {
           internalEvent.value.timezoneId = defaultTimezone.timezoneId;
           internalEvent.value.timezoneName = defaultTimezone.timezoneName;
-          console.log('defaultTimezone ID:', internalEvent.value.timezoneId);
-          console.log('defaultTimezone Name:', internalEvent.value.timezoneName);
         } else {
           console.error('No default timezone found');
         }
@@ -199,15 +190,14 @@ export default {
           ...internalEvent.value,
           ...schedule,
           categoryNo: schedule.categoryNo,
-          tags: schedule.tags.map(tag => tag.name),  // 태그 이름만 포함
+          tags: schedule.tags.map(tag => tag.name),
           createdAt: schedule.createdAt || new Date().toISOString()
         };
-        internalEvent.value.tags.forEach(tag => {
+        for (let tag of internalEvent.value.tags) {
           if (!tagColors[tag]) {
-            tagColors[tag] = getRandomFluorescentColor();
+            tagColors[tag] = getRandomColor();
           }
-        });
-        console.log('Fetched schedule details:', schedule);
+        }
       } catch (error) {
         console.error('Error fetching schedule details:', error);
       }
@@ -219,7 +209,6 @@ export default {
 
     const submit = async () => {
       try {
-        // 시간 형식 수정
         const formattedEvent = {
           ...internalEvent.value,
           startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
@@ -227,7 +216,6 @@ export default {
           tags: internalEvent.value.tags.map(tag => tag.name)
         };
 
-        // 루틴 추가
         if (internalEvent.value.repeat && !internalEvent.value.routineId) {
           const routineResponse = await axiosInstance.post('/api/routine/add', {
             routineStart: formattedEvent.startTime,
@@ -243,20 +231,13 @@ export default {
           ? `/api/schedule/update/${props.scheduleId}`
           : `/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
 
-        console.log('Submitting to API:', apiUrl);
-        console.log('Formatted event data:', formattedEvent);
-
         const response = await axiosInstance.post(apiUrl, formattedEvent);
-        console.log('Response from API:', response.data);
-
         const scheduleId = response.data.scheduleId;
 
-        // 태그 추가
         for (let tag of internalEvent.value.tags) {
           await axiosInstance.post(`/api/tag/add/${scheduleId}`, tag);
         }
 
-        // 참여자 추가
         for (let employee of selectedEmployees.value) {
           await axiosInstance.post(`/api/participant/add`, {
             scheduleId,
@@ -290,13 +271,13 @@ export default {
       showCategoryModal.value = false;
     };
 
-    const updateSchedule = (tags) => {
+    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
       internalEvent.value.tags = tags;
-      tags.forEach(tag => {
+      for (let tag in newTagColors) {
         if (!tagColors[tag]) {
-          tagColors[tag] = getRandomFluorescentColor();
+          tagColors[tag] = newTagColors[tag];
         }
-      });
+      }
     };
 
     const searchEmployees = async () => {
@@ -333,6 +314,20 @@ export default {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
     };
 
+    // 직원 검색과 선택을 통해서 참가자를 추가하고 삭제하는 함수를 정의합니다.
+    const addParticipant = async (empId) => {
+      try {
+        await axiosInstance.post('/api/participant/add', {
+          scheduleId: props.scheduleId,
+          empId
+        });
+        alert('참가자가 추가되었습니다.');
+      } catch (error) {
+        console.error('Error adding participant:', error.response ? error.response.data : error.message);
+        alert('참가자 추가에 실패했습니다.');
+      }
+    };
+
     const toggleRoutineModal = () => {
       showRoutineModal.value = internalEvent.value.repeat;
     };
@@ -347,31 +342,9 @@ export default {
       showRoutineModal.value = false;
     };
 
-    const getRandomFluorescentColor = () => {
-      const fluorescentColors = [
-        '#CCFF00', // Fluorescent Chartreuse
-        '#FFFF00', // Fluorescent Yellow
-        '#00FF00', // Fluorescent Green
-        '#00FFFF', // Fluorescent Cyan
-        '#FF00FF', // Fluorescent Magenta
-        '#FF1493', // Deep Pink
-        '#FF4500', // Orange Red
-        '#FF6347', // Tomato
-        '#FFD700', // Gold
-        '#ADFF2F', // Green Yellow
-        '#7CFC00', // Lawn Green
-        '#32CD32', // Lime Green
-        '#98FB98', // Pale Green
-        '#00FF7F', // Spring Green
-        '#00FA9A', // Medium Spring Green
-        '#40E0D0', // Turquoise
-        '#20B2AA', // Light Sea Green
-        '#00CED1', // Dark Turquoise
-        '#1E90FF', // Dodger Blue
-        '#FF69B4', // Hot Pink
-        '#FFB6C1', // Light Pink
-      ];
-      return fluorescentColors[Math.floor(Math.random() * fluorescentColors.length)];
+    const getRandomColor = () => {
+      const colors = ['#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585'];
+      return colors[Math.floor(Math.random() * colors.length)];
     };
 
     return {
@@ -392,6 +365,7 @@ export default {
       handleRoutineClose,
       handleRoutineConfirm,
       tagColors,
+      addParticipant
     };
   }
 };
