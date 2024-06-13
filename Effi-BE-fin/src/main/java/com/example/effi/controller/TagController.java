@@ -3,6 +3,8 @@ package com.example.effi.controller;
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
 import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.DTO.TagScheduleResponseDTO;
+import com.example.effi.domain.Entity.Tag;
+import com.example.effi.repository.TagRepository;
 import com.example.effi.service.ScheduleService;
 import com.example.effi.service.TagScheduleService;
 import com.example.effi.service.TagService;
@@ -20,11 +22,21 @@ public class TagController {
     private final TagService tagService;
     private final TagScheduleService tagScheduleService;
     private final ScheduleService scheduleService;
+    private final TagRepository tagRepository;
 
-    // add
+    // add -> 있는 경우 기존 responseDTO 리턴
+    @PostMapping("/add")
+    public TagResponseDTO addTag(@RequestBody String inputString) {
+        Tag tagByTagName = tagRepository.findTagByTagName(inputString);
+        if (tagByTagName == null)
+            tagService.addTag(inputString);
+        TagResponseDTO tag = tagService.getTag(inputString);
+        return (tagService.getTag(inputString));
+    }
+
+    // add with schedule
     @PostMapping("/add/{scheduleId}")
-    public TagResponseDTO addTag(@PathVariable("scheduleId") Long scheduleId, @RequestBody String inputString) {
-        Long tagId = tagService.addTag(inputString);
+    public TagResponseDTO addTagWithSchedule(@PathVariable("scheduleId") Long scheduleId, @RequestBody String inputString) {
         tagScheduleService.addTagSchedule(scheduleId, inputString);
         return tagService.getTag(inputString);
     }

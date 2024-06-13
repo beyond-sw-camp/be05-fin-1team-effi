@@ -25,7 +25,7 @@ public class ScheduleRequestDTO {
     private Date createdAt;
     private Date updatedAt;
 
-    private Long categoryId;
+    private Long categoryNo;
     private Long routineId;
 
     public ScheduleRequestDTO(Schedule schedule) {
@@ -39,7 +39,7 @@ public class ScheduleRequestDTO {
         this.deleteYn = schedule.getDeleteYn();
         this.createdAt = schedule.getCreatedAt();
         this.updatedAt = schedule.getUpdatedAt();
-        this.categoryId = schedule.getCategory().getCategoryId();
+        this.categoryNo = schedule.getCategory().getCategoryNo();
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else

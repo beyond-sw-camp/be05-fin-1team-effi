@@ -15,25 +15,22 @@ public class GroupDTO {
 
     private Long categoryId;
 
-    public GroupDTO(Long groupId, String groupName, Boolean deleteYn, Category category) {
+    public GroupDTO(Long groupId, String groupName, Boolean deleteYn) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.deleteYn = deleteYn;
-        this.categoryId = category.getCategoryId();
     }
 
     public GroupDTO(Group grp) {
         this.groupId = grp.getGroupId();
         this.groupName = grp.getGroupName();
         this.deleteYn = grp.getDeleteYn();
-        this.categoryId = grp.getCategory().getCategoryId();
     }
 
     public Group toEntity(Category category) {
         return Group.builder()
                 .groupName(groupName)
                 .deleteYn(deleteYn)
-                .category(category)
                 .build();
     }
     public void setGroupName(String groupName) {
