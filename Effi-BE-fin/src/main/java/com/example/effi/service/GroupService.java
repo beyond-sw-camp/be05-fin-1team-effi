@@ -49,9 +49,6 @@ public class GroupService {
                     .build());
         }
 
-        Category category = categoryRepository.findByCategoryId(3)
-                .orElseThrow(() -> new IllegalArgumentException("category_id가 3인 카테고리를 찾을 수 없습니다."));
-
         Group group = Group.builder()
                 .groupName(groupRequestDTO.getGroupName())
                 .deleteYn(false)
