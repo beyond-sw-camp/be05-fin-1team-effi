@@ -51,11 +51,10 @@
     </v-sheet>
     <schedule-modal
       v-if="dialog"
-      :dialog="dialog"
-      :event="selectedEvent"
+      :show="dialog"
       :is-edit-mode="isEditMode"
-      @update:dialog="updateDialog"
-      @submit-event="handleEventSubmit"
+      :event="selectedEvent"
+      @close="updateDialog(false)"
     />
     <v-menu v-model="timezoneMenu" bottom right>
       <v-list>
@@ -91,7 +90,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    selectedGroupId:{
+    selectedGroupId: {
       type: Array,
       default: () => [],
     }
@@ -131,8 +130,6 @@ export default {
         if (!token) {
           throw new Error('No access token found');
         }
-
-        console.log('in vcalendar', props.selectedGroupId);
 
         let schedules = [];
         if (props.selectedCategories.length === 0 && props.selectedGroupId.length === 0) {
