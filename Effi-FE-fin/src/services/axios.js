@@ -72,7 +72,7 @@ axiosInstance.interceptors.response.use(
               .then(response => {
                 const accessToken = response.headers['new-access-token'];
                 sessionStorage.setItem('accessToken', accessToken);
-                useAuthStore.accessToken.value = accessToken;
+                useAuthStore.accessToken = accessToken;
                 originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
 
                 processQueue(null, accessToken);
