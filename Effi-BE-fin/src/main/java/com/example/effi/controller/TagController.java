@@ -22,9 +22,17 @@ public class TagController {
     private final ScheduleService scheduleService;
 
     // add
+    @PostMapping("/add")
+    public TagResponseDTO addTag(@RequestBody String inputString) {
+        tagService.addTag(inputString);
+        TagResponseDTO tag = tagService.getTag(inputString);
+        return tag;
+    }
+
+    // add with schedule
     @PostMapping("/add/{scheduleId}")
-    public TagResponseDTO addTag(@PathVariable("scheduleId") Long scheduleId, @RequestBody String inputString) {
-        Long tagId = tagService.addTag(inputString);
+    public TagResponseDTO addTagWithSchedule(@PathVariable("scheduleId") Long scheduleId, @RequestBody String inputString) {
+        tagService.addTag(inputString);
         tagScheduleService.addTagSchedule(scheduleId, inputString);
         return tagService.getTag(inputString);
     }

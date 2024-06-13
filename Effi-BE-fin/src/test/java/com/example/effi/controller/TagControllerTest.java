@@ -99,12 +99,12 @@ public class TagControllerTest {
     }
 
     @Test
-    void testAddTag() {
+    void testaddTagWithSchedule() {
         when(tagService.addTag(anyString())).thenReturn(1L);
         when(tagScheduleService.addTagSchedule(anyLong(), anyString())).thenReturn(1L);
         when(tagService.getTag(anyString())).thenReturn(sampleTagResponseDTO);
 
-        TagResponseDTO response = tagController.addTag(1L, "Sample Tag");
+        TagResponseDTO response = tagController.addTagWithSchedule(1L, "Sample Tag");
 
         assertThat(response.getTagId()).isEqualTo(1L);
         assertThat(response.getTagName()).isEqualTo("Sample Tag");
@@ -115,11 +115,11 @@ public class TagControllerTest {
     }
 
     @Test
-    void testAddTagFailure() {
+    void testaddTagWithScheduleFailure() {
         when(tagService.addTag(anyString())).thenThrow(new RuntimeException("Tag creation failed"));
 
         assertThrows(RuntimeException.class, () -> {
-            tagController.addTag(1L, "Sample Tag");
+            tagController.addTagWithSchedule(1L, "Sample Tag");
         });
 
         verify(tagService).addTag(anyString());
