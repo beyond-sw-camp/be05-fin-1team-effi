@@ -4,9 +4,7 @@
       <button class="close-button" @click="$emit('close')">×</button>
       <h2>일정 상세 보기</h2>
       <div class="modal-body">
-        <!-- Add Schedule Form -->
         <form @submit.prevent="submit">
-          <!-- Form Fields -->
           <div class="form-group">
             <label for="title">제목:</label>
             <input type="text" id="title" v-model="internalEvent.title" required>
@@ -69,12 +67,19 @@
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
           </div>
-        <div class="form-group">
+          <div class="form-group">
             <label for="tag">태그</label>
             <div>
-              <TagApp :schedule="internalEvent" @update-schedule="updateSchedule"/>
+              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule"/>
               <div class="tag-list">
-                <span v-for="tag in internalEvent.tags" :key="tag" class="tag-item">{{ tag }}</span>
+                <span
+                  v-for="tag in internalEvent.tags"
+                  :key="tag"
+                  class="tag-item"
+                  :style="{ backgroundColor: tagColors[tag] }"
+                >
+                  {{ tag }}
+                </span>
               </div>
             </div>
           </div>
@@ -87,7 +92,7 @@
             </select>
           </div>
           <div class="form-group checkbox-group">
-            <label for="noticeYn">1시간 전 메일 알림<input type="checkbox" id="noticeYn" v-model="internalEvent.noticeYn"></label>
+            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
             <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
@@ -105,16 +110,16 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, reactive } from 'vue';
+import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
-import TagApp from './TagAdd.vue';
+import TagAdd from './TagAdd.vue';
 import RoutineModal from './RoutineModal.vue';
 
 export default {
   components: {
     CategoryModal,
-    TagApp,
+    TagAdd,
     RoutineModal
   },
   props: {
@@ -140,7 +145,7 @@ export default {
       endDate: '',
       endTime: '',
       status: 0,
-      noticeYn: false,
+      notificationYn: false,
       deleteYn: false,
       createdAt: new Date().toISOString(),
       updatedAt: null,
@@ -149,6 +154,7 @@ export default {
       tags: []
     });
 
+    const tagColors = reactive({});
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
@@ -169,7 +175,7 @@ export default {
 
     const fetchDefaultTimezone = async (empId) => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/timezone-emp/${empId}/default`);
+        const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
         console.log('API response:', response.data); // 전체 응답 데이터 로깅
         const defaultTimezone = response.data.data;
         if (defaultTimezone) {
@@ -187,15 +193,20 @@ export default {
 
     const fetchScheduleDetails = async (scheduleId) => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/schedule/find/${scheduleId}`);
+        const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
         const schedule = response.data;
         internalEvent.value = {
           ...internalEvent.value,
           ...schedule,
           categoryNo: schedule.categoryNo,
-          tags: schedule.tags.map(tag => ({ name: tag })),
+          tags: schedule.tags.map(tag => tag.name),  // 태그 이름만 포함
           createdAt: schedule.createdAt || new Date().toISOString()
         };
+        internalEvent.value.tags.forEach(tag => {
+          if (!tagColors[tag]) {
+            tagColors[tag] = getRandomFluorescentColor();
+          }
+        });
         console.log('Fetched schedule details:', schedule);
       } catch (error) {
         console.error('Error fetching schedule details:', error);
@@ -218,7 +229,7 @@ export default {
 
         // 루틴 추가
         if (internalEvent.value.repeat && !internalEvent.value.routineId) {
-          const routineResponse = await axios.post('http://localhost:8080/api/routine/add', {
+          const routineResponse = await axiosInstance.post('/api/routine/add', {
             routineStart: formattedEvent.startTime,
             routineEnd: formattedEvent.endTime,
             routineCycle: internalEvent.value.routineCycle
@@ -229,20 +240,25 @@ export default {
         }
 
         const apiUrl = props.isEditMode
-          ? `http://localhost:8080/api/schedule/update/${props.scheduleId}`
-          : `http://localhost:8080/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
+          ? `/api/schedule/update/${props.scheduleId}`
+          : `/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
 
         console.log('Submitting to API:', apiUrl);
         console.log('Formatted event data:', formattedEvent);
 
-        const response = await axios.post(apiUrl, formattedEvent);
+        const response = await axiosInstance.post(apiUrl, formattedEvent);
         console.log('Response from API:', response.data);
 
         const scheduleId = response.data.scheduleId;
 
+        // 태그 추가
+        for (let tag of internalEvent.value.tags) {
+          await axiosInstance.post(`/api/tag/add/${scheduleId}`, tag);
+        }
+
         // 참여자 추가
         for (let employee of selectedEmployees.value) {
-          await axios.post(`http://localhost:8080/api/participant/add`, {
+          await axiosInstance.post(`/api/participant/add`, {
             scheduleId,
             empId: employee.empNo
           });
@@ -276,6 +292,11 @@ export default {
 
     const updateSchedule = (tags) => {
       internalEvent.value.tags = tags;
+      tags.forEach(tag => {
+        if (!tagColors[tag]) {
+          tagColors[tag] = getRandomFluorescentColor();
+        }
+      });
     };
 
     const searchEmployees = async () => {
@@ -290,10 +311,10 @@ export default {
         }
       };
       try {
-        const response = await axios.get(`http://localhost:8080/api/groups/search?name=${searchQuery.value}`, config);
+        const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
         const employees = response.data;
         for (let employee of employees) {
-          const deptResponse = await axios.get(`http://localhost:8080/api/search/dept/${employee.deptId}`, config);
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
           employee.deptName = deptResponse.data;
         }
         searchResults.value = employees;
@@ -326,6 +347,33 @@ export default {
       showRoutineModal.value = false;
     };
 
+    const getRandomFluorescentColor = () => {
+      const fluorescentColors = [
+        '#CCFF00', // Fluorescent Chartreuse
+        '#FFFF00', // Fluorescent Yellow
+        '#00FF00', // Fluorescent Green
+        '#00FFFF', // Fluorescent Cyan
+        '#FF00FF', // Fluorescent Magenta
+        '#FF1493', // Deep Pink
+        '#FF4500', // Orange Red
+        '#FF6347', // Tomato
+        '#FFD700', // Gold
+        '#ADFF2F', // Green Yellow
+        '#7CFC00', // Lawn Green
+        '#32CD32', // Lime Green
+        '#98FB98', // Pale Green
+        '#00FF7F', // Spring Green
+        '#00FA9A', // Medium Spring Green
+        '#40E0D0', // Turquoise
+        '#20B2AA', // Light Sea Green
+        '#00CED1', // Dark Turquoise
+        '#1E90FF', // Dodger Blue
+        '#FF69B4', // Hot Pink
+        '#FFB6C1', // Light Pink
+      ];
+      return fluorescentColors[Math.floor(Math.random() * fluorescentColors.length)];
+    };
+
     return {
       internalEvent,
       searchQuery,
@@ -342,7 +390,8 @@ export default {
       removeEmployee,
       toggleRoutineModal,
       handleRoutineClose,
-      handleRoutineConfirm
+      handleRoutineConfirm,
+      tagColors,
     };
   }
 };

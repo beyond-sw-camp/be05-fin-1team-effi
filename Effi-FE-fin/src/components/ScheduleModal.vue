@@ -1,19 +1,17 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <button class="close-button" @click="$emit('close')">×</button>
-      <h2>일정 상세 보기</h2>
+      <button class="close-button" @click="closeModal">×</button>
+      <h2>{{ isEditMode ? '일정 수정하기' : '일정 추가하기' }}</h2>
       <div class="modal-body">
-        <!-- Add Schedule Form -->
         <form @submit.prevent="submit">
-          <!-- Form Fields -->
           <div class="form-group">
             <label for="title">제목:</label>
             <input type="text" id="title" v-model="internalEvent.title" required>
           </div>
           <div class="form-group">
-            <label for="content">내용:</label>
-            <textarea id="content" v-model="internalEvent.content" required></textarea>
+            <label for="context">내용:</label>
+            <textarea id="context" v-model="internalEvent.context" required></textarea>
           </div>
           <div class="form-group">
             <label for="startDate">시작일:</label>
@@ -38,8 +36,7 @@
             </div>
           </div>
           <div class="form-group checkbox-group">
-            <label for="repeat">반복</label>
-            <input type="checkbox" id="repeat" v-model="internalEvent.repeat">
+            <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat" @change="toggleRoutineModal"></label>
           </div>
           <div class="form-group">
             <label for="participants">참여자</label>
@@ -64,11 +61,11 @@
           </div>
           <div class="form-group">
             <label for="category">카테고리</label>
-            <div>
-              {{ internalEvent.category ? internalEvent.category : '카테고리 없음' }}
-              <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
-            </div>
+            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
             <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <div v-if="internalEvent.categoryName" class="selected-category">
+              선택된 카테고리: {{ internalEvent.categoryName }}
+            </div>
           </div>
           <div class="form-group">
             <label for="tag">태그</label>
@@ -88,14 +85,19 @@
             </select>
           </div>
           <div class="form-group checkbox-group">
-            <label for="emailAlert">1시간 전 메일 알림</label>
-            <input type="checkbox" id="emailAlert" v-model="internalEvent.emailAlert">
+            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
             <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
           </div>
         </form>
       </div>
+      <RoutineModal
+        v-if="showRoutineModal"
+        :show="showRoutineModal"
+        @close="handleRoutineClose"
+        @confirm="handleRoutineConfirm"
+      />
     </div>
   </div>
 </template>
@@ -105,11 +107,13 @@ import { ref, onMounted } from 'vue';
 import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
 import TagApp from './TagAdd.vue';
+import RoutineModal from './RoutineModal.vue';
 
 export default {
   components: {
     CategoryModal,
-    TagApp
+    TagApp,
+    RoutineModal
   },
   props: {
     show: {
@@ -119,38 +123,53 @@ export default {
     isEditMode: {
       type: Boolean,
       default: false
+    },
+    event: {
+      type: Object,
+      default: () => ({
+        title: '',
+        content: '',
+        startDate: '',
+        startTime: '',
+        endDate: '',
+        endTime: '',
+      })
     }
   },
   setup(props, { emit }) {
     const internalEvent = ref({
       title: '',
-      content: '',
+      context: '',
       startDate: '',
       startTime: '',
       endDate: '',
       endTime: '',
-      timezoneId: null,
-      timezoneName: '',
-      repeat: false,
-      category: null,
-      tags: [],
       status: 0,
-      emailAlert: false,
-      groupId: null
+      notificationYn: false,
+      deleteYn: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+      categoryNo: null,
+      routineId: null,
+      tags: []
     });
 
-    const timezones = ref([]);
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
     const showCategoryModal = ref(false);
+    const showRoutineModal = ref(false);
 
     onMounted(() => {
-      const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
-      if (empId) {
-        fetchDefaultTimezone(empId);
+      if (props.isEditMode) {
+        Object.assign(internalEvent.value, props.event);
       } else {
-        console.error('empNo not found in sessionStorage');
+        const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
+        if (empId) {
+          fetchDefaultTimezone(empId);
+        } else {
+          console.error('empNo not found in sessionStorage');
+        }
       }
     });
 
@@ -176,13 +195,76 @@ export default {
       emit('close');
     };
 
-    const submit = () => {
-      console.log('Form submitted', internalEvent.value);
-      closeModal();
+    const submit = async () => {
+      try {
+        // 시간 형식 수정
+        const formattedEvent = {
+          ...internalEvent.value,
+          startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
+          endTime: new Date(`${internalEvent.value.endDate}T${internalEvent.value.endTime}`),
+          tags: internalEvent.value.tags.map(tag => tag.name)
+        };
+
+        // 루틴 추가
+        if (internalEvent.value.repeat && !internalEvent.value.routineId) {
+          const routineResponse = await axios.post('http://localhost:8080/api/routine/add', {
+            routineStart: formattedEvent.startTime,
+            routineEnd: formattedEvent.endTime,
+            routineCycle: internalEvent.value.routineCycle
+          });
+          formattedEvent.routineId = routineResponse.data.routineId;
+        } else if (!internalEvent.value.repeat) {
+          formattedEvent.routineId = null;
+        }
+
+        const apiUrl = props.isEditMode
+          ? `http://localhost:8080/api/schedule/update/${props.event.id}`
+          : `http://localhost:8080/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
+
+        console.log('Submitting to API:', apiUrl);
+        console.log('Formatted event data:', formattedEvent);
+
+        const response = await axios.post(apiUrl, formattedEvent);
+        console.log('Response from API:', response.data);
+
+        const scheduleId = response.data.scheduleId;
+
+        // 태그 추가
+        for (let tag of internalEvent.value.tags) {
+          await axios.post(`http://localhost:8080/api/tag/add/${scheduleId}`, tag);
+        }
+
+        // 참여자 추가
+        for (let employee of selectedEmployees.value) {
+          await axios.post(`http://localhost:8080/api/participant/add`, {
+            scheduleId,
+            empId: employee.empNo
+          });
+        }
+
+        alert('일정이 추가되었습니다.');
+        closeModal();
+      } catch (error) {
+        console.error('Error submitting form:', error.response ? error.response.data : error.message);
+        alert('일정 추가에 실패했습니다.');
+      }
     };
 
-    const handleCategorySelect = (selection) => {
-      internalEvent.value.category = selection;
+    const handleCategorySelect = async (selection) => {
+      const category = {
+        1: '회사',
+        2: '부서',
+        3: '그룹',
+        4: '개인'
+      };
+      internalEvent.value.categoryNo = selection.selectedOption;
+      internalEvent.value.categoryName = category[selection.selectedOption] || '';
+
+      if (selection.selectedOption === 2) {
+        internalEvent.value.deptId = selection.selectedDeptId;
+      } else if (selection.selectedOption === 3) {
+        internalEvent.value.groupId = selection.selectedGroupId;
+      }
       showCategoryModal.value = false;
     };
 
@@ -217,29 +299,50 @@ export default {
     const selectEmployee = (employee) => {
       if (!selectedEmployees.value.some(emp => emp.empNo === employee.empNo)) {
         selectedEmployees.value.push(employee);
-        console.log('Selected employees:', selectedEmployees.value); // 선택된 사원 목록 로그 출력
       }
     };
 
     const removeEmployee = (empNo) => {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
-      console.log('Selected employees after removal:', selectedEmployees.value); // 제거 후 선택된 사원 목록 로그 출력
     };
+
+    const toggleRoutineModal = () => {
+      showRoutineModal.value = internalEvent.value.repeat;
+    };
+
+    const handleRoutineClose = () => {
+      showRoutineModal.value = false;
+    };
+
+    const handleRoutineConfirm = (routineData) => {
+      internalEvent.value.routineId = routineData.routineId;
+      internalEvent.value.routineCycle = routineData.routineCycle;
+      showRoutineModal.value = false;
+    };
+
+    watch(() => props.event, (newEvent) => {
+      if (props.isEditMode) {
+        Object.assign(internalEvent.value, newEvent);
+      }
+    });
 
     return {
       internalEvent,
-      timezones,
       searchQuery,
       searchResults,
       selectedEmployees,
       showCategoryModal,
+      showRoutineModal,
       closeModal,
       submit,
       handleCategorySelect,
       updateSchedule,
       searchEmployees,
       selectEmployee,
-      removeEmployee
+      removeEmployee,
+      toggleRoutineModal,
+      handleRoutineClose,
+      handleRoutineConfirm
     };
   }
 };
@@ -431,16 +534,17 @@ button.update-button:hover, button#category:hover, button#group:hover {
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 8px; /* 태그 사이의 간격을 설정합니다 */
 }
 
 .tag-item {
-  background-color: #FBB584;
-  color: white;
   padding: 5px 10px;
   border-radius: 5px;
+  color: white;
+  font-size: 14px;
   cursor: pointer;
+  display: inline-block;
+  background-color: var(--tag-color, #888); /* 기본 태그 색상 */
 }
 
 h2 {
