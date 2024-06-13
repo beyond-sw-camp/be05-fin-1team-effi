@@ -34,6 +34,7 @@ public class ScheduleService {
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
     private final CategoryService categoryService;
+    private final RoutineService routineService;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -210,6 +211,7 @@ public class ScheduleService {
         }
         Routine routine = routineRepository.findById(routineId).orElse(null);
         if (routine == null || routine.getDeleteYn() == true) {
+            // 루틴 삭제시 하나만 스케줄 하나에 해당하는 루틴만 삭제
             sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                     sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
                     sch.getCategory(), null);
@@ -218,7 +220,9 @@ public class ScheduleService {
         sch.update(sch.getTitle(), sch.getContext(), sch.getStartTime(),
                 sch.getEndTime(), sch.getStatus(), sch.getNotificationYn(),
                 sch.getCategory(), routine);
-        return new ScheduleResponseDTO(scheduleRepository.save(sch));
+        ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(scheduleRepository.save(sch));
+        addRoutineSchedule(scheduleResponseDTO);
+        return scheduleResponseDTO;
     }
 
     // delete schedule
