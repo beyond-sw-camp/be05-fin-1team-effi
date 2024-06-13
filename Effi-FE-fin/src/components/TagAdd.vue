@@ -31,6 +31,7 @@
                   </v-text-field>
                 </v-col>
               </v-row>
+              <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
               <v-row>
                 <v-col>
                   <div class="chip-wrapper">
@@ -39,7 +40,7 @@
                       :key="index"
                       :style="{ backgroundColor: getTagColor(tag) }"
                       close
-                      @click:close="removeTag(index)"
+                      @click="removeTag(index)"
                     >
                       {{ tag }}
                     </v-chip>
@@ -100,6 +101,8 @@ export default {
     const aiResponseTags = ref([]);
     const tagColors = reactive({});
     const message = ref('');
+    const errorMessage = ref('');
+
 
     watch(
       () => [props.schedule.title, props.schedule.context],
@@ -109,6 +112,7 @@ export default {
     );
 
     const addTag = () => {
+      errorMessage.value = '';
       if (newTag.value.trim() !== '') {
         const tag = newTag.value.trim();
         if (!tags.value.includes(tag)) {
@@ -119,7 +123,8 @@ export default {
           newTag.value = '';
           emitTags();
         } else {
-          alert('중복된 태그입니다.');
+          errorMessage.value = '중복된 태그입니다';
+          newTag.value = '';
         }
       }
     };
@@ -182,7 +187,8 @@ export default {
       aiResponseTags,
       addTagFromAi,
       closeDialog,
-      getTagColor
+      getTagColor,
+      errorMessage
     };
   }
 };
@@ -199,4 +205,9 @@ export default {
   box-sizing: border-box;
   cursor: pointer; /* 클릭 가능한 요소로 변경 */
 }
+.error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 12px;
+  }
 </style>
