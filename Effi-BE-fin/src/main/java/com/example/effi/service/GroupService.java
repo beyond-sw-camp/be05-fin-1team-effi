@@ -75,6 +75,7 @@ public class GroupService {
         addEmployeesToGroup(savedGroup.getGroupId(), groupRequestDTO.getEmployeeIds());
 
         GroupResponseDTO responseDTO = GroupResponseDTO.builder()
+                .groupId(savedGroup.getGroupId())
                 .groupName(savedGroup.getGroupName())
                 .employeeIds(groupRequestDTO.getEmployeeIds())
                 .build();
@@ -287,6 +288,14 @@ public class GroupService {
             }
         }
         return groupNameDTOS;
+    }
+
+    // 그룹 이름으로 그룹 찾아서 그룹 정보 반환
+    @Transactional
+    public GroupDTO findGroupByName(String groupName) {
+        Group group = groupRepository.findByGroupName(groupName)
+            .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 그룹 이름: " + groupName));
+        return new GroupDTO(group);
     }
 
 }
