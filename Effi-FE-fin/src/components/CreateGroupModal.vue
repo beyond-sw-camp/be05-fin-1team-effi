@@ -87,16 +87,20 @@ export default {
           groupName: this.groupName,
           employeeIds: empNos
         }, config);
-        const emailresponse = await axiosInstance.post('http://localhost:8080/api/auth/send/group/add/{groupId}', {
-          groupId : response.data.groupId
+
+        console.log('Group created:', response.data);
+        
+        const groupId = response.data.data.groupId; // groupId를 제대로 받아옴
+        const emailResponse = await axiosInstance.post(`http://localhost:8080/api/auth/group/add/${groupId}`, {
+          groupId: groupId
         }, config);
 
         console.log('그룹 생성 성공:', response.data);
-        console.log('그룹 생성 메일 전송 성공:', emailresponse.data);
+        console.log('그룹 생성 메일 전송 성공:', emailResponse.data);
         this.$emit('close');
       } catch (error) {
         console.error('그룹 생성 오류:', error.response ? error.response.data : error.message);
-        console.error('그룹 생성 메일 전송 오류:', error.emailresponse ? error.emailresponse.data : error.emailmessage);
+        console.error('그룹 생성 메일 전송 오류:', error.response ? error.response.data : error.message);
       }
     },
 
@@ -172,8 +176,6 @@ export default {
   width: 300px;
   z-index: 10001;
 }
-
-
 
 .close-button {
   background: none;
