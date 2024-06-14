@@ -40,6 +40,14 @@
             <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat" @change="toggleRoutineModal"></label>
           </div>
           <div class="form-group">
+            <label for="category">카테고리</label>
+            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
+            <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <div v-if="internalEvent.categoryName" class="selected-category">
+              선택된 카테고리: {{ internalEvent.categoryName }}
+            </div>
+          </div>
+          <div class="form-group">
             <label for="participants">참여자</label>
             <div class="input-group">
               <input type="text" id="participants" placeholder="추가할 사원을 검색하세요" v-model="searchQuery" class="group-input" />
@@ -58,14 +66,6 @@
                   <button @click="removeEmployee(emp.empNo)" class="remove-button">×</button>
                 </li>
               </ul>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="category">카테고리</label>
-            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
-            <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
-            <div v-if="internalEvent.categoryName" class="selected-category">
-              선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
           </div>
           <div class="form-group">
@@ -227,9 +227,24 @@ export default {
           formattedEvent.routineId = null;
         }
 
-        const apiUrl = props.isEditMode
-          ? `/api/schedule/update/${props.scheduleId}`
-          : `/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
+        let apiUrl;
+        if (props.isEditMode) {
+          apiUrl = `/api/schedule/update/${props.scheduleId}`;
+        } else {
+          switch (formattedEvent.categoryNo) {
+            case 1:
+              apiUrl = `/api/schedule/add/company`;
+              break;
+            case 2:
+              apiUrl = `/api/schedule/add/dept/${formattedEvent.deptId}`;
+              break;
+            case 3:
+              apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
+              break;
+            default:
+              apiUrl = `/api/schedule/add`;
+          }
+        }
 
         const response = await axiosInstance.post(apiUrl, formattedEvent);
         const scheduleId = response.data.scheduleId;
@@ -238,11 +253,8 @@ export default {
           await axiosInstance.post(`/api/tag/add/${scheduleId}`, tag);
         }
 
-        for (let employee of selectedEmployees.value) {
-          await axiosInstance.post(`/api/participant/add`, {
-            scheduleId,
-            empId: employee.empNo
-          });
+        if (formattedEvent.categoryNo === 4) {
+          await addParticipants(scheduleId, formattedEvent.categoryNo);
         }
 
         alert('일정이 추가되었습니다.');
@@ -314,14 +326,28 @@ export default {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
     };
 
-    // 직원 검색과 선택을 통해서 참가자를 추가하고 삭제하는 함수를 정의합니다.
-    const addParticipant = async (empId) => {
+    const addParticipants = async (scheduleId, categoryNo) => {
       try {
-        await axiosInstance.post('/api/participant/add', {
-          scheduleId: props.scheduleId,
-          empId
+        if (categoryNo === 4) {
+          for (let employee of selectedEmployees.value) {
+            await addParticipant(scheduleId, employee.empNo);
+          }
+        }
+      } catch (error) {
+        console.error('Error adding participants:', error.response ? error.response.data : error.message);
+        alert('참가자 추가에 실패했습니다.');
+      }
+    };
+
+    const addParticipant = async (scheduleId, empId) => {
+      try {
+        const response = await axiosInstance.post('/api/participant/add', null, {
+          params: {
+            scheduleId: scheduleId,
+            empId: empId
+          }
         });
-        alert('참가자가 추가되었습니다.');
+        console.log('addParticipant response:', response.data);
       } catch (error) {
         console.error('Error adding participant:', error.response ? error.response.data : error.message);
         alert('참가자 추가에 실패했습니다.');
@@ -382,6 +408,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-container {
@@ -393,6 +420,7 @@ export default {
   width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  z-index: 1001;
 }
 
 .close-button {

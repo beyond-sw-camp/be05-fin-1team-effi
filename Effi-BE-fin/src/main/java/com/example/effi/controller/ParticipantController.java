@@ -54,7 +54,6 @@ public class ParticipantController {
     }
 
     // 추가 -> 그룹에 잇는 사람들
-    // 그룹 사용법 문의 후 확인 필요
     @PostMapping("/add/group/{groupId}")
     public ResponseEntity<?> addParticipantGroup(@PathVariable("groupId") Long groupId, Long scheduleId) {
         try {

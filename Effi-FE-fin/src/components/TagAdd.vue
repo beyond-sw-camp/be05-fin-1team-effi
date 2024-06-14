@@ -3,8 +3,9 @@
     <v-dialog v-model="dialog" max-width="600">
       <template v-slot:activator="{ props: activatorProps }">
         <v-btn
+          id="add-tag-button"
           class="text-none font-weight-regular"
-          text="Tags"
+          text="태그 추가하기"
           variant="tonal"
           v-bind="activatorProps"
         ></v-btn>
@@ -195,6 +196,17 @@ export default {
 </script>
 
 <style scoped>
+button{
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #FBB584;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+
+}
 .chip-wrapper {
   display: flex;
   flex-wrap: wrap;

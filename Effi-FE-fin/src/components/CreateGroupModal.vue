@@ -56,7 +56,20 @@ export default {
   },
   methods: {
     async createGroup() {
-      const empNos = this.selectedEmployees.map(emp => emp.empNo);
+      const token = sessionStorage.getItem('accessToken');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+      const myEmpNo = Number(sessionStorage.getItem('empNo'));
+      const firstEmpNos = this.selectedEmployees.map(emp => emp.empNo);
+      const empNos = firstEmpNos.filter(empNo => empNo !== myEmpNo);
 
       // 데이터 확인용 콘솔 로그
       console.log('Creating group with data:', {
@@ -69,28 +82,24 @@ export default {
         return;
       }
 
-      const token = sessionStorage.getItem('accessToken');
-      if (!token) {
-        console.error('No token found');
-        return;
-      }
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      try {
-        const response = await axiosInstance.post('/api/groups', {
+      try { 
+        const response = await axiosInstance.post('http://localhost:8080/api/groups', {
           groupName: this.groupName,
           employeeIds: empNos
         }, config);
+        const emailresponse = await axiosInstance.post('http://localhost:8080/api/auth/send/group/add/{groupId}', {
+          groupId : response.data.groupId
+        }, config);
+
         console.log('그룹 생성 성공:', response.data);
+        console.log('그룹 생성 메일 전송 성공:', emailresponse.data);
         this.$emit('close');
       } catch (error) {
         console.error('그룹 생성 오류:', error.response ? error.response.data : error.message);
+        console.error('그룹 생성 메일 전송 오류:', error.emailresponse ? error.emailresponse.data : error.emailmessage);
       }
     },
+
     fetchGroupLeaderName() {
       const name = sessionStorage.getItem('name');
       if (name) {

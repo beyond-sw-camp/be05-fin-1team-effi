@@ -46,7 +46,7 @@ export default defineComponent({
   width: 100%;
   position: fixed;
   top: 0;
-  z-index: 1000; /* 헤더가 다른 요소 위에 위치하도록 설정 */
+  z-index: 500; /* 헤더가 다른 요소 위에 위치하도록 설정 */
 }
 
 .content {
