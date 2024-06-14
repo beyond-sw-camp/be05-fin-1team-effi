@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @Builder
 public class GroupResponseDTO {
-
+    
+    private Long groupId;
     private String groupName;
     private List<Long> employeeIds;
 }
