@@ -34,6 +34,7 @@
 
 <script>
 import axiosInstance from '@/services/axios';
+import { useRouter } from 'vue-router';
 
 export default {
   props: {
@@ -53,6 +54,10 @@ export default {
   },
   created() {
     this.fetchGroupLeaderName();
+  },
+  setup() {
+    const router = useRouter();
+    return { router };
   },
   methods: {
     async createGroup() {
@@ -82,25 +87,30 @@ export default {
         return;
       }
 
-      try { 
+      try {
         const response = await axiosInstance.post('http://localhost:8080/api/groups', {
           groupName: this.groupName,
           employeeIds: empNos
         }, config);
-
-        console.log('Group created:', response.data);
         
         const groupId = response.data.data.groupId; // groupId를 제대로 받아옴
-        const emailResponse = await axiosInstance.post(`http://localhost:8080/api/auth/group/add/${groupId}`, {
-          groupId: groupId
-        }, config);
-
         console.log('그룹 생성 성공:', response.data);
-        console.log('그룹 생성 메일 전송 성공:', emailResponse.data);
+
+        // 그룹 생성이 성공하면 모달을 닫고 홈으로 이동
         this.$emit('close');
+        this.router.push('/');
+
+        // 이메일 전송 시도
+        try {
+          const emailResponse = await axiosInstance.post(`http://localhost:8080/api/auth/send/group/add/${groupId}`, {
+            groupId: groupId
+          }, config);
+          console.log('그룹 생성 메일 전송 성공:', emailResponse.data);
+        } catch (emailError) {
+          console.error('그룹 생성 메일 전송 오류:', emailError.response ? emailError.response.data : emailError.message);
+        }
       } catch (error) {
         console.error('그룹 생성 오류:', error.response ? error.response.data : error.message);
-        console.error('그룹 생성 메일 전송 오류:', error.response ? error.response.data : error.message);
       }
     },
 
