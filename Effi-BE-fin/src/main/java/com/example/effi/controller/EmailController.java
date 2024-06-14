@@ -67,14 +67,4 @@ public class EmailController {
         return ResponseEntity.ok().build();
     }
 
-    //일정 알림 메일 -> notifyYN 상관 X
-    @PostMapping("/send/{scheduleId}")
-    public ResponseEntity<?> scheduleMail(@PathVariable("scheduleId") Long scheduleId) {
-        participantService.findAllByScheduleId(scheduleId)
-                        .forEach(participantResponseDTO
-                                -> mailService.scheduleNotifyMail(employeeService.
-                                findById(participantResponseDTO.getEmpId()).getEmail(), scheduleId));
-        return ResponseEntity.ok().build();
-    }
-
 }

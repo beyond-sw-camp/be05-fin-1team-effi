@@ -11,17 +11,23 @@ import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 @RequiredArgsConstructor
 @Transactional
@@ -34,7 +40,13 @@ public class ScheduleService {
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
     private final CategoryService categoryService;
-    private final RoutineService routineService;
+    private final TaskScheduler taskScheduler;
+
+    @Autowired
+    @Lazy
+    private EmailService emailService;
+
+    private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -97,7 +109,9 @@ public class ScheduleService {
             return new ScheduleResponseDTO(scheduleRepository.save(scheduleRequestDTO.toEntity(category, routine)));
         }
         Schedule entity = scheduleRequestDTO.toEntity(category, null);
-        return new ScheduleResponseDTO(scheduleRepository.save(entity));
+        ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(scheduleRepository.save(entity));
+        scheduleNotification(scheduleResponseDTO); // 메일 관련
+        return scheduleResponseDTO;
     }
 
     // 루틴 스케줄 자동 추가
@@ -181,7 +195,9 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : schedules) {
             participantService.addParticipant(sch.getScheduleId(), empId);
-            res.add(new ScheduleResponseDTO(sch));
+            ScheduleResponseDTO scheduleResponseDTO1 = new ScheduleResponseDTO(sch);
+            res.add(scheduleResponseDTO1);
+            scheduleNotification(scheduleResponseDTO1); // 메일 관련
         }
         return res;
     }
@@ -200,7 +216,9 @@ public class ScheduleService {
             sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
                     scheduleRequestDTO.getEndTime(), scheduleRequestDTO.getStatus(), scheduleRequestDTO.getNotificationYn(),
                     category, null);
-        return new ScheduleResponseDTO(scheduleRepository.save(sch));
+        ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(scheduleRepository.save(sch));
+        scheduleNotification(scheduleResponseDTO);
+        return scheduleResponseDTO;
     }
 
     //update routine
@@ -250,4 +268,54 @@ public class ScheduleService {
         return res;
     }
 
+    // 메일 관련
+    public void scheduleNotification(ScheduleResponseDTO schedule) {
+        try {
+            if (scheduledTasks.containsKey(schedule.getScheduleId())){
+                System.out.println("Removing existing task for scheduleId: " + schedule.getScheduleId());
+                scheduledTasks.remove(schedule.getScheduleId());
+            }
+
+            if (Boolean.TRUE.equals(schedule.getDeleteYn()) || Boolean.FALSE.equals(schedule.getNotificationYn())) {
+                System.out.println("Cancelling task for scheduleId: " + schedule.getScheduleId() + " due to delete or notification off.");
+                cancelScheduledTask(schedule.getScheduleId());
+                return; // 삭제 혹은 메일 알림 X
+            }
+
+            LocalDateTime notificationTime = schedule.getStartTime().toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime()
+                    .minusHours(1);
+
+            System.out.println("Calculated notificationTime: " + notificationTime);
+
+            if (notificationTime.isAfter(LocalDateTime.now())) {
+                Date notificationDate = Date.from(notificationTime.atZone(ZoneId.systemDefault()).toInstant());
+                System.out.println("Scheduling task for scheduleId: " + schedule.getScheduleId() + " at " + notificationDate);
+                ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> sendNotification(schedule.getScheduleId()), notificationDate);
+                scheduledTasks.put(schedule.getScheduleId(), scheduledFuture);
+            } else {
+                System.out.println("Notification time is in the past. No task scheduled for scheduleId: " + schedule.getScheduleId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error in scheduling notification for scheduleId: " + schedule.getScheduleId());
+        }
+    }
+
+
+    private void cancelScheduledTask(Long scheduleId) {
+        ScheduledFuture<?> scheduledTask = scheduledTasks.remove(scheduleId);
+        if (scheduledTask != null) {
+            scheduledTask.cancel(false);
+        }
+    }
+
+    private void sendNotification(Long scheduleId) {
+        List<ParticipantResponseDTO> participants = participantService.findAllByScheduleId(scheduleId);
+        for (ParticipantResponseDTO participant : participants) {
+            String email = employeeService.findById(participant.getEmpId()).getEmail();
+            emailService.scheduleNotifyMail(email, scheduleId);
+        }
+    }
 }
