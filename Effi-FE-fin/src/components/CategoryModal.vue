@@ -69,14 +69,12 @@ export default {
     },
     handleSelectDept(deptId) {
       this.selectedDeptId = deptId;
-      console.log('Selected deptId:', deptId); // 선택된 부서 ID를 확인하는 로그
-      this.showDepartmentModal = false; // 모달 닫기
+      this.showDepartmentModal = false;
       this.returnSelection();
     },
     handleSelectGroup(groupId) {
       this.selectedGroupId = groupId;
-      console.log('Selected groupId:', groupId); // 선택된 부서 ID를 확인하는 로그
-      this.showGroupModal = false; // 모달 닫기
+      this.showGroupModal = false;
       this.returnSelection();
     },
     handleClose() {
