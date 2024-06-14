@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+@Async
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -55,7 +57,7 @@ public class EmailService {
         body += "<h1> 안녕하세요 이피 입니다. </h1>";
         body += "<br>";
         body += "<strong>";
-        body += MessageBody +"이 편집 되었습니다."  + "</strong><div><br/> ";
+        body += MessageBody +"에서 탈퇴 되었습니다."  + "</strong><div><br/> ";
         body += "</div>";
         sendMail(fromEmail, toEmail, title, body);
     }
@@ -146,6 +148,7 @@ public class EmailService {
             helper.setSubject(title);
             helper.setText(body, true);
             javaMailSender.send(message);
+            System.out.println("메일 전송완료");
         } catch (MessagingException e) {
             e.printStackTrace();
         }
