@@ -1,42 +1,20 @@
 <template>
   <div>
     <v-sheet class="d-flex" height="54" tile>
-      <v-select
-        v-model="type"
-        :items="types"
-        class="ma-2"
-        label="View Mode"
-        variant="outlined"
-        dense
-        hide-details
-        @change="onViewModeChange"
-      ></v-select>
-      <v-select
-        v-model="weekday"
-        :items="weekdays"
-        class="ma-2"
-        label="Weekdays"
-        variant="outlined"
-        dense
-        hide-details
-        @change="onWeekdayChange"
-      ></v-select>
+      <v-select v-model="type" :items="types" class="ma-2" label="View Mode" variant="outlined" dense hide-details
+        @change="onViewModeChange"></v-select>
+      <v-select v-model="weekday" :items="weekdays" class="ma-2" label="Weekdays" variant="outlined" dense hide-details
+        @change="onWeekdayChange"></v-select>
     </v-sheet>
     <v-sheet>
-      <v-calendar
-        ref="calendar"
-        v-model="calendarValue"
-        :events="events"
-        :view-mode="type"
-        :weekdays="weekday"
-        @dblclick:date="openAddScheduleModal"
-        @click:event="openEditScheduleModal"
-      >
+      <v-calendar ref="calendar" v-model="calendarValue" :events="events" :view-mode="type" :weekdays="weekday"
+        @dblclick:date="openAddScheduleModal" @click:event="openEditScheduleModal">
         <template v-slot:event="{ event }">
           <div class="event" :style="{ backgroundColor: event.color }">
             <strong>{{ event.title }}</strong>
             <br>
-            {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD HH:mm') : '' }}
+            {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ?
+              event.end.format('YYYY-MM-DD HH:mm') : '' }}
           </div>
         </template>
         <template v-slot:timeGutter="{ time, index }">
@@ -49,21 +27,11 @@
         </template>
       </v-calendar>
     </v-sheet>
-    <schedule-modal
-      v-if="dialog"
-      :dialog="dialog"
-      :event="selectedEvent"
-      :is-edit-mode="isEditMode"
-      @update:dialog="updateDialog"
-      @submit-event="handleEventSubmit"
-    />
+    <schedule-modal v-if="dialog" :show="dialog" :is-edit-mode="isEditMode" :event="selectedEvent"
+      @close="updateDialog(false)" />
     <v-menu v-model="timezoneMenu" bottom right>
       <v-list>
-        <v-list-item
-          v-for="timezone in availableTimezones"
-          :key="timezone.timezoneId"
-          @click="addTimezone(timezone)"
-        >
+        <v-list-item v-for="timezone in availableTimezones" :key="timezone.timezoneId" @click="addTimezone(timezone)">
           <v-list-item-title>{{ timezone.timezoneName }}</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -73,7 +41,6 @@
 
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
-import axios from 'axios';
 import axiosInstance from '@/services/axios';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -91,7 +58,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    selectedGroupId:{
+    selectedGroupId: {
       type: Array,
       default: () => [],
     }
@@ -131,8 +98,6 @@ export default {
         if (!token) {
           throw new Error('No access token found');
         }
-
-        console.log('in vcalendar', props.selectedGroupId);
 
         let schedules = [];
         if (props.selectedCategories.length === 0 && props.selectedGroupId.length === 0) {
@@ -206,7 +171,7 @@ export default {
         if (!empId) {
           throw new Error('No employee ID found');
         }
-        const response = await axios.get(`/api/timezone-emp/${empId}`);
+        const response = await axiosInstance.get(`/api/timezone-emp/${empId}`);
         const userTimezones = response.data.data.timezones;
         timezonesSelected.value = userTimezones.map((tz) => tz.timezoneName);
       } catch (error) {
@@ -301,7 +266,7 @@ export default {
         if (!empId) {
           throw new Error('No employee ID found');
         }
-        await axios.post(`/api/timezone-emp/${empId}/add`, null, {
+        await axiosInstance.post(`/api/timezone-emp/${empId}/add`, null, {
           params: {
             timezoneId: timezone.timezoneId,
             isDefault: false,

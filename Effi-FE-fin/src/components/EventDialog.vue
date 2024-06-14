@@ -4,7 +4,6 @@
       <button class="close-button" @click="$emit('close')">×</button>
       <h2>일정 상세 보기</h2>
       <div class="modal-body">
-        <!-- Add Schedule Form -->
         <form @submit.prevent="submit">
           <!-- Form Fields -->
           <div class="form-group">
@@ -69,12 +68,12 @@
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
           </div>
-        <div class="form-group">
+          <div class="form-group">
             <label for="tag">태그</label>
             <div>
-              <TagApp :schedule="internalEvent" @update-schedule="updateSchedule"/>
+              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule"/>
               <div class="tag-list">
-                <span v-for="tag in internalEvent.tags" :key="tag" class="tag-item">{{ tag }}</span>
+                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
               </div>
             </div>
           </div>
@@ -87,7 +86,7 @@
             </select>
           </div>
           <div class="form-group checkbox-group">
-            <label for="noticeYn">1시간 전 메일 알림<input type="checkbox" id="noticeYn" v-model="internalEvent.noticeYn"></label>
+            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
             <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
@@ -105,16 +104,16 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, reactive, onMounted } from 'vue';
+import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
-import TagApp from './TagAdd.vue';
+import TagAdd from './TagAdd.vue';
 import RoutineModal from './RoutineModal.vue';
 
 export default {
   components: {
     CategoryModal,
-    TagApp,
+    TagAdd,
     RoutineModal
   },
   props: {
@@ -140,7 +139,7 @@ export default {
       endDate: '',
       endTime: '',
       status: 0,
-      noticeYn: false,
+      notificationYn: false,
       deleteYn: false,
       createdAt: new Date().toISOString(),
       updatedAt: null,
@@ -154,6 +153,7 @@ export default {
     const selectedEmployees = ref([]);
     const showCategoryModal = ref(false);
     const showRoutineModal = ref(false);
+    const tagColors = reactive({});
 
     onMounted(() => {
       const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
@@ -169,14 +169,11 @@ export default {
 
     const fetchDefaultTimezone = async (empId) => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/timezone-emp/${empId}/default`);
-        console.log('API response:', response.data); // 전체 응답 데이터 로깅
+        const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
         const defaultTimezone = response.data.data;
         if (defaultTimezone) {
           internalEvent.value.timezoneId = defaultTimezone.timezoneId;
           internalEvent.value.timezoneName = defaultTimezone.timezoneName;
-          console.log('defaultTimezone ID:', internalEvent.value.timezoneId);
-          console.log('defaultTimezone Name:', internalEvent.value.timezoneName);
         } else {
           console.error('No default timezone found');
         }
@@ -187,16 +184,20 @@ export default {
 
     const fetchScheduleDetails = async (scheduleId) => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/schedule/find/${scheduleId}`);
+        const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
         const schedule = response.data;
         internalEvent.value = {
           ...internalEvent.value,
           ...schedule,
           categoryNo: schedule.categoryNo,
-          tags: schedule.tags.map(tag => ({ name: tag })),
+          tags: schedule.tags.map(tag => tag.name),
           createdAt: schedule.createdAt || new Date().toISOString()
         };
-        console.log('Fetched schedule details:', schedule);
+        for (let tag of internalEvent.value.tags) {
+          if (!tagColors[tag]) {
+            tagColors[tag] = getRandomColor();
+          }
+        }
       } catch (error) {
         console.error('Error fetching schedule details:', error);
       }
@@ -208,7 +209,6 @@ export default {
 
     const submit = async () => {
       try {
-        // 시간 형식 수정
         const formattedEvent = {
           ...internalEvent.value,
           startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
@@ -216,9 +216,8 @@ export default {
           tags: internalEvent.value.tags.map(tag => tag.name)
         };
 
-        // 루틴 추가
         if (internalEvent.value.repeat && !internalEvent.value.routineId) {
-          const routineResponse = await axios.post('http://localhost:8080/api/routine/add', {
+          const routineResponse = await axiosInstance.post('/api/routine/add', {
             routineStart: formattedEvent.startTime,
             routineEnd: formattedEvent.endTime,
             routineCycle: internalEvent.value.routineCycle
@@ -229,20 +228,18 @@ export default {
         }
 
         const apiUrl = props.isEditMode
-          ? `http://localhost:8080/api/schedule/update/${props.scheduleId}`
-          : `http://localhost:8080/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
+          ? `/api/schedule/update/${props.scheduleId}`
+          : `/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
 
-        console.log('Submitting to API:', apiUrl);
-        console.log('Formatted event data:', formattedEvent);
-
-        const response = await axios.post(apiUrl, formattedEvent);
-        console.log('Response from API:', response.data);
-
+        const response = await axiosInstance.post(apiUrl, formattedEvent);
         const scheduleId = response.data.scheduleId;
 
-        // 참여자 추가
+        for (let tag of internalEvent.value.tags) {
+          await axiosInstance.post(`/api/tag/add/${scheduleId}`, tag);
+        }
+
         for (let employee of selectedEmployees.value) {
-          await axios.post(`http://localhost:8080/api/participant/add`, {
+          await axiosInstance.post(`/api/participant/add`, {
             scheduleId,
             empId: employee.empNo
           });
@@ -274,8 +271,13 @@ export default {
       showCategoryModal.value = false;
     };
 
-    const updateSchedule = (tags) => {
+    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
       internalEvent.value.tags = tags;
+      for (let tag in newTagColors) {
+        if (!tagColors[tag]) {
+          tagColors[tag] = newTagColors[tag];
+        }
+      }
     };
 
     const searchEmployees = async () => {
@@ -290,10 +292,10 @@ export default {
         }
       };
       try {
-        const response = await axios.get(`http://localhost:8080/api/groups/search?name=${searchQuery.value}`, config);
+        const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
         const employees = response.data;
         for (let employee of employees) {
-          const deptResponse = await axios.get(`http://localhost:8080/api/search/dept/${employee.deptId}`, config);
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
           employee.deptName = deptResponse.data;
         }
         searchResults.value = employees;
@@ -312,6 +314,20 @@ export default {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
     };
 
+    // 직원 검색과 선택을 통해서 참가자를 추가하고 삭제하는 함수를 정의합니다.
+    const addParticipant = async (empId) => {
+      try {
+        await axiosInstance.post('/api/participant/add', {
+          scheduleId: props.scheduleId,
+          empId
+        });
+        alert('참가자가 추가되었습니다.');
+      } catch (error) {
+        console.error('Error adding participant:', error.response ? error.response.data : error.message);
+        alert('참가자 추가에 실패했습니다.');
+      }
+    };
+
     const toggleRoutineModal = () => {
       showRoutineModal.value = internalEvent.value.repeat;
     };
@@ -324,6 +340,11 @@ export default {
       internalEvent.value.routineId = routineData.routineId;
       internalEvent.value.routineCycle = routineData.routineCycle;
       showRoutineModal.value = false;
+    };
+
+    const getRandomColor = () => {
+      const colors = ['#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585'];
+      return colors[Math.floor(Math.random() * colors.length)];
     };
 
     return {
@@ -342,7 +363,9 @@ export default {
       removeEmployee,
       toggleRoutineModal,
       handleRoutineClose,
-      handleRoutineConfirm
+      handleRoutineConfirm,
+      tagColors,
+      addParticipant
     };
   }
 };

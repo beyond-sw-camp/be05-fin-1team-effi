@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 
 export default {
   props: {
@@ -40,7 +40,7 @@ export default {
   methods: {
     async fetchFindTimezone() {
       try {
-        const response = await axios.get('http://localhost:8080/api/mypage/timezones');
+        const response = await axiosInstance.get('/api/mypage/timezones');
         this.timezones = response.data;
       } catch (error) {
         console.error('타임존 검색 오류:', error.response ? error.response.data : error.message);
@@ -56,7 +56,7 @@ export default {
       }
       const empId = sessionStorage.getItem('empNo');
       try {
-        await axios.post(`http://localhost:8080/api/timezone-emp/${empId}/add`, null, {
+        await axiosInstance.post(`/api/timezone-emp/${empId}/add`, null, {
           params: {
             timezoneId: this.selectedTimezoneId
           }

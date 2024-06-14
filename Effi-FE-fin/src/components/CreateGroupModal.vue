@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 
 export default {
   props: {
@@ -81,7 +81,7 @@ export default {
       };
 
       try {
-        const response = await axios.post('http://localhost:8080/api/groups', {
+        const response = await axiosInstance.post('/api/groups', {
           groupName: this.groupName,
           employeeIds: empNos
         }, config);
@@ -111,10 +111,10 @@ export default {
         }
       };
       try {
-        const response = await axios.get(`http://localhost:8080/api/groups/search?name=${this.searchQuery}`, config);
+        const response = await axiosInstance.get(`/api/groups/search?name=${this.searchQuery}`, config);
         const employees = response.data;
         for (let employee of employees) {
-          const deptResponse = await axios.get(`http://localhost:8080/api/search/dept/${employee.deptId}`, config);
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
           employee.deptName = deptResponse.data;
         }
         this.searchResults = employees;

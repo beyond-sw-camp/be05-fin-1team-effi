@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from '@/services/axios';
 
 export default {
   props: {
@@ -31,7 +31,7 @@ export default {
   methods: {
     async fetchFindDept() {
       try {
-        const response = await axios.get('http://localhost:8080/api/search/dept');
+        const response = await axiosInstance.get('/api/search/dept');
         this.departments = response.data;
       } catch (error) {
         console.error('부서 검색 오류:', error.response ? error.response.data : error.message);
