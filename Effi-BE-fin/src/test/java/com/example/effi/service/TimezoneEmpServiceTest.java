@@ -27,6 +27,11 @@ import static org.mockito.Mockito.*;
 
 class TimezoneEmpServiceTest {
 
+    /*
+    * updateEmployeeTimezone 메서드 테스트
+    * getDefaultTimezoneForEmployee 메서드 테스트
+    */
+
     @Mock
     private TimezoneEmpRepository timezoneEmpRepository;
 

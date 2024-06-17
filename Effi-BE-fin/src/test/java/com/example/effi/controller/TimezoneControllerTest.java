@@ -25,6 +25,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class TimezoneControllerTest {
 
+  /*
+  * 안짠거
+  * addTimezone(TimezoneDTO timezoneDTO)
+  * updateTimezone(Long timezoneId, TimezoneDTO timezoneDTO)
+  */
+
   private MockMvc mockMvc;
 
   @Mock

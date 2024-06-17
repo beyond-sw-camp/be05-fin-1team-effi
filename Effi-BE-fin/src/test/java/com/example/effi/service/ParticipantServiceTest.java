@@ -30,18 +30,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ParticipantServiceTest {
 
+    /*
+     * findByEmpIdAndScheduleId
+     */
+
     @Autowired
     ScheduleService scheduleService;
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
-    private RoutineRepository routineRepository;
-    @Autowired
     private EmployeeService employeeService;
     @Autowired
     private ParticipantService participantService;
-    @Autowired
-    private RoutineService routineService;
     @Autowired
     private EmployeeRepository employeeRepository;
 

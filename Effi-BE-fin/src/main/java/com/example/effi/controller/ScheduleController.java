@@ -24,7 +24,6 @@ public class ScheduleController {
     private final EmployeeService employeeService;
     private final ParticipantService participantService;
     private final EmployeeRepository employeeRepository;
-    private final GroupService groupService;
     private final GroupEmpRepository groupEmpRepository;
     private final CategoryService categoryService;
 
@@ -40,7 +39,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -64,7 +65,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -89,7 +92,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -111,7 +116,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -211,8 +218,15 @@ public class ScheduleController {
     //그룹 탈퇴시 그룹 스케줄 삭제
     @PutMapping("/delete/groupSchedule/{groupId}")
     public ResponseEntity<?> deleteGroupSchedule(@PathVariable("groupId") Long groupId){
-        List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.deleteGroupSchedule(groupId);
-        return ResponseEntity.ok(scheduleResponseDTOS);
+        try{
+            List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.deleteGroupSchedule(groupId);
+            return ResponseEntity.ok(scheduleResponseDTOS);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete schedule: " + e.getMessage());
+        }
     }
 
 }

@@ -39,6 +39,14 @@ import static org.mockito.Mockito.*;
 
 class GroupServiceTest {
 
+    /*
+    * 안짠거
+    * deleteGroupAndMembers
+    * findGroupLeader
+    * findMyGroup
+    * findGroupByName
+    */
+
     @InjectMocks
     private GroupService groupService;
 

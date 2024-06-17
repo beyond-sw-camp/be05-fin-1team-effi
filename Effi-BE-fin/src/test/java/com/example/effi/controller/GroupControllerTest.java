@@ -35,6 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(GroupController.class)
 class GroupControllerTest {
+  /* 안짠 애들
+  findAllGroups()
+  findGroupById()
+  findMyGroups()
+  findGroupByName()
+  */
+
   @Autowired
   private MockMvc mockMvc;
 

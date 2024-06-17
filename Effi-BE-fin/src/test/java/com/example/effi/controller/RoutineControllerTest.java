@@ -30,6 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class RoutineControllerTest {
 
+    /*
+    * 안짠거
+    * addRoutine(Long scheduleId, RoutineRequestDTO input) - 스케줄 ID가 유효하지 않거나 기타 예외가 발생하는 경우
+    * deleteRoutine(Long routineId) - 루틴 ID가 유효하지 않은 경우
+    */
+
     @Autowired
     private RoutineService routineService;
 
