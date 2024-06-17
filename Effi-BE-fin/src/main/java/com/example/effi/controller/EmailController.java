@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,13 +32,13 @@ public class EmailController {
         return ResponseEntity.ok().build();
     }
 
-    // 그룹 편집 시 메일 전송
+    // 그룹 편집 시 메일 전송 (나갔을때 나간 사ㅏ람에게)
     @PostMapping("/send/group/update/{groupId}")
     public ResponseEntity<?> groupUpdateMail(@PathVariable("groupId") Long groupId) {
-        if (!groupService.findGroupLeader(groupId))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("그룹 리더만 메일을 전송할 수 있습니다.");
-        groupService.findEmployeeIdsByGroupId(groupId)
-                .forEach(emp -> mailService.updateGroupMail(employeeService.findById(emp).getEmail(), groupId));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long empId = Long.valueOf(authentication.getName());
+
+        mailService.updateGroupMail(employeeService.findById(empId).getEmail(), groupId);
         return ResponseEntity.ok().build();
     }
 
@@ -64,16 +66,6 @@ public class EmailController {
                                        @PathVariable("scheduleId") Long scheduleId) {
         groupService.findEmployeeIdsByGroupId(groupId)
                 .forEach(empId -> mailService.groupEmplyesMail(employeeService.findById(empId).getEmail(), scheduleId));
-        return ResponseEntity.ok().build();
-    }
-
-    //일정 알림 메일 -> notifyYN 상관 X
-    @PostMapping("/send/{scheduleId}")
-    public ResponseEntity<?> scheduleMail(@PathVariable("scheduleId") Long scheduleId) {
-        participantService.findAllByScheduleId(scheduleId)
-                        .forEach(participantResponseDTO
-                                -> mailService.scheduleNotifyMail(employeeService.
-                                findById(participantResponseDTO.getEmpId()).getEmail(), scheduleId));
         return ResponseEntity.ok().build();
     }
 

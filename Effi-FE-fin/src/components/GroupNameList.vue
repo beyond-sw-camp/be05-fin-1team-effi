@@ -7,9 +7,9 @@
     <div v-if="isOpen" class="group-list">
       <div v-for="group in groups" :key="group.id" class="group-item">
         <input
-            type="checkbox"
-            :id="group.id"
-            v-model="group.selected"
+          type="checkbox"
+          :id="group.id"
+          v-model="group.selected"
         />
         <label :for="group.id">{{ group.name }}</label>
         <button v-if="group.selected" @click="removeGroup(group.id)" class="remove-button">━</button>
@@ -20,6 +20,7 @@
 
 <script>
 import axiosInstance from "@/services/axios.js";
+import { watch } from 'vue';
 
 export default {
   data() {
@@ -90,14 +91,21 @@ export default {
   },
   mounted() {
     this.fetchGroups(); // 컴포넌트가 마운트될 때 그룹 목록을 불러옵니다.
+  },
+  watch: {
+    groups: {
+      handler(newGroups) {
+        const selectedGroupIds = newGroups.filter(group => group.selected).map(group => group.id);
+        this.$emit('selectedGroups', selectedGroupIds);
+      },
+      deep: true,
+    }
   }
 };
 </script>
 
-
 <style scoped>
 .group-container {
-  //background-color: #f7d6c3;
   padding: 10px;
   border-radius: 5px;
   width: 200px;

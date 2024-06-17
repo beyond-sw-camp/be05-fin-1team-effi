@@ -1,8 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth';
+
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
-import { useAuthStore } from '../stores/auth';
+
+import ModalTest from '@/views/ModalTest.vue';
+import ScheduleTestView from '../views/ScheduleTestView.vue'
+import CategoryScheduleView from '../views/CategoryScheduleView.vue'
+import SearchView from '../views/SearchView.vue'
+
+import test from '../views/test.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,11 +30,44 @@ const router = createRouter({
     {
       path: '/mypage',
       name: 'mypage',
-      component: MyPageView
+
+      component: MyPageView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/modaltest',
+      name: 'modaltest',
+      component: ModalTest
+
+    },
+    {
+      path: '/category',
+      name: 'category',
+      component: CategoryScheduleView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/search',
+      name: 'search',
+      component: SearchView,
+      meta: { requiresAuth: true }
+
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: test,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/schedule',
+      name: 'schedule',
+      component: ScheduleTestView,
+      meta: { requiresAuth: true }
     }
   ]
 });
-//커밋을 위한 주석
+
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 

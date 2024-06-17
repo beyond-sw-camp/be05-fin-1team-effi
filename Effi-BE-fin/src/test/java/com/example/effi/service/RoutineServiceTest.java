@@ -92,7 +92,6 @@ public class RoutineServiceTest {
         scheduleRequest.setStartTime(date);
         scheduleRequest.setEndTime(date);
         scheduleRequest.setRoutineId(routineId);
-        scheduleRequest.setCategoryId(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();

@@ -1,21 +1,40 @@
 <template>
   <div class="container">
-    <Navigation class="navigation" />
+    <Navigation @update-categories="handleUpdateCategories"  @update-groups="handleUpdateGroups" class="navigation" />
     <div class="content">
-      <VCalendar class="calendar" />
+      <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId" />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import Navigation from '@/components/LeftSidebar.vue';
 import VCalendar from '@/components/VCalendar.vue';
 
 export default defineComponent({
   components: {
     Navigation,
-    VCalendar,
+    VCalendar
+  },
+  setup() {
+    const selectedCategories = ref([]);
+    const selectedGroupId = ref([]);
+
+    const handleUpdateCategories = (categories) => {
+      selectedCategories.value = categories;
+    };
+
+    const handleUpdateGroups = (groups) => {
+      selectedGroupId.value = groups;
+    }
+
+    return {
+      selectedCategories,
+      handleUpdateCategories,
+      selectedGroupId,
+      handleUpdateGroups
+    };
   },
 });
 </script>
@@ -56,10 +75,12 @@ export default defineComponent({
   .navigation {
     display: none; /* 작은 화면에서는 네비게이션 숨김 */
   }
+
   .content {
     width: 100%;
     padding: 10px;
   }
+
   .calendar {
     width: 100%;
     height: auto;

@@ -35,6 +35,7 @@ public class EmployeeController {
         return ResponseEntity.badRequest().body(GlobalResponse.builder()
                                             .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
                                             .status(HttpStatus.BAD_REQUEST.value())
+                                            .data(response)
                                             .build());
     }
 

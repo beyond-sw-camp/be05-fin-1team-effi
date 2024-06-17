@@ -25,7 +25,7 @@ public class ScheduleDTO {
     private Date createdAt;
     private Date updatedAt;
 
-    private Long categoryId;
+    private Long categoryNo;
     private Long routineId;
 
     public Schedule toEntity(Category category, Routine routine) {
@@ -51,7 +51,7 @@ public class ScheduleDTO {
         this.status = schedule.getStatus();
         this.notificationYn = schedule.getNotificationYn();
         this.deleteYn = schedule.getDeleteYn();
-        this.categoryId = category.getCategoryId();
+        this.categoryNo = category.getCategoryNo();
         this.routineId = routine.getRoutineId();
         this.createdAt = schedule.getCreatedAt();
         this.updatedAt = schedule.getUpdatedAt();

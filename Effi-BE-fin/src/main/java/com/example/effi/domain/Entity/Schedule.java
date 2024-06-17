@@ -46,7 +46,7 @@ public class Schedule {
 
     // category와 연결
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_no")
     private Category category;
 
     //routine

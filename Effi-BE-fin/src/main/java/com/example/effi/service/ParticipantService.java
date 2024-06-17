@@ -2,6 +2,7 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.ParticipantResponseDTO;
 import com.example.effi.domain.Entity.Participant;
+import com.example.effi.domain.Entity.Schedule; 
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.ScheduleRepository;
@@ -60,6 +61,12 @@ public class ParticipantService {
     public ParticipantResponseDTO findByParticipantId(Long participantId) {
         Participant parti = participantRepository.findById(participantId).get();
         return new ParticipantResponseDTO(parti);
+    }
+
+    //select empId && scheduleId
+    public ParticipantResponseDTO findByEmpIdAndScheduleId(Long empId, Long scheduleId) {
+        Participant byEmployeeIdAndScheduleScheduleId = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
+        return new ParticipantResponseDTO(byEmployeeIdAndScheduleScheduleId);
     }
 
     // delete

@@ -1,15 +1,15 @@
 <!-- app.vue -->
 <template>
   <div id="app">
-    <AppHeader v-if="showHeader" />
-    <div class="content">
+    <AppHeader v-if="showHeader" @search-results="handleSearchResults" />
+    <div class="content" :search-results="searchResults">
       <router-view />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { ref, defineComponent, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppHeader from '@/components/HomeHeader.vue';
 
@@ -20,9 +20,16 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const showHeader = computed(() => route.name !== 'login' && route.name !== 'test');
+    const searchResults = ref([]);
+
+    const handleSearchResults = (results) => { 
+      searchResults.value = results;
+    };
 
     return {
       showHeader,
+      searchResults, 
+      handleSearchResults,
     };
   },
 });
@@ -39,7 +46,7 @@ export default defineComponent({
   width: 100%;
   position: fixed;
   top: 0;
-  z-index: 1000; /* 헤더가 다른 요소 위에 위치하도록 설정 */
+  z-index: 500; /* 헤더가 다른 요소 위에 위치하도록 설정 */
 }
 
 .content {

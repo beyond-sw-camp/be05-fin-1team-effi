@@ -6,4 +6,5 @@ import com.example.effi.domain.Entity.Dept;
 
 public interface DeptRepository extends JpaRepository<Dept, Long> {
 
+    Dept findByDeptId(Long deptId);
 }

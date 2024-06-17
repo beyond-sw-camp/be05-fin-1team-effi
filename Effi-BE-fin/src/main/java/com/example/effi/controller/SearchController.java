@@ -1,14 +1,15 @@
 package com.example.effi.controller;
 
+import com.example.effi.domain.DTO.DeptDTO;
 import com.example.effi.domain.DTO.SearchResponseDTO;
+import com.example.effi.domain.Entity.Dept;
+import com.example.effi.repository.DeptRepository;
 import com.example.effi.service.SearchService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SearchController {
     private final SearchService searchService;
+    private final DeptRepository deptRepository;
 
     // api/search/title?title=<title> -> 제목에 title 을 포함하는 모든 스케줄 검색
     @GetMapping("/title")
@@ -38,9 +40,22 @@ public class SearchController {
         return ResponseEntity.ok(schedules);
     }
 
+    // deptId로 deptName 찾기
+    @GetMapping("/dept/{deptId}")
+    public ResponseEntity<String> searchSchedulesByDept(@PathVariable Long deptId){
+        Dept byDeptId = deptRepository.findByDeptId(deptId);
+        return ResponseEntity.ok(byDeptId.getDeptName());
+    }
 
-
-
+    @GetMapping("/dept")
+    public ResponseEntity<List<DeptDTO>> searchAlldept(){
+        List<Dept> deptRepositoryAll = deptRepository.findAll();
+        List<DeptDTO> deptList = new ArrayList<>();
+        for (Dept dept : deptRepositoryAll) {
+            deptList.add(new DeptDTO(dept.getDeptId(), dept.getDeptName()));
+        }
+        return ResponseEntity.ok(deptList);
+    }
 
 }
 

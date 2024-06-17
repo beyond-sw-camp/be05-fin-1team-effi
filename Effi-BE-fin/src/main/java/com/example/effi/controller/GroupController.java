@@ -21,13 +21,17 @@ public class GroupController {
 
     // 그룹 생성
     @PostMapping
-    public ResponseEntity<GlobalResponse> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
+    public ResponseEntity<?> createGroup(@RequestBody GroupRequestDTO groupRequestDTO) {
+        if (groupRequestDTO.getEmployeeIds() == null || groupRequestDTO.getEmployeeIds().isEmpty()) {
+            return ResponseEntity.badRequest().body("Employee list cannot be null or empty");
+        }
         return groupService.createGroup(groupRequestDTO);
     }
 
     // 그룹에 구성원 추가
     @PostMapping("/{groupId}/employees")
-    public ResponseEntity<GlobalResponse> addEmployeesToGroup(@PathVariable Long groupId, @RequestBody List<Long> employeeIds) {
+    public ResponseEntity<GlobalResponse> addEmployeesToGroup(@PathVariable Long groupId,
+            @RequestBody List<Long> employeeIds) {
         return groupService.addEmployeesToGroup(groupId, employeeIds);
     }
 
@@ -46,7 +50,8 @@ public class GroupController {
 
     // 그룹 이름 변경
     @PutMapping("/{groupId}")
-    public ResponseEntity<GlobalResponse> updateGroupName(@PathVariable Long groupId, @RequestBody UpdateGroupNameRequest request) {
+    public ResponseEntity<GlobalResponse> updateGroupName(@PathVariable Long groupId,
+            @RequestBody UpdateGroupNameRequest request) {
         return groupService.updateGroupName(groupId, request.getNewGroupName());
     }
 
@@ -85,4 +90,9 @@ public class GroupController {
         return ResponseEntity.ok(myGroup);
     }
 
+    // 그룹 이름으로 그룹 찾아서 그룹 정보 반환
+    @GetMapping("/find/name/{groupName}")
+    public ResponseEntity<GroupDTO> findGroupByName(@PathVariable String groupName) {
+        return ResponseEntity.ok(groupService.findGroupByName(groupName));
+    }
 }

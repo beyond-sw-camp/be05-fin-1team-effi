@@ -7,9 +7,16 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+@Async
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -50,7 +57,7 @@ public class EmailService {
         body += "<h1> 안녕하세요 이피 입니다. </h1>";
         body += "<br>";
         body += "<strong>";
-        body += MessageBody +"이 편집 되었습니다."  + "</strong><div><br/> ";
+        body += MessageBody +"에서 탈퇴 되었습니다."  + "</strong><div><br/> ";
         body += "</div>";
         sendMail(fromEmail, toEmail, title, body);
     }
@@ -109,8 +116,13 @@ public class EmailService {
 
     // 일정에 대한 미리 알림 메일 전송 기능 구현
     // 일정 하나 (empId-email, scheduleId, notifitionYn)
-    public void scheduleNotifyMail(String email, Long scheduleId){
+    public void scheduleNotifyMail(String email, Long scheduleId) {
         MessageBody = scheduleService.getSchedule(scheduleId).getTitle();
+        LocalDateTime startTime = scheduleService.getSchedule(scheduleId).getStartTime()
+                .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String formattedStartTime = startTime.format(formatter);
 
         String fromEmail = "teseuteu593@gmail.com";//?
         String toEmail = email;
@@ -119,8 +131,9 @@ public class EmailService {
         body += "<h1> 안녕하세요 이피 입니다. </h1>";
         body += "<br>";
         body += "<strong>";
-        body += MessageBody  + "</strong><div><br/> ";
-        body += "일정이 시작 되었습니다.<br/>";
+        body += MessageBody + "</strong><div><br/> ";
+        body += "일정이 시작 1시간 전입니다.<br/>";
+        body += "일정 시작 시간: " + formattedStartTime + "<br/>";
         body += "</div>";
         sendMail(fromEmail, toEmail, title, body);
     }
@@ -135,6 +148,7 @@ public class EmailService {
             helper.setSubject(title);
             helper.setText(body, true);
             javaMailSender.send(message);
+            System.out.println("메일 전송완료");
         } catch (MessagingException e) {
             e.printStackTrace();
         }
