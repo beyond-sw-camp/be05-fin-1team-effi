@@ -23,6 +23,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class TagControllerTest {
 
+    /*
+    * 안짠거
+    * addTag(String inputString)
+    * findTagByScheduleId(Long scheduleId)
+    */
+
     @Mock
     private TagService tagService;
 

@@ -24,6 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RoutineServiceTest {
 
+    /*
+    addRoutine
+    */
+
     @Autowired
     ScheduleService scheduleService;
     @Autowired

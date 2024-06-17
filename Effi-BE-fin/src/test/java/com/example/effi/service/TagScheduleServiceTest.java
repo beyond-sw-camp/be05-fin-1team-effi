@@ -29,6 +29,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class TagScheduleServiceTest {
 
+    /*
+    findTagIdList
+    */
+
     @Mock
     private TagScheduleRepository tagScheduleRepository;
 

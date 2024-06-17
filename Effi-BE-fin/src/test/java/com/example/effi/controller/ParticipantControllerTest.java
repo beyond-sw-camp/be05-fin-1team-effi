@@ -28,6 +28,11 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class ParticipantControllerTest {
 
+    /*
+    * 안짠거
+    * addParticipantGroup - 실패
+    */
+
     private MockMvc mockMvc;
 
     @Autowired
