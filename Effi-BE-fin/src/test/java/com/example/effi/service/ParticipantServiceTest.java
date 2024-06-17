@@ -35,13 +35,9 @@ public class ParticipantServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
-    private RoutineRepository routineRepository;
-    @Autowired
     private EmployeeService employeeService;
     @Autowired
     private ParticipantService participantService;
-    @Autowired
-    private RoutineService routineService;
     @Autowired
     private EmployeeRepository employeeRepository;
 

@@ -27,7 +27,7 @@ public class GroupDTO {
         this.deleteYn = grp.getDeleteYn();
     }
 
-    public Group toEntity(Category category) {
+    public Group toEntity() {
         return Group.builder()
                 .groupName(groupName)
                 .deleteYn(deleteYn)

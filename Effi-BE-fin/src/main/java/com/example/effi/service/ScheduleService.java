@@ -47,6 +47,8 @@ public class ScheduleService {
     private EmailService emailService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+    @Autowired
+    private GroupService groupService;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -255,9 +257,18 @@ public class ScheduleService {
 
     // group나갔을때 그 그룹에 해당하는 스케줄 삭제
     public List<ScheduleResponseDTO> deleteGroupSchedule(Long groupId){
+        GroupDTO groupById = groupService.findGroupById(groupId);
+        if (groupById == null)
+            throw new IllegalArgumentException("Group not found");
+
         CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+        if (byGroupId == null)
+            throw new IllegalArgumentException("Group not found");
+
         Long categoryNo = byGroupId.getCategoryNo();
         List<Schedule> allByCategortyCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+        if (allByCategortyCategoryNo.size() == 0)
+            throw new IllegalArgumentException("Group not found");
 
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : allByCategortyCategoryNo) {
