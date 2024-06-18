@@ -6,6 +6,7 @@ import com.example.effi.domain.Entity.Dept;
 import com.example.effi.repository.DeptRepository;
 import com.example.effi.service.SearchService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,19 +43,40 @@ public class SearchController {
 
     // deptId로 deptName 찾기
     @GetMapping("/dept/{deptId}")
-    public ResponseEntity<String> searchSchedulesByDept(@PathVariable Long deptId){
-        Dept byDeptId = deptRepository.findByDeptId(deptId);
-        return ResponseEntity.ok(byDeptId.getDeptName());
+    public ResponseEntity<?> searchSchedulesByDept(@PathVariable Long deptId){
+        try {
+            Dept byDeptId = deptRepository.findByDeptId(deptId);
+            if (byDeptId == null)
+                throw new IllegalArgumentException("부서가 존재하지 않습니다.");
+            return ResponseEntity.ok(byDeptId.getDeptName());
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
+        }
     }
 
     @GetMapping("/dept")
-    public ResponseEntity<List<DeptDTO>> searchAlldept(){
-        List<Dept> deptRepositoryAll = deptRepository.findAll();
-        List<DeptDTO> deptList = new ArrayList<>();
-        for (Dept dept : deptRepositoryAll) {
-            deptList.add(new DeptDTO(dept.getDeptId(), dept.getDeptName()));
+    public ResponseEntity<?> searchAlldept(){
+        try {
+            List<Dept> deptRepositoryAll = deptRepository.findAll();
+            if (deptRepositoryAll.isEmpty()){
+                throw new IllegalArgumentException("부서가 존재하지 않습니다.");
+            }
+            List<DeptDTO> deptList = new ArrayList<>();
+            for (Dept dept : deptRepositoryAll) {
+                deptList.add(new DeptDTO(dept.getDeptId(), dept.getDeptName()));
+            }
+            return ResponseEntity.ok(deptList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add schedule: " + e.getMessage());
         }
-        return ResponseEntity.ok(deptList);
+
     }
 
 }

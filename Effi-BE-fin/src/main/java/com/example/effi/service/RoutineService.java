@@ -25,7 +25,7 @@ public class RoutineService {
     public RoutineResponseDTO findRoutineById(Long Id){
         Routine routine = routineRepository.findById(Id).orElse(null);
         if (routine == null) {
-            throw new IllegalArgumentException("Routine not found with ID: " + Id);
+            throw new IllegalArgumentException("루틴 ID가 유효하지 않습니다.");
         }
         return new RoutineResponseDTO(routine);
     }
@@ -33,6 +33,8 @@ public class RoutineService {
     // schduleId 찾기
     public List<ScheduleResponseDTO> findAllByRoutineId(Long routineId){
         List<Schedule> lst = scheduleRepository.findAllByRoutine_RoutineId(routineId);
+        if (lst.size() == 0)
+            throw new IllegalArgumentException("루틴 ID가 유효하지 않습니다.");
         List<ScheduleResponseDTO> dtos = new ArrayList<>();
         for(Schedule schedule : lst){
             dtos.add(new ScheduleResponseDTO(schedule));
@@ -42,6 +44,8 @@ public class RoutineService {
 
     //루틴 추가 -> routine Id 리턴
     public Long addRoutine(RoutineRequestDTO routineRequestDTO){
+        if (routineRequestDTO.getRoutineCycle() == null || routineRequestDTO.getRoutineCycle().isEmpty())
+            throw new IllegalArgumentException("루틴 정보가 유효하지 않습니다.");
         return routineRepository.save(routineRequestDTO.toEntity()).getRoutineId();
     }
 
@@ -49,7 +53,7 @@ public class RoutineService {
     public RoutineResponseDTO updateRoutine(Long routineId, RoutineRequestDTO routineRequestDTO){
         Routine routine = routineRepository.findById(routineId).orElse(null);
         if (routine == null) {
-            throw new IllegalArgumentException("Routine not found with ID: " + routineId);
+            throw new IllegalArgumentException("루틴 ID가 유효하지 않습니다.");
         }
         routine.update(routineRequestDTO.getRoutineStart(), routineRequestDTO.getRoutineEnd(),
                 routineRequestDTO.getRoutineCycle());
@@ -60,7 +64,7 @@ public class RoutineService {
     public Long deleteRoutine(Long Id){
         Routine routine = routineRepository.findById(Id).orElse(null);
         if (routine == null) {
-            throw new IllegalArgumentException("Routine not found with ID: " + Id);
+            throw new IllegalArgumentException("루틴 ID가 유효하지 않습니다.");
         }
         routine.delete();
         return routineRepository.save(routine).getRoutineId();
