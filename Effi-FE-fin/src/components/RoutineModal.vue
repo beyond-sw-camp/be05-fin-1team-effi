@@ -47,7 +47,7 @@ export default {
     const routineCycle = ref('daily');
 
     const close = () => {
-      emit('close');
+      emit('close-routine'); // 이벤트 이름을 변경하여 혼동을 피합니다.
     };
 
     const submitRoutine = async () => {
@@ -57,7 +57,7 @@ export default {
           routineEnd: routineEnd.value,
           routineCycle: routineCycle.value
         });
-        emit('confirm', response.data);
+        emit('confirm-routine', response.data); // 이벤트 이름을 변경하여 혼동을 피합니다.
         close();
       } catch (error) {
         console.error('Error adding routine:', error);

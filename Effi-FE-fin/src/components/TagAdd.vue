@@ -136,17 +136,18 @@ export default {
     };
 
     const addTagFromAi = (tag) => {
-      if (!tags.value.includes(tag)) {
-        tags.value.push(tag);
-        if (!tagColors[tag]) {
-          tagColors[tag] = getRandomColor();
+      const trimmedTag = tag.trim(); // 태그의 공백 제거
+      if (!tags.value.includes(trimmedTag)) {
+        tags.value.push(trimmedTag);
+        if (!tagColors[trimmedTag]) {
+          tagColors[trimmedTag] = getRandomColor();
         }
         emitTags();
       }
     };
 
     const emitTags = () => {
-      emit('update-schedule', { tags: tags.value, tagColors: { ...tagColors } });
+      emit('update-schedule', { tags: tags.value.map(tag => tag.trim()), tagColors: { ...tagColors } });
     };
 
     const aiTags = async () => {
@@ -155,7 +156,7 @@ export default {
           message: message.value
         });
         console.log('AI Tags:', response.data);
-        aiResponseTags.value = response.data.tags;
+        aiResponseTags.value = response.data.tags.map(tag => tag.trim()); // 태그의 공백 제거
       } catch (error) {
         console.error('Error fetching AI tags:', error);
       }

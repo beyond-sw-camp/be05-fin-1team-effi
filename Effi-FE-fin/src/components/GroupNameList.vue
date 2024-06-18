@@ -19,21 +19,21 @@
 </template>
 
 <script>
+import { ref, onMounted, watch } from 'vue';
 import axiosInstance from "@/services/axios.js";
-import { watch } from 'vue';
 
 export default {
-  data() {
-    return {
-      isOpen: true,
-      groups: []
+  name: 'GroupNameList',
+  emits: ['selectedGroups'],
+  setup(props, { emit }) {
+    const isOpen = ref(true);
+    const groups = ref([]);
+
+    const toggleGroups = () => {
+      isOpen.value = !isOpen.value;
     };
-  },
-  methods: {
-    toggleGroups() {
-      this.isOpen = !this.isOpen;
-    },
-    async removeGroup(groupId) {
+
+    const removeGroup = async (groupId) => {
       const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
       if (!token) {
         console.error('No token found');
@@ -49,15 +49,16 @@ export default {
         await axiosInstance.delete(`/api/groups/${groupId}/employees`, config);
         console.log(`Group with id ${groupId} has been removed.`);
         // 그룹 리스트를 다시 조회합니다.
-        this.fetchGroups();
+        fetchGroups();
       } catch (error) {
         console.error(`Error removing group with id ${groupId}:`, error);
         if (error.response) {
           console.error('Error details:', error.response.data);
         }
       }
-    },
-    async fetchGroups() {
+    };
+
+    const fetchGroups = async () => {
       const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
       if (!token) {
         console.error('No token found');
@@ -73,7 +74,7 @@ export default {
         console.log(response.data);
         const data = Array.isArray(response.data) ? response.data : response.data.data;
         if (Array.isArray(data)) {
-          this.groups = data.map(group => ({
+          groups.value = data.map(group => ({
             id: group.groupId,
             name: group.groupName,
             selected: false
@@ -87,19 +88,24 @@ export default {
           console.error('Error details:', error.response.data);
         }
       }
-    }
-  },
-  mounted() {
-    this.fetchGroups(); // 컴포넌트가 마운트될 때 그룹 목록을 불러옵니다.
-  },
-  watch: {
-    groups: {
-      handler(newGroups) {
-        const selectedGroupIds = newGroups.filter(group => group.selected).map(group => group.id);
-        this.$emit('selectedGroups', selectedGroupIds);
-      },
-      deep: true,
-    }
+    };
+
+    onMounted(() => {
+      fetchGroups(); // 컴포넌트가 마운트될 때 그룹 목록을 불러옵니다.
+    });
+
+    watch(groups, (newGroups) => {
+      const selectedGroupIds = newGroups.filter(group => group.selected).map(group => group.id);
+      emit('selectedGroups', selectedGroupIds);
+    }, { deep: true });
+
+    return {
+      isOpen,
+      groups,
+      toggleGroups,
+      removeGroup,
+      fetchGroups
+    };
   }
 };
 </script>
