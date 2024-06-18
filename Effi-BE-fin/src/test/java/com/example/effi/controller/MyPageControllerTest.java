@@ -4,6 +4,7 @@ import com.example.effi.domain.DTO.MyPageResponseDTO;
 import com.example.effi.domain.DTO.MyPageUpdateDTO;
 import com.example.effi.service.MyPageService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ class MyPageControllerTest {
     }
 
     @Test
+    @DisplayName("회원 정보 조회 - 성공")
     void mypageView_ShouldReturnMyPageResponseDTO() throws Exception {
         MyPageResponseDTO responseDTO = MyPageResponseDTO.builder()
                 .empNo(1L)
@@ -63,6 +65,7 @@ class MyPageControllerTest {
     }
 
     @Test
+    @DisplayName("회원 정보 조회 - 실패: 직원 정보 없음")
     void mypageView_ShouldReturnNotFound_WhenEmployeeNotFound() throws Exception {
         when(myPageService.getEmployee()).thenThrow(new IllegalArgumentException("Employee not found"));
 
@@ -74,6 +77,7 @@ class MyPageControllerTest {
     }
 
     @Test
+    @DisplayName("타임존 업데이트 - 성공")
     void updateTimezone_ShouldReturnSuccessMessage() throws Exception {
         MyPageUpdateDTO updateDTO = MyPageUpdateDTO.builder()
                 .empId(1L)

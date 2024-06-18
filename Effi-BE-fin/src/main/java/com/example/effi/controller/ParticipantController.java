@@ -21,7 +21,6 @@ import java.util.List;
 public class ParticipantController {
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
-    private final GroupRepository groupRepository;
     private final GroupService groupService;
 
     // 추가 (scheduleId & empId)

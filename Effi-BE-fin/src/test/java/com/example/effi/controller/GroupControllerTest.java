@@ -1,10 +1,7 @@
 package com.example.effi.controller;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
-import com.example.effi.domain.DTO.UpdateGroupNameRequest;
+import com.example.effi.domain.DTO.*;
+import com.example.effi.service.EmployeeService;
 import com.example.effi.service.GroupService;
 import com.example.effi.config.TokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,11 +44,15 @@ class GroupControllerTest {
   @MockBean
   private GroupService groupService;
 
+  @Mock
+  private EmployeeService employeeService;
+
   @MockBean
   private TokenProvider tokenProvider;
 
   @Autowired
   private WebApplicationContext context;
+
 
   private String jwtToken;
 
@@ -330,4 +330,100 @@ class GroupControllerTest {
         .andExpect(jsonPath("$.message").value("그룹 삭제 실패"))
         .andExpect(jsonPath("$.status").value(400));
   }
+
+  @Test
+  @DisplayName("모든 그룹 조회 - 성공")
+  @WithMockUser
+  void findAllGroups_success() throws Exception {
+    GroupDTO group = new GroupDTO(1L, "Example Group", false);
+
+    List<GroupDTO> groups = Arrays.asList(group);
+
+    when(groupService.findAllGroups()).thenReturn(groups);
+
+    mockMvc.perform(get("/api/groups/all")
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].groupName").value("Example Group"));
+  }
+
+  ////// 추가
+  @Test
+  @DisplayName("그룹 id로 그룹 구성원 찾기 - 성공")
+  @WithMockUser
+  void findGroupById_success() throws Exception {
+    EmployeeDTO employee = EmployeeDTO.builder()
+            .id(1L)
+            .empNo(123L)
+            .company("Example Company")
+            .name("John Doe")
+            .email("john@example.com")
+            .phoneNum("123-456-7890")
+            .extensionNum("123")
+            .rank("Manager")
+            .build();
+
+    List<Long> empIds = Arrays.asList(1L);
+    List<EmployeeDTO> employees = Arrays.asList(employee);
+
+    when(groupService.findEmployeeIdsByGroupId(anyLong())).thenReturn(empIds);
+    when(employeeService.findById(anyLong())).thenReturn(employee);
+
+    mockMvc.perform(get("/api/groups/find/{groupId}", 1L)
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].name").value("John Doe"));
+  }
+
+  @Test
+  @DisplayName("그룹 id로 그룹 구성원 찾기 - 실패")
+  @WithMockUser
+  void findGroupById_failure() throws Exception {
+    when(groupService.findEmployeeIdsByGroupId(anyLong())).thenThrow(new RuntimeException("Group not found"));
+
+    mockMvc.perform(get("/api/groups/find/{groupId}", 1L)
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  @DisplayName("내가 속한 그룹 찾기 - 성공")
+  @WithMockUser
+  void findMyGroups_success() throws Exception {
+    GroupNameDTO group = new GroupNameDTO(1L, "Example Group");
+    List<GroupNameDTO> myGroups = Arrays.asList(group);
+
+    when(groupService.findMyGroup()).thenReturn(myGroups);
+
+    mockMvc.perform(get("/api/groups/find/myGroup")
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].groupName").value("Example Group"));
+  }
+
+  @Test
+  @DisplayName("그룹 이름으로 그룹 찾아서 그룹 정보 반환 - 성공")
+  @WithMockUser
+  void findGroupByName_success() throws Exception {
+    GroupDTO group = new GroupDTO(1L, "Example Group", false);
+
+    when(groupService.findGroupByName(anyString())).thenReturn(group);
+
+    mockMvc.perform(get("/api/groups/find/name/{groupName}", "Example Group")
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.groupName").value("Example Group"));
+  }
+
+  @Test
+  @DisplayName("그룹 이름으로 그룹 찾아서 그룹 정보 반환 - 실패")
+  @WithMockUser
+  void findGroupByName_failure() throws Exception {
+    when(groupService.findGroupByName(anyString())).thenThrow(new RuntimeException("Group not found"));
+
+    mockMvc.perform(get("/api/groups/find/name/{groupName}", "Nonexistent Group")
+                    .header(HttpHeaders.AUTHORIZATION, jwtToken))
+            .andExpect(status().isNotFound());
+  }
+
 }
