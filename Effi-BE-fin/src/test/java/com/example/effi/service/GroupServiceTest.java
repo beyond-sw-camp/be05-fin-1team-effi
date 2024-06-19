@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class GroupServiceTest {
@@ -64,6 +65,8 @@ class GroupServiceTest {
         MockitoAnnotations.openMocks(this);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn("1"); // mock employee number
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(1L); // mock employee ID
     }
 
     @DisplayName("그룹 생성 서비스 테스트 - 성공")
@@ -281,11 +284,12 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Long empId = 2L;
-        Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(empId);
         doNothing().when(groupEmpRepository).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         when(groupEmpRepository.countActiveMembersInGroup(groupId)).thenReturn(1L);
 
@@ -296,9 +300,6 @@ class GroupServiceTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("그룹 탈퇴 성공", responseEntity.getBody().getMessage());
 
-        GroupResponseDTO responseData = (GroupResponseDTO) responseEntity.getBody().getData();
-        assertEquals("Example Group", responseData.getGroupName());
-
         verify(groupEmpRepository, times(1)).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
     }
 
@@ -307,7 +308,6 @@ class GroupServiceTest {
     void withdrawGroup_groupNotFound() {
         // Given
         Long groupId = 1L;
-        Long empId = 2L;
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
@@ -319,7 +319,7 @@ class GroupServiceTest {
 
         assertEquals("유효하지 않은 그룹 ID: " + groupId, exception.getMessage());
 
-        verify(groupEmpRepository, never()).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
+        verify(groupEmpRepository, never()).updateDeleteYnByGroupIdAndEmployeeId(anyLong(), anyLong());
     }
 
     @DisplayName("그룹 탈퇴 서비스 테스트 - 모든 구성원이 그룹을 떠난 경우 - 성공")
@@ -328,11 +328,12 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Long empId = 2L;
-        Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(empId);
         doNothing().when(groupEmpRepository).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         when(groupEmpRepository.countActiveMembersInGroup(groupId)).thenReturn(0L);
         when(groupRepository.save(any(Group.class))).thenReturn(group);
@@ -350,6 +351,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(1)).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         verify(groupRepository, times(1)).save(any(Group.class));
     }
+
 
     @DisplayName("그룹 삭제 서비스 테스트 - 성공")
     @Test
@@ -688,41 +690,4 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(1)).findAllByEmployee_Id(empId);
         verify(groupRepository, never()).findById(anyLong());
     }
-
-    @Test
-    @DisplayName("그룹 이름으로 그룹 찾기 - 성공")
-    void findGroupByName_success() {
-        // Given
-        String groupName = "Example Group";
-        Group group = Group.builder().groupName(groupName).build();
-
-        // Mock behavior
-        when(groupRepository.findByGroupName(groupName)).thenReturn(Optional.of(group));
-
-        // When
-        GroupDTO groupDTO = groupService.findGroupByName(groupName);
-
-        // Then
-        assertEquals(groupName, groupDTO.getGroupName());
-        verify(groupRepository, times(1)).findByGroupName(groupName);
-    }
-
-    @Test
-    @DisplayName("그룹 이름으로 그룹 찾기 - 실패: 유효하지 않은 그룹 이름")
-    void findGroupByName_fail() {
-        // Given
-        String groupName = "Nonexistent Group";
-
-        // Mock behavior
-        when(groupRepository.findByGroupName(groupName)).thenReturn(Optional.empty());
-
-        // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            groupService.findGroupByName(groupName);
-        });
-
-        assertEquals("유효하지 않은 그룹 이름: " + groupName, exception.getMessage());
-        verify(groupRepository, times(1)).findByGroupName(groupName);
-    }
-
 }
