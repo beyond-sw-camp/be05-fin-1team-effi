@@ -72,24 +72,19 @@ class GroupServiceTest {
     @DisplayName("그룹 생성 서비스 테스트 - 성공")
     @Test
     void createGroup_success() {
-        // Given
         GroupRequestDTO requestDTO = GroupRequestDTO.builder()
-                .groupName("Example Group")
-                .employeeIds(Arrays.asList(2L, 3L))
+                .groupName("Example Group").employeeIds(Arrays.asList(2L, 3L))
                 .build();
 
         Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder()
-                .groupName("Example Group")
-                .deleteYn(false)
-                .createdAt(Date.valueOf(LocalDate.now()))
+                .groupName("Example Group").deleteYn(false).createdAt(Date.valueOf(LocalDate.now()))
                 .build();
         Employee creator = Employee.builder().empNo(1L).build();
         Employee employee2 = Employee.builder().empNo(2L).build();
         Employee employee3 = Employee.builder().empNo(3L).build();
         Group savedGroup = Group.builder().groupId(1L).groupName("Example Group").build();
 
-        // Mock behavior
         when(authentication.getName()).thenReturn("1");
         when(categoryRepository.findByCategoryId(3)).thenReturn(Optional.of(category));
         when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);
@@ -98,10 +93,8 @@ class GroupServiceTest {
         when(employeeRepository.findById(3L)).thenReturn(Optional.of(employee3));
         when(groupRepository.findById(savedGroup.getGroupId())).thenReturn(Optional.of(savedGroup));
 
-        // When
         ResponseEntity<GlobalResponse> responseEntity = groupService.createGroup(requestDTO);
 
-        // Then
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("그룹 생성 성공", responseEntity.getBody().getMessage());
 
@@ -634,7 +627,6 @@ class GroupServiceTest {
     @Test
     @DisplayName("내 그룹 찾기 - 성공")
     void findMyGroup_success() {
-        // Given
         Long empNo = 1L;
         Long empId = 1L;
         Long groupId1 = 1L;
@@ -648,17 +640,14 @@ class GroupServiceTest {
 
         List<GroupEmp> groupEmpList = List.of(groupEmp1, groupEmp2);
 
-        // Mock behavior
         when(authentication.getName()).thenReturn("1");
         when(employeeService.findEmpIdByEmpNo(empNo)).thenReturn(empId);
         when(groupEmpRepository.findAllByEmployee_Id(empId)).thenReturn(groupEmpList);
         when(groupRepository.findById(groupId1)).thenReturn(Optional.of(group1));
         when(groupRepository.findById(groupId2)).thenReturn(Optional.of(group2));
 
-        // When
         List<GroupNameDTO> result = groupService.findMyGroup();
 
-        // Then
         assertEquals(2, result.size());
         assertEquals(groupId1, result.get(0).getGroupId());
         assertEquals("Group 1", result.get(0).getGroupName());

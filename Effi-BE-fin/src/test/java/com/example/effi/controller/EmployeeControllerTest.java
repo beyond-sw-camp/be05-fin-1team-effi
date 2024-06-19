@@ -64,7 +64,7 @@ public class EmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("로그인 성공"))
+            .andExpect(jsonPath("$.message").value("OK"))
             .andExpect(jsonPath("$.status").value(200))
             .andExpect(jsonPath("$.data.accessToken").value("accessToken"))
             .andExpect(jsonPath("$.data.refreshToken").value("refreshToken"));
@@ -91,7 +91,7 @@ public class EmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message").value("로그인 실패"))
+            .andExpect(jsonPath("$.message").value("Bad Request"))
             .andExpect(jsonPath("$.status").value(400));
     }
 
