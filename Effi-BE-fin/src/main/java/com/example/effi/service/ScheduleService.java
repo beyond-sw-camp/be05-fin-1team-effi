@@ -9,6 +9,7 @@ import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
@@ -37,18 +38,29 @@ public class ScheduleService {
     private final CategoryRepository categoryRepository;
     private final RoutineRepository routineRepository;
     private final ParticipantRepository participantRepository;
-    private final ParticipantService participantService;
-    private final EmployeeService employeeService;
+//    private final EmployeeService employeeService;
     private final CategoryService categoryService;
     private final TaskScheduler taskScheduler;
+//    private final ParticipantService participantService;
+
+    private final EmployeeService employeeService;
+    private final GroupService groupService;
+    private ParticipantService participantService;
+
+    @PostConstruct
+    public void init() {
+        // 지연 초기화
+    }
+
+    public void setParticipantService(ParticipantService participantService) {
+        this.participantService = participantService;
+    }
 
     @Autowired
     @Lazy
     private EmailService emailService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
-    @Autowired
-    private GroupService groupService;
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {

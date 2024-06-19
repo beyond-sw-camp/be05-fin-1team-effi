@@ -341,7 +341,6 @@ class GroupControllerTest {
                 .andExpect(jsonPath("$[0].groupName").value("Example Group"));
     }
 
-    ////// 추가
     @Test
     @DisplayName("그룹 id로 그룹 구성원 찾기 - 성공")
     @WithMockUser

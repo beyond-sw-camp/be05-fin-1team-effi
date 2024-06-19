@@ -7,6 +7,7 @@ import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
