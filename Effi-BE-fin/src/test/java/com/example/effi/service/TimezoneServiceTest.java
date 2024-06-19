@@ -21,10 +21,6 @@ import static org.mockito.Mockito.*;
 
 class TimezoneServiceTest {
 
-    /*
-    deleteTimezone - 실패
-    */
-
     @Mock
     private TimezoneRepository timezoneRepository;
 
