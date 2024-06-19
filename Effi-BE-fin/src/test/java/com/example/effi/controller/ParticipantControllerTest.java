@@ -28,11 +28,6 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class ParticipantControllerTest {
 
-    /*
-    * 안짠거
-    * addParticipantGroup - 실패
-    */
-
     private MockMvc mockMvc;
 
     @Autowired
@@ -66,14 +61,15 @@ public class ParticipantControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-    @DisplayName("Add Participant Test - Failure")
+    @DisplayName("Add Participant Test - Fail")
     @Test
-    public void addParticipantTestFailure() throws Exception {
-        when(participantService.addParticipant(anyLong(), anyLong())).thenThrow(new RuntimeException("Failed to add participant"));
+    public void addParticipantTestFail() throws Exception {
+        when(participantService.addParticipant(anyLong(), anyLong()))
+                .thenThrow(new IllegalArgumentException("Failed to add participant"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/participant/add")
-                        .param("scheduleId", "1")
-                        .param("empId", "1")
+                        .param("scheduleId", "198989898")
+                        .param("empId", "2343")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }

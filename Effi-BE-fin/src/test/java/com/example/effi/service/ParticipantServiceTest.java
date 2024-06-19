@@ -30,10 +30,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ParticipantServiceTest {
 
-    /*
-     * findByEmpIdAndScheduleId
-     */
-
     @Autowired
     ScheduleService scheduleService;
     @Autowired
@@ -89,6 +85,7 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryNo(1L);
     
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
@@ -147,6 +144,7 @@ public class ParticipantServiceTest {
         scheduleRequest.setStartTime(new Date());
         scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryNo(1L);
  
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
@@ -172,19 +170,16 @@ public class ParticipantServiceTest {
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setCategoryId(1L);
         categoryDTO.setCategoryName("hi");
-        Long categoryId = categoryDTO.getCategoryId();
 
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
         scheduleRequest.setTitle("bye");
         scheduleRequest.setContext("hello");
         scheduleRequest.setStatus(0);
-        scheduleRequest.setNotificationYn(false);
-        scheduleRequest.setDeleteYn(false);
-        scheduleRequest.setCreatedAt(new Date());
-        scheduleRequest.setUpdatedAt(null);
-        scheduleRequest.setStartTime(new Date());
-        scheduleRequest.setEndTime(new Date());
+        scheduleRequest.setNotificationYn(false);scheduleRequest.setDeleteYn(false);
+        scheduleRequest.setCreatedAt(new Date());scheduleRequest.setUpdatedAt(null);
+        scheduleRequest.setStartTime(new Date());scheduleRequest.setEndTime(new Date());
         scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryNo(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
@@ -200,7 +195,6 @@ public class ParticipantServiceTest {
         assertThat(byParticipantId).isNotNull();
         assertThat(byParticipantId.getParticipantId()).isEqualTo(participantId);
         assertThat(byParticipantId.getDeleteYn()).isTrue();
-
     }
 
 }

@@ -4,7 +4,9 @@ import com.example.effi.domain.Entity.Tag;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
 @Getter
 @NoArgsConstructor
 public class TagResponseDTO {

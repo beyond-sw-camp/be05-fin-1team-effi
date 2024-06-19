@@ -67,12 +67,13 @@ public class TagController {
 
     //scheduleId로 tag 찾기
     @GetMapping("/find/schedule/{scheduleId}")
-    public ResponseEntity<List<TagResponseDTO>> findTagByScheduleId(@PathVariable("scheduleId") Long scheduleId) {
-        List<Long> tagIdList = tagScheduleService.findTagIdList(scheduleId);
+    public ResponseEntity<?> findTagByScheduleId(@PathVariable("scheduleId") Long scheduleId) {
+        List<Long> tagList = tagScheduleService.findTagIdList(scheduleId);
         List<TagResponseDTO> rtn = new ArrayList<>();
-        for (Long tagId : tagIdList) {
-            rtn.add(tagService.getTagById(tagId));
+        for (Long tag : tagList) {
+            rtn.add(tagService.getTagById(tag));
         }
+
         return ResponseEntity.ok(rtn);
     }
 
