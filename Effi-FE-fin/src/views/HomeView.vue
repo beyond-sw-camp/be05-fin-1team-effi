@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <Navigation @update-categories="handleUpdateCategories"  @update-groups="handleUpdateGroups" class="navigation" />
+    <Navigation @update-categories="handleUpdateCategories" @update-groups="handleUpdateGroups" class="navigation" />
     <div class="content">
-      <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId" />
+      <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId" :show="true" />
     </div>
   </div>
 </template>
@@ -13,6 +13,7 @@ import Navigation from '@/components/LeftSidebar.vue';
 import VCalendar from '@/components/VCalendar.vue';
 
 export default defineComponent({
+  name: 'HomeView',
   components: {
     Navigation,
     VCalendar
@@ -20,6 +21,7 @@ export default defineComponent({
   setup() {
     const selectedCategories = ref([]);
     const selectedGroupId = ref([]);
+    const calendarValue = ref([]);
 
     const handleUpdateCategories = (categories) => {
       selectedCategories.value = categories;
@@ -27,13 +29,14 @@ export default defineComponent({
 
     const handleUpdateGroups = (groups) => {
       selectedGroupId.value = groups;
-    }
+    };
 
     return {
       selectedCategories,
       handleUpdateCategories,
       selectedGroupId,
-      handleUpdateGroups
+      handleUpdateGroups,
+      calendarValue
     };
   },
 });
@@ -52,6 +55,7 @@ export default defineComponent({
   height: 100%; /* 전체 높이 사용 */
   padding: 20px;
   margin-right: 20px;
+  margin-left: -90px ;
   box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
 }
 
@@ -63,11 +67,14 @@ export default defineComponent({
   align-items: center;
   padding: 20px;
   box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
+  width: 100%;
+  margin-right: -100px;
 }
 
 .calendar {
   width: 100%;
   height: 100%;
+  margin: 0 auto;
 }
 
 /* 반응형 스타일 */

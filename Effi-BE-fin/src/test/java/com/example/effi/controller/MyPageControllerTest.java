@@ -57,10 +57,11 @@ class MyPageControllerTest {
         when(myPageService.getEmployee()).thenReturn(responseDTO);
 
         mockMvc.perform(get("/api/mypage/me")
-                        .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{\"empNo\":1,\"name\":\"John Doe\",\"company\":\"Example Corp\",\"email\":\"john.doe@example.com\",\"rank\":\"Manager\",\"phoneNum\":\"123-456-7890\",\"extensionNum\":\"1234\",\"deptName\":\"Sales\",\"timezoneName\":\"UTC\",\"msg\":\"회원 정보 조회\"}"))
+                .andExpect(content().json(
+                        "{\"empNo\":1,\"name\":\"John Doe\",\"company\":\"Example Corp\",\"email\":\"john.doe@example.com\",\"rank\":\"Manager\",\"phoneNum\":\"123-456-7890\",\"extensionNum\":\"1234\",\"deptName\":\"Sales\",\"timezoneName\":\"UTC\",\"msg\":\"회원 정보 조회\"}"))
                 .andDo(print());
     }
 
@@ -70,7 +71,7 @@ class MyPageControllerTest {
         when(myPageService.getEmployee()).thenThrow(new IllegalArgumentException("Employee not found"));
 
         mockMvc.perform(get("/api/mypage/me")
-                        .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(""))
                 .andDo(print());
@@ -85,8 +86,8 @@ class MyPageControllerTest {
                 .build();
 
         mockMvc.perform(put("/api/mypage/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"empId\":1,\"timezoneId\":2}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"empId\":1,\"timezoneId\":2}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Timezone updated successfully"))
                 .andDo(print());
@@ -94,15 +95,14 @@ class MyPageControllerTest {
 
     @Test
     void updateTimezone_ShouldReturnBadRequest_WhenInvalidInput() throws Exception {
-        doThrow(new IllegalArgumentException("Invalid input")).when(myPageService).updateEmployeeTimezone(any(MyPageUpdateDTO.class));
+        doThrow(new IllegalArgumentException("Invalid input")).when(myPageService)
+                .updateEmployeeTimezone(any(MyPageUpdateDTO.class));
 
         mockMvc.perform(put("/api/mypage/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"empId\":1,\"timezoneId\":2}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"empId\":1,\"timezoneId\":2}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Invalid input"))
                 .andDo(print());
     }
-
-
 }
