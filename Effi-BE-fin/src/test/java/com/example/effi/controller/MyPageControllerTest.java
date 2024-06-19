@@ -93,6 +93,7 @@ class MyPageControllerTest {
     }
 
     @Test
+    @DisplayName("타임존 업데이트 - 실패:잘못된 타임존")
     void updateTimezone_ShouldReturnBadRequest_WhenInvalidInput() throws Exception {
         doThrow(new IllegalArgumentException("Invalid input")).when(myPageService).updateEmployeeTimezone(any(MyPageUpdateDTO.class));
 
