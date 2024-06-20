@@ -29,8 +29,13 @@ public class ParticipantService {
         if (empId == null || employeeRepository.findById(empId) == null)
             throw new IllegalArgumentException("사원 ID가 유효하지 않습니다.");
         Participant check = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
-        if (check != null && check.getDeleteYn() == false) {
-            throw new RuntimeException("Participant already exists");
+        if (check != null) {
+            if (check.getDeleteYn() == false) {
+                throw new RuntimeException("Participant already exists");
+            } else {
+                check.setDeleteYn(false);
+                return new ParticipantResponseDTO(participantRepository.save(check));
+            }
         }
         return new ParticipantResponseDTO(participantRepository.save(
                 Participant.builder()

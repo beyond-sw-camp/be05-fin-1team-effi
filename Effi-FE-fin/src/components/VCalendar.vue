@@ -42,6 +42,7 @@
     </v-sheet>
     <schedule-modal
       :show="showScheduleDialog"
+      :selected-date="selectedDate"
       @close="updateShowDialog(false)"
       @submit="handleEventSubmit"
     ></schedule-modal>
@@ -99,6 +100,9 @@ export default {
     const showScheduleDialog = ref(false);
     const showEditDialog = ref(false);
     const selectedEventId = ref(null);
+    // const selectedDate = ref(null); -- 기존코드
+    // const selectedDate = ref(''); -- gpt
+    const selectedDate = ref(dayjs().toDate());
 
     const fetchSchedules = async () => {
       try {
@@ -154,7 +158,7 @@ export default {
             content: schedule.context,
             start: dayjs(schedule.startTime),
             end: dayjs(schedule.endTime),
-            color: 'blue',
+            color: schedule.color,
             open: ref(false),
           }));
         } else {
@@ -254,16 +258,16 @@ export default {
       showEditDialog.value = true;
     };
 
+    const handleEventSubmit = () => {
+      fetchSchedules();
+    };
+
     const updateShowDialog = (value) => {
       showScheduleDialog.value = value;
       showEditDialog.value = value;
     };
 
-    const handleEventSubmit = () => {
-      showScheduleDialog.value = false;
-      showEditDialog.value = false;
-      fetchSchedules();
-    };
+
 
     const onEventClick = (event) => {
       if (event && event.id) {
@@ -275,6 +279,7 @@ export default {
 
     const onDateClick = ({ date }) => {
       console.log('Date clicked:', date);
+      selectedDate.value = date;
       selectedEventId.value = null;
       showScheduleDialog.value = true;
     };
@@ -282,6 +287,7 @@ export default {
     const handleDayLabelClick = (event) => {
       if (event.target.classList.contains('v-calendar-month__day')) {
         const date = event.target.getAttribute('data-date');
+        console.log('Day label clicked:', date);
         onDateClick({ date: dayjs(date) });
       }
     };
@@ -296,6 +302,7 @@ export default {
       showScheduleDialog,
       showEditDialog,
       selectedEventId,
+      selectedDate,
       toToday,
       prevPeriod,
       nextPeriod,

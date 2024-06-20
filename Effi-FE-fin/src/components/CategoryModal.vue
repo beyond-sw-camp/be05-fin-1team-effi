@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import DepartmentModal from './DeptModal.vue';
 import GroupModal from './GroupModal.vue';
 
@@ -45,7 +46,9 @@ export default {
       showGroupModal: false,
       selectedDeptId: null,
       selectedGroupId: null,
-      selectedOption: null  // Track selected category type (1: company, 2: department, 3: group, 4: individual)
+      selectedOption: null,  // Track selected category type (1: company, 2: department, 3: group, 4: individual)
+      categoryNo: null,
+      categoryName: '',
     };
   },
   props: {
@@ -58,9 +61,28 @@ export default {
       required: true
     }
   },
+  watch: {
+    show: {
+      handler(newVal) {
+        if (newVal) {
+          this.fetchCategory();
+        }
+      },
+      immediate: true
+    }
+  },
   methods: {
+    async fetchCategory() {
+      try {
+        const response = await axios.get(`/api/schedule/find/${this.scheduleId}`);
+        const categoryNo = response.data.categoryNo;
+        this.selectedOption = categoryNo;
+        this.categoryName = this.getCategoryName(categoryNo);
+      } catch (error) {
+        console.error('Error fetching category:', error);
+      }
+    },
     openModal(type) {
-      // Set selectedOption based on the type of modal opened
       if (type === 'department') {
         this.showDepartmentModal = true;
         this.selectedOption = 2; // Department
@@ -70,7 +92,6 @@ export default {
       }
     },
     closeModal(type) {
-      // Close the respective modal and reset selectedOption
       if (type === 'department') {
         this.showDepartmentModal = false;
       } else if (type === 'group') {
@@ -78,29 +99,25 @@ export default {
       }
     },
     handleSelectDept(deptId) {
-      // Handle department selection
       this.selectedDeptId = deptId;
       this.showDepartmentModal = false;
       this.returnSelection();
     },
     handleSelectGroup(groupId) {
-      // Handle group selection
       this.selectedGroupId = groupId;
       this.showGroupModal = false;
       this.returnSelection();
     },
     clearSelection() {
-      // Clear the current selection
       this.selectedDeptId = null;
       this.selectedGroupId = null;
       this.selectedOption = null;
+      this.categoryName = '';
     },
     handleClose() {
-      // Emit close event to parent component
       this.$emit('close');
     },
     returnSelection() {
-      // Emit selected results to parent component
       const selectedResult = {
         selectedOption: this.selectedOption,
         selectedDeptId: this.selectedDeptId,
@@ -110,7 +127,6 @@ export default {
       this.handleClose();
     },
     getCategoryName(option) {
-      // Helper method to get category name based on selectedOption
       switch (option) {
         case 1: return '회사';
         case 2: return '부서';
@@ -146,7 +162,7 @@ export default {
   border-radius: 5px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative;
-  width: 200px;
+  width: 300px;
 }
 
 .close-button {

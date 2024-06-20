@@ -112,7 +112,7 @@ public class ScheduleController {
 
             schedule.setCategoryNo(4L);
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
-            participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+            // participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
@@ -226,6 +226,20 @@ public class ScheduleController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to delete schedule: " + e.getMessage());
+        }
+    }
+
+    // 직원 id로 직원 정보 조회
+    @GetMapping("/employee/{empId}")
+    public ResponseEntity<?> findEmpById(@PathVariable("empId") Long empId) {
+        try {
+            EmployeeDTO employeeDTO = employeeService.findById(empId);
+            return ResponseEntity.ok(employeeDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find employee: " + e.getMessage());
         }
     }
 
