@@ -63,7 +63,7 @@
               <ul>
                 <li v-for="emp in selectedEmployees" :key="emp.empNo">
                   {{ emp.name }}
-                  <button @click="removeEmployee(emp.empNo)" class="remove-button">×</button>
+                  <button v-if="emp.empNo !== loggedInEmpNo" @click="removeEmployee(emp)" class="remove-button">×</button>
                 </li>
               </ul>
             </div>
@@ -89,7 +89,8 @@
             <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
-            <button type="submit">수정</button>
+            <button type="submit" class="update-button">수정</button>
+            <button type="button" class="delete-button" @click="deleteSchedule">삭제</button>
           </div>
         </form>
       </div>
@@ -136,9 +137,11 @@ export default {
       endTime: '',
       status: 0,
       notificationYn: false,
-      categoryNo: '1', // Default category
+      categoryNo: '1',
       tags: [],
-      repeat: false
+      repeat: false,
+      routineId: null,
+      routineCycle: null,
     });
 
     const showRoutineModal = ref(false);
@@ -147,16 +150,19 @@ export default {
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
+    const loggedInEmpNo = sessionStorage.getItem('empNo'); // Get logged-in employee number
 
     onMounted(() => {
       if (props.scheduleId) {
         fetchScheduleDetails(props.scheduleId);
+        fetchParticipants(props.scheduleId); // Fetch participants for the schedule
       }
     });
 
     watch(() => props.scheduleId, (newVal) => {
       if (newVal) {
         fetchScheduleDetails(newVal);
+        fetchParticipants(newVal); // Fetch participants when scheduleId changes
       }
     });
 
@@ -177,7 +183,9 @@ export default {
           endDate: endDateTime.toISOString().split('T')[0],
           endTime: endDateTime.toTimeString().split(' ')[0].slice(0, 5),
           categoryNo: schedule.categoryNo ? schedule.categoryNo.toString() : '',
-          tags: schedule.tags ? schedule.tags.map(tag => tag.trim()) : []
+          tags: schedule.tags ? schedule.tags.map(tag => tag.trim()) : [],
+          routineId: schedule.routineId,
+          routineCycle: schedule.routineCycle,
         };
 
         if (internalEvent.value.tags.length > 0) {
@@ -218,6 +226,24 @@ export default {
       }
     };
 
+    const fetchParticipants = async (scheduleId) => {
+      console.log("Fetching participants for scheduleId:", scheduleId);
+      try {
+        const response = await axiosInstance.get(`/api/participant/find/schedule/${scheduleId}`);
+        const participants = response.data;
+        selectedEmployees.value = await Promise.all(participants.map(async (participant) => {
+          const empResponse = await axiosInstance.get(`/api/schedule/employee/${participant.empId}`);
+          return {
+            empNo: participant.empId,
+            name: empResponse.data.name,
+            participantId: participant.participantId
+          };
+        }));
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+      }
+    };
+
     const closeModal = () => {
       emit('close');
     };
@@ -238,6 +264,8 @@ export default {
           await axiosInstance.post(`/api/tag/add/${response.data.scheduleId}`, { tag: tag.trim() });
         }
 
+        await addParticipants(props.scheduleId);
+
         alert('일정이 수정되었습니다.');
         closeModal();
       } catch (error) {
@@ -256,18 +284,20 @@ export default {
     };
 
     const toggleRoutineModal = () => {
+      console.log('toggleRoutineModal called');
       showRoutineModal.value = internalEvent.value.repeat;
     };
 
     const handleRoutineClose = () => {
+      console.log('Routine modal closed');
       showRoutineModal.value = false;
     };
 
     const handleRoutineConfirm = (routine) => {
-      internalEvent.value = {
-        ...internalEvent.value,
-        ...routine
-      };
+      console.log('Routine confirmed:', routine);
+      internalEvent.value.routineId = routine.routineId;
+      internalEvent.value.routineCycle = routine.routineCycle;
+      internalEvent.value.repeat = true;
       showRoutineModal.value = false;
     };
 
@@ -290,13 +320,26 @@ export default {
     };
 
     const searchEmployees = async () => {
+      const token = sessionStorage.getItem('accessToken');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
       try {
-        const response = await axiosInstance.get(`/api/employees/search`, {
-          params: { query: searchQuery.value }
-        });
-        searchResults.value = response.data;
+        const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
+        const employees = response.data;
+        for (let employee of employees) {
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
+          employee.deptName = deptResponse.data;
+        }
+        searchResults.value = employees;
       } catch (error) {
-        console.error('Error searching employees:', error);
+        console.error('Error searching employees:', error.response ? error.response.data : error.message);
       }
     };
 
@@ -306,8 +349,56 @@ export default {
       }
     };
 
-    const removeEmployee = (empNo) => {
-      selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
+    const removeEmployee = async (employee) => {
+      try {
+        if (employee.participantId) {
+          await axiosInstance.put(`/api/participant/delete/${employee.participantId}`);
+          selectedEmployees.value = selectedEmployees.value.filter(emp => emp.participantId !== employee.participantId);
+        } else {
+          selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== employee.empNo);
+        }
+      } catch (error) {
+        console.error('Error removing employee:', error.response ? error.response.data : error.message);
+        alert('참가자 삭제에 실패했습니다.');
+      }
+    };
+
+    const addParticipants = async (scheduleId) => {
+      try {
+        for (let employee of selectedEmployees.value) {
+          if (!employee.participantId) { // 기존 데이터베이스에서 불러온 참여자는 추가하지 않음
+            try {
+              await axiosInstance.post('/api/participant/add', null, {
+                params: {
+                  scheduleId: scheduleId,
+                  empId: employee.empNo
+                }
+              });
+            } catch (error) {
+              if (error.response && error.response.data.includes('Participant already exists')) {
+                console.log(`Participant ${employee.empNo} already exists`);
+                continue; // Skip existing participants
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error adding participants:', error.response ? error.response.data : error.message);
+        alert('참가자 추가에 실패했습니다.');
+      }
+    };
+
+    const deleteSchedule = async () => {
+      try {
+        await axiosInstance.put(`/api/schedule/delete/${props.scheduleId}`);
+        alert('일정이 삭제되었습니다.');
+        closeModal();
+      } catch (error) {
+        console.error('Error deleting schedule:', error.response ? error.response.data : error.message);
+        alert('일정 삭제에 실패했습니다.');
+      }
     };
 
     const getRandomColor = () => {
@@ -327,6 +418,7 @@ export default {
       searchQuery,
       searchResults,
       selectedEmployees,
+      loggedInEmpNo,
       closeModal,
       submit,
       toggleRoutineModal,
@@ -336,7 +428,9 @@ export default {
       handleCategorySelect,
       searchEmployees,
       selectEmployee,
-      removeEmployee
+      removeEmployee,
+      addParticipants,
+      deleteSchedule
     };
   }
 };
@@ -405,7 +499,7 @@ textarea {
   resize: vertical;
 }
 
-button.update-button, button#category, button#group {
+button.update-button {
   display: inline-block;
   margin-top: 10px;
   padding: 10px;
@@ -414,10 +508,26 @@ button.update-button, button#category, button#group {
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  margin-right: 10px;
 }
 
-button.update-button:hover, button#category:hover, button#group:hover {
+button.delete-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button.update-button:hover {
   background-color: #FBB584;
+}
+
+button.delete-button:hover {
+  background-color: #ff4d4d;
 }
 
 .modal-footer {
@@ -426,15 +536,9 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .modal-footer button {
   padding: 10px 20px;
-  background-color: #FBB584;
-  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
-
-.modal-footer button:hover {
-  background-color: #EC971F;
 }
 
 .input-group {

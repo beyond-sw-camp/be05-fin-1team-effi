@@ -41,10 +41,12 @@ public class ScheduleService {
 //    private final EmployeeService employeeService;
     private final CategoryService categoryService;
     private final TaskScheduler taskScheduler;
-//    private final ParticipantService participantService;
 
     private final EmployeeService employeeService;
     private final GroupService groupService;
+    
+    @Autowired
+    @Lazy
     private ParticipantService participantService;
 
     @PostConstruct
@@ -340,5 +342,10 @@ public class ScheduleService {
             String email = employeeService.findById(participant.getEmpId()).getEmail();
             emailService.scheduleNotifyMail(email, scheduleId);
         }
+    }
+
+    // empid로 직원 정보 조회
+    public EmployeeDTO findById(Long empId) {
+        return employeeService.findById(empId);
     }
 }
