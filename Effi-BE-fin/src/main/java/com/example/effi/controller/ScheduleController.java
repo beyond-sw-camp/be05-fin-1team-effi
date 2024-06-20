@@ -229,7 +229,7 @@ public class ScheduleController {
         }
     }
 
-    // 직원 id로 직원 정보 조회
+    // 직원 id로 직원 정보 조회 -> 테스트 코드 팔요
     @GetMapping("/employee/{empId}")
     public ResponseEntity<?> findEmpById(@PathVariable("empId") Long empId) {
         try {
@@ -241,6 +241,18 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to find employee: " + e.getMessage());
         }
+    }
+
+    // 선택한 사람 emp 가지고 와서 schduleList
+    @GetMapping("/find/other/{empId}")
+    public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
+        List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
+        List<ScheduleResponseDTO> scheduleResponseDTOS = new ArrayList<>();
+        for (ParticipantResponseDTO participant : allByEmpId) {
+            Long scheduleId = participant.getScheduleId();
+            scheduleResponseDTOS.add(scheduleService.getSchedule(scheduleId));
+        }
+        return ResponseEntity.ok(scheduleResponseDTOS);
     }
 
 }

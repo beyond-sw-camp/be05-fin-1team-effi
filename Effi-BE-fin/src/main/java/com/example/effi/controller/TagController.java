@@ -9,11 +9,16 @@ import com.example.effi.service.ScheduleService;
 import com.example.effi.service.TagScheduleService;
 import com.example.effi.service.TagService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/api/tag")
@@ -100,4 +105,72 @@ public class TagController {
         tagScheduleService.deleteTag(res.getTagScheduleId());
         return ResponseEntity.ok(null);
     }
+
+    //////////////////////////////////////////////////////////////////////
+    // 내 태그 탑5 찾기
+    @GetMapping("/find/top5Tag")
+    public ResponseEntity<?> findTop5Tag() {
+        // 탑 5 여기서 해야하나? 분석은?
+        try {
+            List<Long> myTagList = tagScheduleService.findMyTagList();
+            Collections.sort(myTagList);
+            Long last = tagService.findLastTagId();
+            List<Long> counts = new ArrayList<>(Collections.nCopies(last.intValue() + 1, 0L)); // TagId : 사용 갯수
+            for (Long a : myTagList){
+                Long l = counts.get(a.intValue());
+                counts.set(a.intValue(), ++l);
+            }
+
+            List<Integer> indices = IntStream.range(0, counts.size())
+                    .boxed()
+                    .filter(index -> index != 0) // 인덱스 0 제거
+                    .collect(Collectors.toList());
+
+            // 인덱스 리스트를 counts 값에 따라 정렬
+            indices.sort(Comparator.comparing(counts::get).reversed());
+
+            List<String> tagList = new ArrayList<>();
+            for (Integer idx = 0 ; idx < 5 ; idx++){
+                Long l = Long.valueOf(indices.get(idx));
+                tagList.add(tagService.getTagName(l));
+            }
+
+            return ResponseEntity.ok(tagList);
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find my Tag: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/find/tagRatio")
+    public ResponseEntity<?> findTagRatio() {
+        // 비율을 리턴 -> 어떻게?
+        try {
+            List<Long> myTagList = tagScheduleService.findMyTagList();
+            Collections.sort(myTagList);
+            Long last = tagService.findLastTagId();
+            List<Long> counts = new ArrayList<>(Collections.nCopies(last.intValue() + 1, 0L)); // TagId : 사용 갯수
+            for (Long a : myTagList){
+                Long l = counts.get(a.intValue());
+                counts.set(a.intValue(), ++l);
+            }
+
+            Long sum = 0L;
+            for (Integer idx = 0; idx < counts.size(); idx++){
+                sum += counts.get(idx);
+            } // 총 개수
+
+            return ResponseEntity.ok(null);
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // 기타 예외로 인한 실패
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find my Tag: " + e.getMessage());
+        }
+    }
+
 }
