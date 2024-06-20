@@ -2,7 +2,7 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
-      <h2>일정 상세 보기</h2>
+      <h2>{{ isEditMode ? '일정 수정하기' : '일정 추가하기' }}</h2>
       <div class="modal-body">
         <form @submit.prevent="submit">
           <!-- Form Fields -->
@@ -96,15 +96,15 @@
       <RoutineModal
         v-if="showRoutineModal"
         :show="showRoutineModal"
-        @close="handleRoutineClose"
-        @confirm="handleRoutineConfirm"
+        @close-routine="handleRoutineClose"
+        @confirm-routine="handleRoutineConfirm"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
 import TagAdd from './TagAdd.vue';
@@ -128,13 +128,17 @@ export default {
     scheduleId: {
       type: Number,
       default: null
+    },
+    initialDate: {
+      type: String,
+      default: ''
     }
   },
   setup(props, { emit }) {
     const internalEvent = ref({
       title: '',
       context: '',
-      startDate: '',
+      startDate: props.initialDate,
       startTime: '',
       endDate: '',
       endTime: '',
@@ -167,6 +171,10 @@ export default {
       }
     });
 
+    watch(() => props.initialDate, (newDate) => {
+      internalEvent.value.startDate = newDate;
+    });
+
     const fetchDefaultTimezone = async (empId) => {
       try {
         const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
@@ -189,6 +197,10 @@ export default {
         internalEvent.value = {
           ...internalEvent.value,
           ...schedule,
+          startDate: new Date(schedule.startTime).toISOString().split('T')[0],
+          startTime: new Date(schedule.startTime).toISOString().split('T')[1].substr(0, 5),
+          endDate: new Date(schedule.endTime).toISOString().split('T')[0],
+          endTime: new Date(schedule.endTime).toISOString().split('T')[1].substr(0, 5),
           categoryNo: schedule.categoryNo,
           tags: schedule.tags.map(tag => tag.name),
           createdAt: schedule.createdAt || new Date().toISOString()
@@ -223,7 +235,8 @@ export default {
             routineCycle: internalEvent.value.routineCycle
           });
           formattedEvent.routineId = routineResponse.data.routineId;
-        } else if (!internalEvent.value.repeat) {
+        } else if (!internalEvent.value.repeat && internalEvent.value.routineId) {
+          await axiosInstance.put(`/api/routine/delete/${internalEvent.value.routineId}`);
           formattedEvent.routineId = null;
         }
 
@@ -241,6 +254,9 @@ export default {
             case 3:
               apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
               break;
+            case 4:
+              apiUrl = `/api/schedule/add`;
+              break;
             default:
               apiUrl = `/api/schedule/add`;
           }
@@ -250,7 +266,7 @@ export default {
         const scheduleId = response.data.scheduleId;
 
         for (let tag of internalEvent.value.tags) {
-          await axiosInstance.post(`/api/tag/add/${scheduleId}`, tag);
+          await axiosInstance.post(`/api/tag/add/${scheduleId}`, { name: tag });
         }
 
         if (formattedEvent.categoryNo === 4) {
@@ -355,17 +371,19 @@ export default {
     };
 
     const toggleRoutineModal = () => {
+      console.log('toggleRoutineModal called');
       showRoutineModal.value = internalEvent.value.repeat;
     };
 
     const handleRoutineClose = () => {
+      console.log('handleRoutineClose called');
       showRoutineModal.value = false;
     };
 
     const handleRoutineConfirm = (routineData) => {
       internalEvent.value.routineId = routineData.routineId;
       internalEvent.value.routineCycle = routineData.routineCycle;
-      showRoutineModal.value = false;
+      internalEvent.value.repeat = true;  // 루틴 설정을 완료했으므로 반복 체크를 true로 설정
     };
 
     const getRandomColor = () => {
@@ -452,7 +470,7 @@ input, select, textarea {
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
-  background-color: #FDDAC1; /* 입력 필드 배경색 */
+  background-color: #FDDAC1;
 }
 
 textarea {
@@ -481,7 +499,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .modal-footer button {
   padding: 10px 20px;
-  background-color: #FBB584; /* 수정하기 버튼 배경색 */
+  background-color: #FBB584;
   color: white;
   border: none;
   border-radius: 5px;
@@ -569,7 +587,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .checkbox-group label {
   margin-right: 10px;
-  white-space: nowrap; /* 줄바꿈 방지 */
+  white-space: nowrap;
 }
 
 .timezone-group {
@@ -579,13 +597,13 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .timezone-value {
   margin-left: 10px;
-  white-space: nowrap; /* 줄바꿈 방지 */
+  white-space: nowrap;
 }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px; /* 태그 사이의 간격을 설정합니다 */
+  gap: 8px;
 }
 
 .tag-item {
@@ -595,7 +613,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
   font-size: 14px;
   cursor: pointer;
   display: inline-block;
-  background-color: var(--tag-color, #888); /* 기본 태그 색상 */
+  background-color: var(--tag-color, #888);
 }
 
 h2 {
