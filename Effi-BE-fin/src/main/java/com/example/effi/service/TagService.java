@@ -103,7 +103,7 @@ public class TagService {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // 마지막 인덱스 찾기
+    // 마지막 인덱스 찾기 *
     public Long findLastTagId(){
         List<TagResponseDTO> allTag = getAllTag();
         Long max = 0L;

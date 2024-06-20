@@ -243,16 +243,18 @@ public class ScheduleController {
         }
     }
 
-    // 선택한 사람 emp 가지고 와서 schduleList
+    // 선택한 사람 emp 가지고 와서 schduleList *
     @GetMapping("/find/other/{empId}")
     public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
         List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
-        List<ScheduleResponseDTO> scheduleResponseDTOS = new ArrayList<>();
+        List<ScheduleResponseDTO> scheduleList = new ArrayList<>();
         for (ParticipantResponseDTO participant : allByEmpId) {
             Long scheduleId = participant.getScheduleId();
-            scheduleResponseDTOS.add(scheduleService.getSchedule(scheduleId));
+            ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
+            if (schedule != null && schedule.getDeleteYn() == false)
+                scheduleList.add(schedule);
         }
-        return ResponseEntity.ok(scheduleResponseDTOS);
+        return ResponseEntity.ok(scheduleList);
     }
 
 }

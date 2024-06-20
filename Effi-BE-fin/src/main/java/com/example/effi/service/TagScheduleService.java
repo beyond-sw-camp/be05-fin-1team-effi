@@ -114,7 +114,7 @@ public class TagScheduleService {
     }
 
     ////////////////////////////////////////////////////////////////
-    // 내 태그 찾기 -> 내 스케줄 찾고 -> schdeuleId로 넘겨주자. -> Tag Id List 리턴
+    // 내 태그 찾기 -> 내 스케줄 찾고 -> schdeuleId로 넘겨주자. -> Tag Id List 리턴 *
     public List<Long> findMyTagList(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long creatorEmpNo = Long.valueOf(authentication.getName());

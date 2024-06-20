@@ -13,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -107,10 +104,9 @@ public class TagController {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // 내 태그 탑5 찾기
+    // 내 태그 탑5 찾기 *
     @GetMapping("/find/top5Tag")
     public ResponseEntity<?> findTop5Tag() {
-        // 탑 5 여기서 해야하나? 분석은?
         try {
             List<Long> myTagList = tagScheduleService.findMyTagList();
             Collections.sort(myTagList);
@@ -126,7 +122,6 @@ public class TagController {
                     .filter(index -> index != 0) // 인덱스 0 제거
                     .collect(Collectors.toList());
 
-            // 인덱스 리스트를 counts 값에 따라 정렬
             indices.sort(Comparator.comparing(counts::get).reversed());
 
             List<String> tagList = new ArrayList<>();
@@ -145,9 +140,9 @@ public class TagController {
         }
     }
 
+    // 사용한 태그 비율 *
     @GetMapping("/find/tagRatio")
     public ResponseEntity<?> findTagRatio() {
-        // 비율을 리턴 -> 어떻게?
         try {
             List<Long> myTagList = tagScheduleService.findMyTagList();
             Collections.sort(myTagList);
@@ -163,7 +158,21 @@ public class TagController {
                 sum += counts.get(idx);
             } // 총 개수
 
-            return ResponseEntity.ok(null);
+            Map<String, Double> percent = new HashMap<>();
+            for (Integer idx = 1 ; idx < counts.size() ; idx++){
+                Long count = counts.get(idx);
+                double value = ((double) count / (double) sum) * 100; // 퍼센트로 계산
+                value = Math.round(value * 100.0) / 100.0; // 소수점 두 자리로 반올림
+                String tagName = tagService.getTagName(Long.valueOf(idx));
+                if (value != 0)
+                    percent.put(tagName, value);
+            }
+
+            List<Map.Entry<String, Double>> entryList = new LinkedList<>(percent.entrySet());
+            entryList.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+
+            return ResponseEntity.ok(entryList); // {"이름" : 비율} 리턴
+
         }catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -172,5 +181,6 @@ public class TagController {
                     .body("Failed to find my Tag: " + e.getMessage());
         }
     }
+
 
 }
