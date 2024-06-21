@@ -9,9 +9,9 @@ import ModalTest from '@/views/ModalTest.vue';
 import ScheduleTestView from '../views/ScheduleTestView.vue'
 import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
+import GroupParticipantsView from '../views/GroupParticipantsView.vue'
 
 import test from '../views/test.vue'
-
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,6 +63,12 @@ const router = createRouter({
       path: '/schedule',
       name: 'schedule',
       component: ScheduleTestView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/groupparticipants',
+      name: 'groupparticipants',
+      component: GroupParticipantsView,
       meta: { requiresAuth: true }
     }
   ]

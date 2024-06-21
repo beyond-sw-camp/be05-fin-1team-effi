@@ -112,7 +112,7 @@ public class ScheduleController {
 
             schedule.setCategoryNo(4L);
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
-            // participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+            participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
@@ -241,6 +241,20 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to find employee: " + e.getMessage());
         }
+    }
+
+    // 선택한 사람 emp 가지고 와서 schduleList
+    @GetMapping("/find/other/{empId}")
+    public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
+        List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
+        List<ScheduleResponseDTO> scheduleList = new ArrayList<>();
+        for (ParticipantResponseDTO participant : allByEmpId) {
+            Long scheduleId = participant.getScheduleId();
+            ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
+            if (schedule != null && schedule.getDeleteYn() == false)
+                scheduleList.add(schedule);
+        }
+        return ResponseEntity.ok(scheduleList);
     }
 
 }
