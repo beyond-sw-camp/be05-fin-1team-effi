@@ -11,6 +11,7 @@
       <div v-if="!isMyPage">
         <SelectCategory @selectCategory="handleUpdateCategories" />
         <GroupNameList @selectedGroups="handleUpdateGroups" />
+        <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
       </div>
     </div>
 
@@ -27,6 +28,7 @@ import { useRoute, useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList.vue';
+import GroupNameListParticipants from './GroupNameListParticipants.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 
@@ -51,6 +53,12 @@ const handleUpdateGroups = (groups) => {
   console.log('Selected groups:', groups);
   emit('update-groups', groups);
 };
+
+const handleUpdateGroupsParticipants = (groups2) => {
+  console.log('Selected groupsParticipants:', groups2);
+  emit('update-groupsParticipants', groups2);
+};
+
 
 const logout = async () => {
   try {
