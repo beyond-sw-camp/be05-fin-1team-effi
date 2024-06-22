@@ -1,35 +1,78 @@
 <template>
-  <div id="app">
-    <button @click="showMainModal = true">카테고리 선택</button>
-    <MainModal :show="showMainModal" @close="showMainModal = false" />
+  <div class="container">
+    <Navigation @update-categories="handleUpdateCategories" @update-groups="handleUpdateGroups" class="navigation" />
+    <div class="content">
+      <TagTop5 class="chart"/>
+      <TagPie class="chart"/>
+    </div>
   </div>
 </template>
 
 <script>
-import MainModal from '@/components/CategoryModal.vue';
+import { defineComponent, ref } from 'vue';
+import Navigation from '@/components/LeftSidebar.vue';
+import TagPie from '@/components/TagPie.vue';
+import TagTop5 from '@/components/TagTop5.vue';
 
-export default {
+export default defineComponent({
   components: {
-    MainModal
+    Navigation,
+    TagPie,
+    TagTop5
   },
-  data() {
-    return {
-      showMainModal: false,
+  setup() {
+    const selectedCategories = ref([]);
+    const selectedGroupId = ref([]);
+    const calendarValue = ref([]);
+
+    const handleUpdateCategories = (categories) => {
+      selectedCategories.value = categories;
     };
-  }
-}
+
+    const handleUpdateGroups = (groups) => {
+      selectedGroupId.value = groups;
+    };
+
+    return {
+      selectedCategories,
+      handleUpdateCategories,
+      selectedGroupId,
+      handleUpdateGroups,
+      calendarValue
+    };
+  },
+});
 </script>
 
-<style scoped>
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
+<style>
+.container {
+  display: flex;
+  margin-top: 60px; /* 헤더 높이만큼의 여백을 추가 */
+  height: calc(100vh - 60px); /* 전체 높이에서 헤더 높이를 뺀 높이 */
+  //width: 100%; /* 전체 너비 사용 */
 }
 
-button:hover {
-  background-color: #0056b3;
+.navigation {
+  width: 200px; /* 네비게이션 너비 고정 */
+  height: 100%; /* 전체 높이 사용 */
+  padding: 20px;
+  box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
+}
+
+.content {
+  display: flex;
+  //flex-grow: 1; /* 남은 공간 모두 사용 */
+  //height: 100%; /* 전체 높이 사용 */
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  align-items: flex-start; /* 위쪽 정렬 */
+  padding: 20px;
+  //box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
+}
+
+.chart {
+  //flex: 0 0 45%; /* 각 차트가 가로의 45% 차지 */
+  //height: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
 }
 </style>
