@@ -121,4 +121,10 @@ export default defineComponent({
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.chart-container h3 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
 </style>
