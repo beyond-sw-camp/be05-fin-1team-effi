@@ -112,7 +112,7 @@ public class ScheduleController {
 
             schedule.setCategoryNo(4L);
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
-            // participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
+            participantService.addParticipant(rtn.getScheduleId(), empId); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
@@ -229,7 +229,7 @@ public class ScheduleController {
         }
     }
 
-    // 직원 id로 직원 정보 조회 -> 테스트 코드 팔요
+    // 직원 id로 직원 정보 조회
     @GetMapping("/employee/{empId}")
     public ResponseEntity<?> findEmpById(@PathVariable("empId") Long empId) {
         try {
@@ -243,7 +243,7 @@ public class ScheduleController {
         }
     }
 
-    // 선택한 사람 emp 가지고 와서 schduleList *
+    // 선택한 사람 emp 가지고 와서 schduleList
     @GetMapping("/find/other/{empId}")
     public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
         List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
