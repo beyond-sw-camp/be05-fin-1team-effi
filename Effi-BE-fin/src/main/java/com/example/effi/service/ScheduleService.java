@@ -9,6 +9,7 @@ import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.RoutineRepository;
 import com.example.effi.repository.ScheduleRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
@@ -37,10 +38,25 @@ public class ScheduleService {
     private final CategoryRepository categoryRepository;
     private final RoutineRepository routineRepository;
     private final ParticipantRepository participantRepository;
-    private final ParticipantService participantService;
-    private final EmployeeService employeeService;
+//    private final EmployeeService employeeService;
     private final CategoryService categoryService;
     private final TaskScheduler taskScheduler;
+
+    private final EmployeeService employeeService;
+    private final GroupService groupService;
+    
+    @Autowired
+    @Lazy
+    private ParticipantService participantService;
+
+    @PostConstruct
+    public void init() {
+        // 지연 초기화
+    }
+
+    public void setParticipantService(ParticipantService participantService) {
+        this.participantService = participantService;
+    }
 
     @Autowired
     @Lazy
@@ -255,9 +271,18 @@ public class ScheduleService {
 
     // group나갔을때 그 그룹에 해당하는 스케줄 삭제
     public List<ScheduleResponseDTO> deleteGroupSchedule(Long groupId){
+        GroupDTO groupById = groupService.findGroupById(groupId);
+        if (groupById == null)
+            throw new IllegalArgumentException("Group not found");
+
         CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+        if (byGroupId == null)
+            throw new IllegalArgumentException("Group not found");
+
         Long categoryNo = byGroupId.getCategoryNo();
         List<Schedule> allByCategortyCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+        if (allByCategortyCategoryNo.size() == 0)
+            throw new IllegalArgumentException("Group not found");
 
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : allByCategortyCategoryNo) {
@@ -317,5 +342,10 @@ public class ScheduleService {
             String email = employeeService.findById(participant.getEmpId()).getEmail();
             emailService.scheduleNotifyMail(email, scheduleId);
         }
+    }
+
+//     empid로 직원 정보 조회
+    public EmployeeDTO findById(Long empId) {
+        return employeeService.findById(empId);
     }
 }

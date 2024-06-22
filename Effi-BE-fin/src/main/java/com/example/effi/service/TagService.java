@@ -102,5 +102,17 @@ public class TagService {
         return new TagResponseDTO(tag);
     }
 
+    //////////////////////////////////////////////////////////////////////
+    // 마지막 인덱스 찾기 *
+    public Long findLastTagId(){
+        List<TagResponseDTO> allTag = getAllTag();
+        Long max = 0L;
+        for (TagResponseDTO t : allTag) {
+            if (max < t.getTagId()) {
+                max = t.getTagId();
+            }
+        }
+        return max;
+    }
 
 }

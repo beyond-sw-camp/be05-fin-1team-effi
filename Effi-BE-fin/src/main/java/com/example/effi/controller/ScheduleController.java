@@ -13,6 +13,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.time.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +29,6 @@ public class ScheduleController {
     private final EmployeeService employeeService;
     private final ParticipantService participantService;
     private final EmployeeRepository employeeRepository;
-    private final GroupService groupService;
     private final GroupEmpRepository groupEmpRepository;
     private final CategoryService categoryService;
 
@@ -40,7 +44,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -64,7 +70,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -89,7 +97,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -111,7 +121,9 @@ public class ScheduleController {
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
-        }catch (Exception e) {
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
@@ -211,8 +223,79 @@ public class ScheduleController {
     //그룹 탈퇴시 그룹 스케줄 삭제
     @PutMapping("/delete/groupSchedule/{groupId}")
     public ResponseEntity<?> deleteGroupSchedule(@PathVariable("groupId") Long groupId){
-        List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.deleteGroupSchedule(groupId);
-        return ResponseEntity.ok(scheduleResponseDTOS);
+        try{
+            List<ScheduleResponseDTO> scheduleResponseDTOS = scheduleService.deleteGroupSchedule(groupId);
+            return ResponseEntity.ok(scheduleResponseDTOS);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete schedule: " + e.getMessage());
+        }
+    }
+
+    // 직원 id로 직원 정보 조회
+    @GetMapping("/employee/{empId}")
+    public ResponseEntity<?> findEmpById(@PathVariable("empId") Long empId) {
+        try {
+            EmployeeDTO employeeDTO = employeeService.findById(empId);
+            return ResponseEntity.ok(employeeDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to find employee: " + e.getMessage());
+        }
+    }
+
+    // 선택한 사람 emp 가지고 와서 schduleList
+    @GetMapping("/find/other/{empId}")
+    public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
+        List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
+        List<ScheduleResponseDTO> scheduleList = new ArrayList<>();
+        for (ParticipantResponseDTO participant : allByEmpId) {
+            Long scheduleId = participant.getScheduleId();
+            ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
+            if (schedule != null && schedule.getDeleteYn() == false)
+                scheduleList.add(schedule);
+        }
+        return ResponseEntity.ok(scheduleList);
+    }
+
+    ////////////////////////////////////////////////
+
+    @GetMapping("/find/7days")
+    public ResponseEntity<?> getScheduleCountForLast7Days() {
+        LocalDate today = LocalDate.now();
+
+        // 7일간의 날짜 리스트 생성 (오늘 포함)
+        List<LocalDate> last7Days = IntStream.rangeClosed(0, 6)
+                .mapToObj(today::minusDays)
+                .collect(Collectors.toList());
+
+        // 날짜별 일정 개수를 저장할 맵 생성
+        Map<String, Long> scheduleCountMap = new LinkedHashMap<>();
+
+        for (LocalDate date : last7Days) {
+            // 해당 날짜의 시작과 끝 시간
+            LocalDateTime startOfDay = date.atStartOfDay();
+            LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+            List<ScheduleResponseDTO> schedules = scheduleService.getAllSchedules();
+
+            // 해당 날짜에 해당하는 일정 개수 계산
+            long count = schedules.stream()
+                    .filter(schedule -> {
+                        LocalDateTime startTime = schedule.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        return !startTime.isBefore(startOfDay) && !startTime.isAfter(endOfDay);
+                    })
+                    .count();
+
+            // 결과 맵에 추가
+            scheduleCountMap.put(date.toString(), count);
+        }
+
+        return ResponseEntity.ok(scheduleCountMap);
     }
 
 }

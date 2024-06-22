@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.effi.domain.DTO.EmployeeDTO;
+import com.example.effi.domain.Entity.Dept;
+import com.example.effi.repository.DeptRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ public class EmployeeService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final DeptRepository deptRepository;
 
     @Transactional
     public SignInResponse signIn(SignInRequest request) {
@@ -90,11 +93,18 @@ public class EmployeeService {
 
     //empno -> empId 찾기
     public Long findEmpIdByEmpNo(Long empNo) {
-        return employeeRepository.findByEmpNo(empNo).getId();
+        Employee byEmpNo = employeeRepository.findByEmpNo(empNo);
+        if (byEmpNo == null)
+            throw new IllegalArgumentException("사원 No가 유효하지 않습니다.");
+        Long id = byEmpNo.getId();
+        return id;
     }
 
     // dept 사람들 empid만 찾기
     public List<Long> findEmpIdByDept(Long deptId) {
+        Dept byId = deptRepository.findById(deptId).orElse(null);
+        if (byId == null)
+            throw new IllegalArgumentException("부서 Id가 유효하지 않습니다.");
         List<Employee> lst = employeeRepository.findAllByDept_DeptId(deptId);
         List<Long> rtn = new ArrayList<>();
         for (Employee emp : lst) {
@@ -105,6 +115,9 @@ public class EmployeeService {
 
     // dept 사람들 emp 찾기
     public List<EmployeeDTO> findAllByDeptId(Long deptId) {
+        Dept byId = deptRepository.findById(deptId).orElse(null);
+        if (byId == null)
+            throw new IllegalArgumentException("부서 Id가 유효하지 않습니다.");
         List<EmployeeDTO> lst = new ArrayList<>();
         employeeRepository.findAllByDept_DeptId(deptId)
                 .forEach(employee -> {
@@ -129,6 +142,6 @@ public class EmployeeService {
         if (employee.isPresent()) {
             return new EmployeeDTO(employee.get());
         }
-        return null;
+        throw new IllegalArgumentException("사원 Id가 유효하지 않습니다.");
     }
 }

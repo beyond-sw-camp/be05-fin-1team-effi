@@ -2,9 +2,11 @@ package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.GlobalResponse;
 import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneListDTO;
 import com.example.effi.service.TimezoneService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,8 @@ import java.util.List;
 @RequestMapping("/api/timezones")
 @RequiredArgsConstructor
 public class TimezoneController {
+
+    @Autowired
     private final TimezoneService timezoneService;
 
     /**
@@ -78,6 +82,11 @@ public class TimezoneController {
         GlobalResponse<?> response = timezoneService.deleteTimezone(timezoneId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-    
+
+    @GetMapping("/timezonelist")
+    public ResponseEntity<List<TimezoneListDTO>> getTimezones() {
+        List<TimezoneListDTO> timezones = timezoneService.getTimezones();
+        return ResponseEntity.ok(timezones);
+    }
 
 }

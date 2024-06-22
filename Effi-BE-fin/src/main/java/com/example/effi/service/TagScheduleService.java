@@ -1,5 +1,6 @@
 package com.example.effi.service;
 
+import com.example.effi.domain.DTO.ParticipantResponseDTO;
 import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.DTO.TagScheduleResponseDTO;
 import com.example.effi.domain.Entity.Schedule;
@@ -9,6 +10,8 @@ import com.example.effi.repository.ScheduleRepository;
 import com.example.effi.repository.TagRepository;
 import com.example.effi.repository.TagScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,9 @@ public class TagScheduleService {
     private final TagService tagService;
     private final TagRepository tagRepository;
     private final ScheduleRepository scheduleRepository;
+    private final EmployeeService employeeService;
+    private final ParticipantService participantService;
+    private final ScheduleService scheduleService;
 
     // tagId로 scheduleId List rtn
     public List<TagScheduleResponseDTO> findByTagId(Long tagId) {
@@ -106,5 +112,39 @@ public class TagScheduleService {
         }
         return tagIdList;
     }
+
+    ////////////////////////////////////////////////////////////////
+    // 내 태그 찾기 -> 내 스케줄 찾고 -> schdeuleId로 넘겨주자. -> Tag Id List 리턴 *
+    public List<Long> findMyTagList(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+
+        List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
+        if (allByEmpId == null)
+            throw new IllegalArgumentException("Tag not found");
+        List<Long> scheduleIdList = new ArrayList<>();
+        for (ParticipantResponseDTO dto : allByEmpId) {
+            Long scheduleId = dto.getScheduleId();
+            if (scheduleService.getSchedule(scheduleId)!= null
+                    && scheduleService.getSchedule(scheduleId).getDeleteYn() == false)
+                scheduleIdList.add(scheduleId);
+        }
+        if (scheduleIdList == null)
+            throw new IllegalArgumentException("Tag not found");
+
+        List<Long> tagIdList = new ArrayList<>();
+        for(Long scheduleId : scheduleIdList){
+            List<Long> tmpList = findTagIdList(scheduleId);
+            for (Long tagId : tmpList) {
+                tagIdList.add(tagId);
+            }
+        }
+        if (tagIdList == null)
+            throw new IllegalArgumentException("Tag not found");
+
+        return tagIdList;
+    }
+
 
 }

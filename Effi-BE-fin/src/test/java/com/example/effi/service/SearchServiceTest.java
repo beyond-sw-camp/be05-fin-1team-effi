@@ -3,11 +3,14 @@ package com.example.effi.service;
 import com.example.effi.domain.DTO.SearchResponseDTO;
 import com.example.effi.domain.Entity.Participant;
 import com.example.effi.domain.Entity.Schedule;
+import com.example.effi.domain.Entity.Tag;
+import com.example.effi.domain.Entity.TagSchedule;
 import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.SearchRepository;
 import com.example.effi.repository.TagScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,6 +60,7 @@ public class SearchServiceTest {
         when(authentication.getName()).thenReturn("1"); // Assuming empId as String "1"
     }
 
+    @DisplayName("이름으로 schedule 찾기 - 성공")
     @Test
     void testSearchSchedulesByTitle() {
         Schedule schedule = mock(Schedule.class);
@@ -70,6 +75,7 @@ public class SearchServiceTest {
         assertThat(results).isNotEmpty();
     }
 
+    @DisplayName("이름으로 schedule 찾기 - 실패")
     @Test
     void testSearchSchedulesByTitleFailure() {
         when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());
@@ -79,13 +85,15 @@ public class SearchServiceTest {
         assertThat(results).isEmpty();
     }
 
+    @DisplayName("태그로 schedule 찾기 - 성공")
     @Test
     void testSearchSchedulesByTag() {
         Schedule schedule = mock(Schedule.class);
         Participant participant = mock(Participant.class);
         when(participant.getSchedule()).thenReturn(schedule);
         when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.singletonList(participant));
-        when(tagScheduleRepository.findAllByTag_TagNameContainingIgnoreCase(anyString())).thenReturn(Collections.singletonList(schedule));
+        when(tagScheduleRepository.findAllByTag_TagNameContainingIgnoreCase(anyString())).
+                thenReturn(Collections.singletonList(schedule));
         when(tagScheduleRepository.findAllBySchedule_ScheduleId(anyLong())).thenReturn(Collections.emptyList());
 
         List<SearchResponseDTO> results = searchService.searchSchedulesByTag("tag");
@@ -93,6 +101,7 @@ public class SearchServiceTest {
         assertThat(results).isNotEmpty();
     }
 
+    @DisplayName("태그로 schedule 찾기 - 실패")
     @Test
     void testSearchSchedulesByTagFailure() {
         when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());
@@ -102,6 +111,7 @@ public class SearchServiceTest {
         assertThat(results).isEmpty();
     }
 
+    @DisplayName("카테고리로 schedule 찾기 - 성공")
     @Test
     void testSearchSchedulesByCategory() {
         Schedule schedule = mock(Schedule.class);
@@ -116,6 +126,7 @@ public class SearchServiceTest {
         assertThat(results).isNotEmpty();
     }
 
+    @DisplayName("카테고리로 schedule 찾기 - 실패")
     @Test
     void testSearchSchedulesByCategoryFailure() {
         when(participantRepository.findAllByEmployee_Id(anyLong())).thenReturn(Collections.emptyList());

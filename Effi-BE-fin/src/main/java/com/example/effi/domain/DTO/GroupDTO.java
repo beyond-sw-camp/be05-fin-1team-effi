@@ -13,8 +13,6 @@ public class GroupDTO {
     private String groupName;
     private Boolean deleteYn;
 
-    private Long categoryId;
-
     public GroupDTO(Long groupId, String groupName, Boolean deleteYn) {
         this.groupId = groupId;
         this.groupName = groupName;
@@ -27,7 +25,7 @@ public class GroupDTO {
         this.deleteYn = grp.getDeleteYn();
     }
 
-    public Group toEntity(Category category) {
+    public Group toEntity() {
         return Group.builder()
                 .groupName(groupName)
                 .deleteYn(deleteYn)

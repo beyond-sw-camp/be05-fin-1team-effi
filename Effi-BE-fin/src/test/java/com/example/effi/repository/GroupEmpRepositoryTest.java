@@ -37,19 +37,23 @@ public class GroupEmpRepositoryTest {
 
     private Group testGroup;
     private Employee testEmployee;
+    private Category testCategory;
 
     @BeforeEach
     void setUp() {
-        Category category = Category.builder()
-                .categoryName("Test Category")
-                .build();
-        entityManager.persist(category);
-
         testGroup = Group.builder()
                 .groupName("Test Group")
                 .deleteYn(false)
+                .createdAt(java.sql.Date.valueOf(java.time.LocalDate.now()))
                 .build();
         entityManager.persist(testGroup);
+
+        testCategory = Category.builder()
+                .categoryId(1L)
+                .categoryName("Test Category")
+                .group(testGroup)
+                .build();
+        entityManager.persist(testCategory);
 
         testEmployee = Employee.builder()
                 .empNo(1L)
@@ -79,7 +83,8 @@ public class GroupEmpRepositoryTest {
     @Rollback(false)
     @Transactional
     public void testFindByGroup_GroupIdAndEmployee_Id() {
-        GroupEmp found = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(), testEmployee.getId());
+        GroupEmp found = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(),
+                testEmployee.getId());
         assertThat(found).isNotNull();
     }
 
@@ -101,7 +106,8 @@ public class GroupEmpRepositoryTest {
         entityManager.flush(); // 상태를 데이터베이스에 반영
         entityManager.clear(); // 엔티티 매니저를 초기화하여 최신 상태를 반영
 
-        GroupEmp updated = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(), testEmployee.getId());
+        GroupEmp updated = groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(testGroup.getGroupId(),
+                testEmployee.getId());
         assertThat(updated.getDeleteYn()).isTrue();
     }
 
@@ -159,5 +165,4 @@ public class GroupEmpRepositoryTest {
 
         assertThat(groupEmpRepository.findAllByGroup_GroupId(0L)).isEmpty();
     }
-    
 }

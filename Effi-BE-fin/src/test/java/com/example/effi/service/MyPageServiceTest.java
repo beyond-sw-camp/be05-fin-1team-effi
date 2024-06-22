@@ -10,6 +10,7 @@ import com.example.effi.repository.MyPageRepository;
 import com.example.effi.repository.TimezoneEmpRepository;
 import com.example.effi.repository.TimezoneRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,6 +54,7 @@ class MyPageServiceTest {
         when(authentication.getName()).thenReturn("1");
     }
 
+    @DisplayName("마이페이지에서 내 Emp 정보 조회 - 성공")
     @Test
     void getEmployee_ShouldReturnMyPageResponseDTO() {
         Employee employee = Employee.builder()
@@ -86,6 +88,7 @@ class MyPageServiceTest {
         verify(myPageRepository, times(1)).findDefaultTimezoneName(anyLong());
     }
 
+    @DisplayName("마이페이지에서 내 Emp 정보 조회 - 실패: 직원 정보 없음")
     @Test
     void getEmployee_ShouldThrowException_WhenEmployeeNotFound() {
         when(myPageRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -96,6 +99,7 @@ class MyPageServiceTest {
         verify(myPageRepository, never()).findDefaultTimezoneName(anyLong());
     }
 
+    @DisplayName("마이페이지에서 기본 타임존 조회 실패: 타임존 정보 없음")
     @Test
     void getEmployee_ShouldThrowException_WhenDefaultTimezoneNotFound() {
         Employee employee = Employee.builder()
@@ -118,6 +122,7 @@ class MyPageServiceTest {
         verify(myPageRepository, times(1)).findDefaultTimezoneName(anyLong());
     }
 
+    @DisplayName("마이페이지에서 타임존 수정 - 성공")
     @Test
     void updateEmployeeTimezone_ShouldUpdateTimezone() {
         Timezone existingTimezone = Timezone.builder()
@@ -172,6 +177,7 @@ class MyPageServiceTest {
         verify(timezoneEmpRepository, times(1)).save(timezoneEmp);
     }
 
+    @DisplayName("마이페이지에서 타임존 수정 - 실패: 기본 타임존 정보 없음")
     @Test
     void updateEmployeeTimezone_ShouldThrowException_WhenTimezoneEmpNotFound() {
         MyPageUpdateDTO myPageUpdateDTO = MyPageUpdateDTO.builder()
@@ -186,6 +192,7 @@ class MyPageServiceTest {
         verify(timezoneEmpRepository, times(1)).findByEmpIdAndDefaultTimezone(anyLong());
     }
 
+    @DisplayName("마이페이지에서 타임존 수정 - 실패: 새로운 타임존 정보 없음")
     @Test
     void updateEmployeeTimezone_ShouldThrowException_WhenTimezoneNotFound() {
         Timezone existingTimezone = Timezone.builder()

@@ -20,7 +20,6 @@ public class EmailController {
     private final EmailService mailService;
     private final EmployeeService employeeService;
     private final GroupService groupService;
-    private final ParticipantService participantService;
 
     // 그룹 추가 시 메일 전송 Leader
     @PostMapping("/send/group/add/{groupId}")

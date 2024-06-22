@@ -87,8 +87,10 @@ public class TimezoneEmpControllerTest {
     @Test
     @DisplayName("직원의 모든 타임존 조회 테스트 - 성공")
     public void testGetTimezonesForEmployee() throws Exception {
-        TimezoneDTO timezone1 = new TimezoneDTO(1L, "UTC", "US", "UTC", 0L, 0, "N/A");
-        TimezoneDTO timezone2 = new TimezoneDTO(2L, "PST", "US", "PST", 0L, -28800, "N/A");
+        TimezoneDTO timezone1 = new TimezoneDTO(1L, "UTC", "US", "UTC",
+                0L, 0, "N/A");
+        TimezoneDTO timezone2 = new TimezoneDTO(2L, "PST", "US", "PST",
+                0L, -28800, "N/A");
         List<TimezoneDTO> timezones = Arrays.asList(timezone1, timezone2);
 
         GlobalResponse<Map<String, List<TimezoneDTO>>> response = GlobalResponse

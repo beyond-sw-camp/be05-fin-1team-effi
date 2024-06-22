@@ -1,8 +1,8 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <button class="close-button" @click="$emit('close')">×</button>
-      <h2>{{ isEditMode ? '일정 수정하기' : '일정 추가하기' }}</h2>
+      <button class="close-button" @click="closeModal">✕</button>
+      <h2>일정 수정하기</h2>
       <div class="modal-body">
         <form @submit.prevent="submit">
           <!-- Form Fields -->
@@ -30,7 +30,7 @@
             <label for="endTime">종료 시간:</label>
             <input type="time" id="endTime" v-model="internalEvent.endTime" required>
           </div>
-          <div class="form-group timezone-group">
+          <div class="form-group">
             <label for="timezone">타임존:</label>
             <div class="timezone-value">
               {{ internalEvent.timezoneName }}
@@ -42,7 +42,7 @@
           <div class="form-group">
             <label for="category">카테고리</label>
             <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
-            <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false" @select="handleCategorySelect" />
             <div v-if="internalEvent.categoryName" class="selected-category">
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
@@ -63,7 +63,7 @@
               <ul>
                 <li v-for="emp in selectedEmployees" :key="emp.empNo">
                   {{ emp.name }}
-                  <button @click="removeEmployee(emp.empNo)" class="remove-button">×</button>
+                  <button v-if="emp.empNo !== loggedInEmpNo" @click="removeEmployee(emp)" class="remove-button">×</button>
                 </li>
               </ul>
             </div>
@@ -89,7 +89,8 @@
             <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
-            <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
+            <button type="submit" class="update-button">수정</button>
+            <button type="button" class="delete-button" @click="deleteSchedule">삭제</button>
           </div>
         </form>
       </div>
@@ -104,76 +105,111 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
 import axiosInstance from '@/services/axios';
-import CategoryModal from './CategoryModal.vue';
 import TagAdd from './TagAdd.vue';
 import RoutineModal from './RoutineModal.vue';
+import CategoryModal from './CategoryModal.vue';
 
 export default {
   components: {
-    CategoryModal,
     TagAdd,
-    RoutineModal
+    RoutineModal,
+    CategoryModal
   },
   props: {
     show: {
       type: Boolean,
       required: true
     },
-    isEditMode: {
-      type: Boolean,
-      default: false
-    },
     scheduleId: {
       type: Number,
-      default: null
-    },
-    initialDate: {
-      type: String,
-      default: ''
+      required: true
     }
   },
   setup(props, { emit }) {
     const internalEvent = ref({
       title: '',
       context: '',
-      startDate: props.initialDate,
+      startDate: '',
       startTime: '',
       endDate: '',
       endTime: '',
       status: 0,
       notificationYn: false,
-      deleteYn: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: null,
-      categoryNo: null,
+      categoryNo: '1',
+      tags: [],
+      repeat: false,
       routineId: null,
-      tags: []
+      routineCycle: null,
     });
 
+    const showRoutineModal = ref(false);
+    const showCategoryModal = ref(false);
+    const tagColors = reactive({});
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
-    const showCategoryModal = ref(false);
-    const showRoutineModal = ref(false);
-    const tagColors = reactive({});
+    const loggedInEmpNo = sessionStorage.getItem('empNo'); // Get logged-in employee number
 
     onMounted(() => {
-      const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
-      if (empId) {
-        fetchDefaultTimezone(empId);
-      } else {
-        console.error('empNo not found in sessionStorage');
-      }
-      if (props.isEditMode && props.scheduleId) {
+      if (props.scheduleId) {
         fetchScheduleDetails(props.scheduleId);
+        fetchParticipants(props.scheduleId); // Fetch participants for the schedule
       }
     });
 
-    watch(() => props.initialDate, (newDate) => {
-      internalEvent.value.startDate = newDate;
+    watch(() => props.scheduleId, (newVal) => {
+      if (newVal) {
+        fetchScheduleDetails(newVal);
+        fetchParticipants(newVal); // Fetch participants when scheduleId changes
+      }
     });
+
+    const fetchScheduleDetails = async (scheduleId) => {
+      console.log("Fetching schedule details for scheduleId:", scheduleId);
+      try {
+        const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
+        const schedule = response.data;
+
+        const startDateTime = new Date(schedule.startTime);
+        const endDateTime = new Date(schedule.endTime);
+
+        internalEvent.value = {
+          ...internalEvent.value,
+          ...schedule,
+          startDate: startDateTime.toISOString().split('T')[0],
+          startTime: startDateTime.toTimeString().split(' ')[0].slice(0, 5),
+          endDate: endDateTime.toISOString().split('T')[0],
+          endTime: endDateTime.toTimeString().split(' ')[0].slice(0, 5),
+          categoryNo: schedule.categoryNo ? schedule.categoryNo.toString() : '',
+          tags: schedule.tags ? schedule.tags.map(tag => tag.trim()) : [],
+          routineId: schedule.routineId,
+          routineCycle: schedule.routineCycle,
+        };
+
+        if (internalEvent.value.tags.length > 0) {
+          internalEvent.value.tags.forEach(tag => {
+            if (!tagColors[tag]) {
+              tagColors[tag] = getRandomColor();
+            }
+          });
+        }
+
+        const empId = sessionStorage.getItem('empNo');
+        if (empId) {
+          fetchDefaultTimezone(empId);
+        } else {
+          console.error('empNo not found in sessionStorage');
+        }
+
+      } catch (error) {
+        console.error('Error fetching schedule details:', error);
+        if (props.show) {
+          alert('일정 세부 정보를 불러오는 데 실패했습니다.');
+        }
+      }
+    };
 
     const fetchDefaultTimezone = async (empId) => {
       try {
@@ -190,28 +226,21 @@ export default {
       }
     };
 
-    const fetchScheduleDetails = async (scheduleId) => {
+    const fetchParticipants = async (scheduleId) => {
+      console.log("Fetching participants for scheduleId:", scheduleId);
       try {
-        const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
-        const schedule = response.data;
-        internalEvent.value = {
-          ...internalEvent.value,
-          ...schedule,
-          startDate: new Date(schedule.startTime).toISOString().split('T')[0],
-          startTime: new Date(schedule.startTime).toISOString().split('T')[1].substr(0, 5),
-          endDate: new Date(schedule.endTime).toISOString().split('T')[0],
-          endTime: new Date(schedule.endTime).toISOString().split('T')[1].substr(0, 5),
-          categoryNo: schedule.categoryNo,
-          tags: schedule.tags.map(tag => tag.name),
-          createdAt: schedule.createdAt || new Date().toISOString()
-        };
-        for (let tag of internalEvent.value.tags) {
-          if (!tagColors[tag]) {
-            tagColors[tag] = getRandomColor();
-          }
-        }
+        const response = await axiosInstance.get(`/api/participant/find/schedule/${scheduleId}`);
+        const participants = response.data;
+        selectedEmployees.value = await Promise.all(participants.map(async (participant) => {
+          const empResponse = await axiosInstance.get(`/api/schedule/employee/${participant.empId}`);
+          return {
+            empNo: participant.empId,
+            name: empResponse.data.name,
+            participantId: participant.participantId
+          };
+        }));
       } catch (error) {
-        console.error('Error fetching schedule details:', error);
+        console.error('Error fetching participants:', error);
       }
     };
 
@@ -225,63 +254,54 @@ export default {
           ...internalEvent.value,
           startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
           endTime: new Date(`${internalEvent.value.endDate}T${internalEvent.value.endTime}`),
-          tags: internalEvent.value.tags.map(tag => tag.name)
+          tags: internalEvent.value.tags.map(tag => tag.trim())
         };
 
-        if (internalEvent.value.repeat && !internalEvent.value.routineId) {
-          const routineResponse = await axiosInstance.post('/api/routine/add', {
-            routineStart: formattedEvent.startTime,
-            routineEnd: formattedEvent.endTime,
-            routineCycle: internalEvent.value.routineCycle
-          });
-          formattedEvent.routineId = routineResponse.data.routineId;
-        } else if (!internalEvent.value.repeat && internalEvent.value.routineId) {
-          await axiosInstance.put(`/api/routine/delete/${internalEvent.value.routineId}`);
-          formattedEvent.routineId = null;
-        }
-
-        let apiUrl;
-        if (props.isEditMode) {
-          apiUrl = `/api/schedule/update/${props.scheduleId}`;
-        } else {
-          switch (formattedEvent.categoryNo) {
-            case 1:
-              apiUrl = `/api/schedule/add/company`;
-              break;
-            case 2:
-              apiUrl = `/api/schedule/add/dept/${formattedEvent.deptId}`;
-              break;
-            case 3:
-              apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
-              break;
-            case 4:
-              apiUrl = `/api/schedule/add`;
-              break;
-            default:
-              apiUrl = `/api/schedule/add`;
-          }
-        }
-
+        const apiUrl = `/api/schedule/update/${props.scheduleId}`;
         const response = await axiosInstance.post(apiUrl, formattedEvent);
-        const scheduleId = response.data.scheduleId;
 
         for (let tag of internalEvent.value.tags) {
-          await axiosInstance.post(`/api/tag/add/${scheduleId}`, { name: tag });
+          await axiosInstance.post(`/api/tag/add/${response.data.scheduleId}`, { tag: tag.trim() });
         }
 
-        if (formattedEvent.categoryNo === 4) {
-          await addParticipants(scheduleId, formattedEvent.categoryNo);
-        }
+        await addParticipants(props.scheduleId);
 
-        alert('일정이 추가되었습니다.');
+        alert('일정이 수정되었습니다.');
         closeModal();
       } catch (error) {
         console.error('Error submitting form:', error.response ? error.response.data : error.message);
-        alert('일정 추가에 실패했습니다.');
+        alert('일정 수정에 실패했습니다.');
       }
     };
 
-    const handleCategorySelect = async (selection) => {
+    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
+      internalEvent.value.tags = tags.map(tag => tag.trim());
+      for (let tag in newTagColors) {
+        if (!tagColors[tag]) {
+          tagColors[tag] = newTagColors[tag];
+        }
+      }
+    };
+
+    const toggleRoutineModal = () => {
+      console.log('toggleRoutineModal called');
+      showRoutineModal.value = internalEvent.value.repeat;
+    };
+
+    const handleRoutineClose = () => {
+      console.log('Routine modal closed');
+      showRoutineModal.value = false;
+    };
+
+    const handleRoutineConfirm = (routine) => {
+      console.log('Routine confirmed:', routine);
+      internalEvent.value.routineId = routine.routineId;
+      internalEvent.value.routineCycle = routine.routineCycle;
+      internalEvent.value.repeat = true;
+      showRoutineModal.value = false;
+    };
+
+    const handleCategorySelect = (selection) => {
       const category = {
         1: '회사',
         2: '부서',
@@ -297,15 +317,6 @@ export default {
         internalEvent.value.groupId = selection.selectedGroupId;
       }
       showCategoryModal.value = false;
-    };
-
-    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
-      internalEvent.value.tags = tags;
-      for (let tag in newTagColors) {
-        if (!tagColors[tag]) {
-          tagColors[tag] = newTagColors[tag];
-        }
-      }
     };
 
     const searchEmployees = async () => {
@@ -338,15 +349,39 @@ export default {
       }
     };
 
-    const removeEmployee = (empNo) => {
-      selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
+    const removeEmployee = async (employee) => {
+      try {
+        if (employee.participantId) {
+          await axiosInstance.put(`/api/participant/delete/${employee.participantId}`);
+          selectedEmployees.value = selectedEmployees.value.filter(emp => emp.participantId !== employee.participantId);
+        } else {
+          selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== employee.empNo);
+        }
+      } catch (error) {
+        console.error('Error removing employee:', error.response ? error.response.data : error.message);
+        alert('참가자 삭제에 실패했습니다.');
+      }
     };
 
-    const addParticipants = async (scheduleId, categoryNo) => {
+    const addParticipants = async (scheduleId) => {
       try {
-        if (categoryNo === 4) {
-          for (let employee of selectedEmployees.value) {
-            await addParticipant(scheduleId, employee.empNo);
+        for (let employee of selectedEmployees.value) {
+          if (!employee.participantId) { // 기존 데이터베이스에서 불러온 참여자는 추가하지 않음
+            try {
+              await axiosInstance.post('/api/participant/add', null, {
+                params: {
+                  scheduleId: scheduleId,
+                  empId: employee.empNo
+                }
+              });
+            } catch (error) {
+              if (error.response && error.response.data.includes('Participant already exists')) {
+                console.log(`Participant ${employee.empNo} already exists`);
+                continue; // Skip existing participants
+              } else {
+                throw error;
+              }
+            }
           }
         }
       } catch (error) {
@@ -355,61 +390,47 @@ export default {
       }
     };
 
-    const addParticipant = async (scheduleId, empId) => {
+    const deleteSchedule = async () => {
       try {
-        const response = await axiosInstance.post('/api/participant/add', null, {
-          params: {
-            scheduleId: scheduleId,
-            empId: empId
-          }
-        });
-        console.log('addParticipant response:', response.data);
+        await axiosInstance.put(`/api/schedule/delete/${props.scheduleId}`);
+        alert('일정이 삭제되었습니다.');
+        closeModal();
       } catch (error) {
-        console.error('Error adding participant:', error.response ? error.response.data : error.message);
-        alert('참가자 추가에 실패했습니다.');
+        console.error('Error deleting schedule:', error.response ? error.response.data : error.message);
+        alert('일정 삭제에 실패했습니다.');
       }
     };
 
-    const toggleRoutineModal = () => {
-      console.log('toggleRoutineModal called');
-      showRoutineModal.value = internalEvent.value.repeat;
-    };
-
-    const handleRoutineClose = () => {
-      console.log('handleRoutineClose called');
-      showRoutineModal.value = false;
-    };
-
-    const handleRoutineConfirm = (routineData) => {
-      internalEvent.value.routineId = routineData.routineId;
-      internalEvent.value.routineCycle = routineData.routineCycle;
-      internalEvent.value.repeat = true;  // 루틴 설정을 완료했으므로 반복 체크를 true로 설정
-    };
-
     const getRandomColor = () => {
-      const colors = ['#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585'];
-      return colors[Math.floor(Math.random() * colors.length)];
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     };
 
     return {
       internalEvent,
+      showRoutineModal,
+      showCategoryModal,
+      tagColors,
       searchQuery,
       searchResults,
       selectedEmployees,
-      showCategoryModal,
-      showRoutineModal,
+      loggedInEmpNo,
       closeModal,
       submit,
-      handleCategorySelect,
-      updateSchedule,
-      searchEmployees,
-      selectEmployee,
-      removeEmployee,
       toggleRoutineModal,
       handleRoutineClose,
       handleRoutineConfirm,
-      tagColors,
-      addParticipant
+      updateSchedule,
+      handleCategorySelect,
+      searchEmployees,
+      selectEmployee,
+      removeEmployee,
+      addParticipants,
+      deleteSchedule
     };
   }
 };
@@ -478,7 +499,7 @@ textarea {
   resize: vertical;
 }
 
-button.update-button, button#category, button#group {
+button.update-button {
   display: inline-block;
   margin-top: 10px;
   padding: 10px;
@@ -487,10 +508,26 @@ button.update-button, button#category, button#group {
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  margin-right: 10px;
 }
 
-button.update-button:hover, button#category:hover, button#group:hover {
+button.delete-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button.update-button:hover {
   background-color: #FBB584;
+}
+
+button.delete-button:hover {
+  background-color: #ff4d4d;
 }
 
 .modal-footer {
@@ -499,15 +536,9 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .modal-footer button {
   padding: 10px 20px;
-  background-color: #FBB584;
-  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
-
-.modal-footer button:hover {
-  background-color: #EC971F;
 }
 
 .input-group {
