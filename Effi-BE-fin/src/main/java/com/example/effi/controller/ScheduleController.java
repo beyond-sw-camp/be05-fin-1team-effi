@@ -13,6 +13,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.time.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -255,6 +260,42 @@ public class ScheduleController {
                 scheduleList.add(schedule);
         }
         return ResponseEntity.ok(scheduleList);
+    }
+
+    ////////////////////////////////////////////////
+
+    @GetMapping("/find/7days")
+    public ResponseEntity<?> getScheduleCountForLast7Days() {
+        LocalDate today = LocalDate.now();
+
+        // 7일간의 날짜 리스트 생성 (오늘 포함)
+        List<LocalDate> last7Days = IntStream.rangeClosed(0, 6)
+                .mapToObj(today::minusDays)
+                .collect(Collectors.toList());
+
+        // 날짜별 일정 개수를 저장할 맵 생성
+        Map<String, Long> scheduleCountMap = new LinkedHashMap<>();
+
+        for (LocalDate date : last7Days) {
+            // 해당 날짜의 시작과 끝 시간
+            LocalDateTime startOfDay = date.atStartOfDay();
+            LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+            List<ScheduleResponseDTO> schedules = scheduleService.getAllSchedules();
+
+            // 해당 날짜에 해당하는 일정 개수 계산
+            long count = schedules.stream()
+                    .filter(schedule -> {
+                        LocalDateTime startTime = schedule.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        return !startTime.isBefore(startOfDay) && !startTime.isAfter(endOfDay);
+                    })
+                    .count();
+
+            // 결과 맵에 추가
+            scheduleCountMap.put(date.toString(), count);
+        }
+
+        return ResponseEntity.ok(scheduleCountMap);
     }
 
 }

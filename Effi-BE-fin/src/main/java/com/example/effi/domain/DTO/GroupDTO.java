@@ -13,8 +13,6 @@ public class GroupDTO {
     private String groupName;
     private Boolean deleteYn;
 
-    private Long categoryId;
-
     public GroupDTO(Long groupId, String groupName, Boolean deleteYn) {
         this.groupId = groupId;
         this.groupName = groupName;
