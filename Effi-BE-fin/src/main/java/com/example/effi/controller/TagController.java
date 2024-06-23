@@ -1,6 +1,7 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.ScheduleResponseDTO;
+import com.example.effi.domain.DTO.TagDTO;
 import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.DTO.TagScheduleResponseDTO;
 import com.example.effi.domain.Entity.Tag;
@@ -38,9 +39,9 @@ public class TagController {
 
     // add with schedule
     @PostMapping("/add/{scheduleId}")
-    public TagResponseDTO addTagWithSchedule(@PathVariable("scheduleId") Long scheduleId, @RequestBody String inputString) {
-        tagScheduleService.addTagSchedule(scheduleId, inputString);
-        return tagService.getTag(inputString);
+    public TagResponseDTO addTagWithSchedule(@PathVariable("scheduleId") Long scheduleId, @RequestBody TagDTO inputString) {
+        tagScheduleService.addTagSchedule(scheduleId, inputString.getTag());
+        return tagService.getTag(inputString.getTag());
     }
 
     // select (예은)

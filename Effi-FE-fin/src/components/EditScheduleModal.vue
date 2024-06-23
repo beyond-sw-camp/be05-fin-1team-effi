@@ -41,7 +41,7 @@
           </div>
           <div class="form-group">
             <label for="category">카테고리</label>
-            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
+            <button @click="showCategoryModal = true" type="button" class="category-btn" id="category">카테고리 추가하기</button>
             <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false" @select="handleCategorySelect" />
             <div v-if="internalEvent.categoryName" class="selected-category">
               선택된 카테고리: {{ internalEvent.categoryName }}
@@ -63,7 +63,7 @@
               <ul>
                 <li v-for="emp in selectedEmployees" :key="emp.empNo">
                   {{ emp.name }}
-                  <button v-if="emp.empNo !== loggedInEmpNo" @click="removeEmployee(emp)" class="remove-button">×</button>
+                  <button v-if="emp.empNo !== loggedInEmpNo" @click.stop.prevent="removeEmployee(emp)" class="remove-button">×</button>
                 </li>
               </ul>
             </div>
@@ -71,7 +71,7 @@
           <div class="form-group">
             <label for="tag">태그</label>
             <div>
-              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule"/>
+              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule" @remove-tag="removeTag"/>
               <div class="tag-list">
                 <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
               </div>
@@ -138,6 +138,7 @@ export default {
       status: 0,
       notificationYn: false,
       categoryNo: '1',
+      categoryId: null,
       tags: [],
       repeat: false,
       routineId: null,
@@ -150,51 +151,53 @@ export default {
     const searchQuery = ref('');
     const searchResults = ref([]);
     const selectedEmployees = ref([]);
-    const loggedInEmpNo = sessionStorage.getItem('empNo'); // Get logged-in employee number
+    const loggedInEmpNo = sessionStorage.getItem('empNo');
+    const tagMap = ref({});  // 태그 이름과 ID를 매핑하기 위한 객체
+    const existingTags = ref([]); // 기존 태그를 저장하는 배열
 
     onMounted(() => {
       if (props.scheduleId) {
         fetchScheduleDetails(props.scheduleId);
-        fetchParticipants(props.scheduleId); // Fetch participants for the schedule
+        fetchParticipants(props.scheduleId);
+        fetchTags(props.scheduleId);
       }
     });
 
     watch(() => props.scheduleId, (newVal) => {
       if (newVal) {
         fetchScheduleDetails(newVal);
-        fetchParticipants(newVal); // Fetch participants when scheduleId changes
+        fetchParticipants(newVal);
+        fetchTags(newVal);
       }
     });
 
     const fetchScheduleDetails = async (scheduleId) => {
-      console.log("Fetching schedule details for scheduleId:", scheduleId);
       try {
         const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
         const schedule = response.data;
-
         const startDateTime = new Date(schedule.startTime);
         const endDateTime = new Date(schedule.endTime);
 
         internalEvent.value = {
           ...internalEvent.value,
           ...schedule,
-          startDate: startDateTime.toISOString().split('T')[0],
+          startDate: new Date(startDateTime.getTime() - (startDateTime.getTimezoneOffset() * 60000)).toISOString().split('T')[0],
           startTime: startDateTime.toTimeString().split(' ')[0].slice(0, 5),
-          endDate: endDateTime.toISOString().split('T')[0],
+          endDate: new Date(endDateTime.getTime() - (endDateTime.getTimezoneOffset() * 60000)).toISOString().split('T')[0],
           endTime: endDateTime.toTimeString().split(' ')[0].slice(0, 5),
           categoryNo: schedule.categoryNo ? schedule.categoryNo.toString() : '',
-          tags: schedule.tags ? schedule.tags.map(tag => tag.trim()) : [],
+          tags: schedule.tags ? schedule.tags.map(tag => tag.tagName) : [],
           routineId: schedule.routineId,
           routineCycle: schedule.routineCycle,
         };
 
-        if (internalEvent.value.tags.length > 0) {
-          internalEvent.value.tags.forEach(tag => {
-            if (!tagColors[tag]) {
-              tagColors[tag] = getRandomColor();
-            }
-          });
-        }
+        existingTags.value = internalEvent.value.tags.slice(); // 기존 태그를 저장
+
+        internalEvent.value.tags.forEach(tag => {
+          if (!tagColors[tag]) {
+            tagColors[tag] = getRandomColor();
+          }
+        });
 
         const empId = sessionStorage.getItem('empNo');
         if (empId) {
@@ -202,12 +205,28 @@ export default {
         } else {
           console.error('empNo not found in sessionStorage');
         }
-
       } catch (error) {
         console.error('Error fetching schedule details:', error);
         if (props.show) {
           alert('일정 세부 정보를 불러오는 데 실패했습니다.');
         }
+      }
+    };
+
+    const fetchTags = async (scheduleId) => {
+      try {
+        const response = await axiosInstance.get(`/api/tag/find/schedule/${scheduleId}`);
+        const tags = response.data;
+        internalEvent.value.tags = tags.map(tag => tag.tagName);
+        tags.forEach(tag => {
+          tagMap.value[tag.tagName] = tag.tagId;  // 태그 이름과 ID 매핑
+          if (!tagColors[tag.tagName]) {
+            tagColors[tag.tagName] = getRandomColor();
+          }
+        });
+        existingTags.value = internalEvent.value.tags.slice(); // 기존 태그를 저장
+      } catch (error) {
+        console.error('Error fetching tags:', error);
       }
     };
 
@@ -227,7 +246,6 @@ export default {
     };
 
     const fetchParticipants = async (scheduleId) => {
-      console.log("Fetching participants for scheduleId:", scheduleId);
       try {
         const response = await axiosInstance.get(`/api/participant/find/schedule/${scheduleId}`);
         const participants = response.data;
@@ -248,20 +266,40 @@ export default {
       emit('close');
     };
 
+    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
+      const existingTagSet = new Set(existingTags.value.map(tag => tag.trim()));
+      const newTags = tags.map(tag => tag.trim()).filter(tag => !existingTagSet.has(tag));
+
+      internalEvent.value.tags = [...existingTagSet, ...newTags];
+
+      for (let tag in newTagColors) {
+        if (!tagColors[tag]) {
+          tagColors[tag] = newTagColors[tag];
+        }
+      }
+    };
+
     const submit = async () => {
       try {
         const formattedEvent = {
           ...internalEvent.value,
           startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
           endTime: new Date(`${internalEvent.value.endDate}T${internalEvent.value.endTime}`),
-          tags: internalEvent.value.tags.map(tag => tag.trim())
+          tags: [...new Set(internalEvent.value.tags.map(tag => tag.trim()))]  // 중복 제거
         };
 
-        const apiUrl = `/api/schedule/update/${props.scheduleId}`;
-        const response = await axiosInstance.post(apiUrl, formattedEvent);
+        const categoryResponse = await axiosInstance.get(`/api/category/find/${formattedEvent.categoryNo}`);
+        const categoryId = categoryResponse.data.categoryId;
+        formattedEvent.categoryId = categoryId;
 
-        for (let tag of internalEvent.value.tags) {
-          await axiosInstance.post(`/api/tag/add/${response.data.scheduleId}`, { tag: tag.trim() });
+        const apiUrl = `/api/schedule/update/${props.scheduleId}`;
+        await axiosInstance.post(apiUrl, formattedEvent);
+
+        const newTags = new Set(formattedEvent.tags.map(tag => tag.trim()));
+        for (let tag of newTags) {
+          if (!existingTags.value.includes(tag)) {
+            await axiosInstance.post(`/api/tag/add/${props.scheduleId}`, { "tag": tag });
+          }
         }
 
         await addParticipants(props.scheduleId);
@@ -274,34 +312,22 @@ export default {
       }
     };
 
-    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
-      internalEvent.value.tags = tags.map(tag => tag.trim());
-      for (let tag in newTagColors) {
-        if (!tagColors[tag]) {
-          tagColors[tag] = newTagColors[tag];
-        }
-      }
-    };
-
     const toggleRoutineModal = () => {
-      console.log('toggleRoutineModal called');
       showRoutineModal.value = internalEvent.value.repeat;
     };
 
     const handleRoutineClose = () => {
-      console.log('Routine modal closed');
       showRoutineModal.value = false;
     };
 
     const handleRoutineConfirm = (routine) => {
-      console.log('Routine confirmed:', routine);
       internalEvent.value.routineId = routine.routineId;
       internalEvent.value.routineCycle = routine.routineCycle;
       internalEvent.value.repeat = true;
       showRoutineModal.value = false;
     };
 
-    const handleCategorySelect = (selection) => {
+    const handleCategorySelect = async (selection) => {
       const category = {
         1: '회사',
         2: '부서',
@@ -316,6 +342,15 @@ export default {
       } else if (selection.selectedOption === 3) {
         internalEvent.value.groupId = selection.selectedGroupId;
       }
+
+      await deleteAllParticipants(props.scheduleId);
+
+      if (selection.selectedOption === 2) {
+        await fetchAndAddDeptMembers(selection.selectedDeptId);
+      } else if (selection.selectedOption === 3) {
+        await fetchAndAddGroupMembers(selection.selectedGroupId);
+      }
+
       showCategoryModal.value = false;
     };
 
@@ -366,7 +401,7 @@ export default {
     const addParticipants = async (scheduleId) => {
       try {
         for (let employee of selectedEmployees.value) {
-          if (!employee.participantId) { // 기존 데이터베이스에서 불러온 참여자는 추가하지 않음
+          if (!employee.participantId) {
             try {
               await axiosInstance.post('/api/participant/add', null, {
                 params: {
@@ -377,7 +412,7 @@ export default {
             } catch (error) {
               if (error.response && error.response.data.includes('Participant already exists')) {
                 console.log(`Participant ${employee.empNo} already exists`);
-                continue; // Skip existing participants
+                continue;
               } else {
                 throw error;
               }
@@ -387,6 +422,47 @@ export default {
       } catch (error) {
         console.error('Error adding participants:', error.response ? error.response.data : error.message);
         alert('참가자 추가에 실패했습니다.');
+      }
+    };
+
+    const fetchAndAddDeptMembers = async (deptId) => {
+      try {
+        const response = await axiosInstance.post(`/api/participant/add/dept/${deptId}`, null, {
+          params: {
+            scheduleId: props.scheduleId
+          }
+        });
+        console.log('fetchAndAddDeptMembers response:', response.data);
+      } catch (error) {
+        console.error('Error fetching and adding dept members:', error.response ? error.response.data : error.message);
+        alert('부서원 추가에 실패했습니다.');
+      }
+    };
+
+    const fetchAndAddGroupMembers = async (groupId) => {
+      try {
+        const response = await axiosInstance.post(`/api/participant/add/group/${groupId}`, null, {
+          params: {
+            scheduleId: props.scheduleId
+          }
+        });
+        console.log('fetchAndAddGroupMembers response:', response.data);
+      } catch (error) {
+        console.error('Error fetching and adding group members:', error.response ? error.response.data : error.message);
+        alert('그룹 구성원 추가에 실패했습니다.');
+      }
+    };
+
+    const deleteAllParticipants = async (scheduleId) => {
+      try {
+        const participantsResponse = await axiosInstance.get(`/api/participant/find/schedule/${scheduleId}`);
+        const participants = participantsResponse.data;
+        for (let participant of participants) {
+          await axiosInstance.put(`/api/participant/delete/${participant.participantId}`);
+        }
+      } catch (error) {
+        console.error('Error deleting participants:', error.response ? error.response.data : error.message);
+        alert('기존 참가자 삭제에 실패했습니다.');
       }
     };
 
@@ -410,6 +486,16 @@ export default {
       return color;
     };
 
+    const removeTag = async (tag) => {
+      try {
+        const tagId = tagMap.value[tag]; // 태그 ID를 찾음
+        await axiosInstance.post(`/api/tag/delete/${props.scheduleId}/${tagId}`);
+        console.log(`Tag ${tag} removed successfully.`);
+      } catch (error) {
+        console.error('Error removing tag:', error.response ? error.response.data : error.message);
+      }
+    };
+
     return {
       internalEvent,
       showRoutineModal,
@@ -430,7 +516,12 @@ export default {
       selectEmployee,
       removeEmployee,
       addParticipants,
-      deleteSchedule
+      fetchAndAddDeptMembers,
+      fetchAndAddGroupMembers,
+      deleteAllParticipants,
+      deleteSchedule,
+      getRandomColor,
+      removeTag
     };
   }
 };
@@ -500,6 +591,18 @@ textarea {
 }
 
 button.update-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #FBB584;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.category-btn {
   display: inline-block;
   margin-top: 10px;
   padding: 10px;

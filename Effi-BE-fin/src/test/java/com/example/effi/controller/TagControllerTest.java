@@ -148,9 +148,11 @@ public class TagControllerTest {
         Tag tag1 = Tag.builder().tagName("tag1").build();
         Tag tag2 = Tag.builder().tagName("tag2").build();
         TagResponseDTO responseDTO1 = new TagResponseDTO();
-        responseDTO1.setTagId(tag1.getTagId());responseDTO1.setTagName(tag1.getTagName());
+        responseDTO1.setTagId(tag1.getTagId());
+        responseDTO1.setTagName(tag1.getTagName());
         TagResponseDTO responseDTO2 = new TagResponseDTO();
-        responseDTO2.setTagId(tag2.getTagId());responseDTO2.setTagName(tag2.getTagName());
+        responseDTO2.setTagId(tag2.getTagId());
+        responseDTO2.setTagName(tag2.getTagName());
 
         when(tagScheduleService.findTagIdList(scheduleId)).thenReturn(tagIds);
         when(tagService.getTagById(1L)).thenReturn(responseDTO1);
@@ -177,16 +179,19 @@ public class TagControllerTest {
         assertEquals(0, result.size());
     }
 
-    @DisplayName("schedule에 tag 추가 - 성공")
+    @DisplayName("addTagWithSchedule - 성공적으로 스케줄에 태그 추가")
     @Test
     void testAddTagWithSchedule() {
         when(tagScheduleService.addTagSchedule(anyLong(), anyString())).thenReturn(1L);
         TagResponseDTO sampleTagResponseDTO = new TagResponseDTO();
         sampleTagResponseDTO.setTagId(1L);
         sampleTagResponseDTO.setTagName("Sample Tag");
-        when(tagService.getTag(anyString())).thenReturn(sampleTagResponseDTO);
 
-        TagResponseDTO response = tagController.addTagWithSchedule(1L, "Sample Tag");
+        when(tagService.getTag(anyString())).thenReturn(sampleTagResponseDTO);
+        TagDTO tag = new TagDTO();
+        tag.setTag("Sample Tag");
+
+        TagResponseDTO response = tagController.addTagWithSchedule(1L, tag);
 
         assertThat(response.getTagId()).isEqualTo(1L);
         assertThat(response.getTagName()).isEqualTo("Sample Tag");
@@ -195,20 +200,24 @@ public class TagControllerTest {
         verify(tagService).getTag(anyString());
     }
 
-    @DisplayName("schedule에 tag 추가 - 실패")
+    @DisplayName("addTagWithSchedule - 스케줄에 태그 추가 실패")
     @Test
     void testAddTagWithScheduleFailure() {
-        doThrow(new RuntimeException("Tag creation failed")).when(tagScheduleService).addTagSchedule(anyLong(), anyString());
+        doThrow(new RuntimeException("Tag creation failed")).when(tagScheduleService).addTagSchedule(anyLong(),
+                anyString());
+
+        TagDTO tag = new TagDTO();
+        tag.setTag("Sample Tag");
 
         assertThrows(RuntimeException.class, () -> {
-            tagController.addTagWithSchedule(1L, "Sample Tag");
+            tagController.addTagWithSchedule(1L, tag);
         });
 
         verify(tagScheduleService).addTagSchedule(anyLong(), anyString());
         verify(tagService, never()).getTag(anyString());
     }
 
-    @DisplayName("tag 조회 - 성공")
+    @DisplayName("findTag - 태그 조회 성공")
     @Test
     void testFindTag() {
         when(tagService.getTag(anyString())).thenReturn(sampleTagResponseDTO);
@@ -222,7 +231,7 @@ public class TagControllerTest {
         verify(tagService).getTag(anyString());
     }
 
-    @DisplayName("tag 조회 - 실패")
+    @DisplayName("findTag - 태그 조회 실패")
     @Test
     void testFindTagFailure() {
         when(tagService.getTag(anyString())).thenThrow(new RuntimeException("Tag not found"));
@@ -234,7 +243,7 @@ public class TagControllerTest {
         verify(tagService).getTag(anyString());
     }
 
-    @DisplayName("전체 tag 조회 - 성공")
+    @DisplayName("findAllTag - 전체 태그 조회 성공")
     @Test
     void testFindAllTag() {
         when(tagService.getAllTag()).thenReturn(Collections.singletonList(sampleTagResponseDTO));
@@ -249,7 +258,7 @@ public class TagControllerTest {
         verify(tagService).getAllTag();
     }
 
-    @DisplayName("전체 tag 조회 - 실패")
+    @DisplayName("findAllTag - 전체 태그 조회 실패")
     @Test
     void testFindAllTagFailure() {
         when(tagService.getAllTag()).thenThrow(new RuntimeException("Failed to fetch tags"));
@@ -261,10 +270,11 @@ public class TagControllerTest {
         verify(tagService).getAllTag();
     }
 
-    @DisplayName("tagId로 Tag 조회 - 성공")
+    @DisplayName("findTagById - 태그 ID로 태그 조회 성공")
     @Test
     void testFindTagById() {
-        when(tagScheduleService.findByTagId(anyLong())).thenReturn(Collections.singletonList(sampleTagScheduleResponseDTO));
+        when(tagScheduleService.findByTagId(anyLong()))
+                .thenReturn(Collections.singletonList(sampleTagScheduleResponseDTO));
         when(scheduleService.getSchedule(anyLong())).thenReturn(sampleScheduleResponseDTO);
 
         ResponseEntity<List<ScheduleResponseDTO>> response = tagController.findTagById(1L);
@@ -279,7 +289,7 @@ public class TagControllerTest {
         verify(scheduleService).getSchedule(anyLong());
     }
 
-    @DisplayName("tagId로 Tag 조회 - 실패")
+    @DisplayName("findTagById - 태그 ID로 태그 조회 실패")
     @Test
     void testFindTagByIdFailure() {
         when(tagScheduleService.findByTagId(anyLong())).thenThrow(new RuntimeException("Tag not found"));
@@ -291,10 +301,11 @@ public class TagControllerTest {
         verify(tagScheduleService).findByTagId(anyLong());
     }
 
-    @DisplayName("Tag 수정 - 성공")
+    @DisplayName("updateTag - 태그 수정 성공")
     @Test
     void testUpdateTag() {
-        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenReturn(sampleTagScheduleResponseDTO);
+        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong()))
+                .thenReturn(sampleTagScheduleResponseDTO);
         when(tagScheduleService.addTagSchedule(anyLong(), anyString())).thenReturn(1L);
         when(tagScheduleService.findTagSchedule(anyLong())).thenReturn(sampleTagScheduleResponseDTO);
 
@@ -311,10 +322,11 @@ public class TagControllerTest {
         verify(tagScheduleService).findTagSchedule(anyLong());
     }
 
-    @DisplayName("Tag 수정 - 실패")
+    @DisplayName("updateTag - 태그 수정 실패")
     @Test
     void testUpdateTagFailure() {
-        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenThrow(new RuntimeException("TagSchedule not found"));
+        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong()))
+                .thenThrow(new RuntimeException("TagSchedule not found"));
 
         assertThrows(RuntimeException.class, () -> {
             tagController.updateTag(1L, 1L, "Updated Tag");
@@ -323,10 +335,11 @@ public class TagControllerTest {
         verify(tagScheduleService).findByScheduleIdAndTagId(anyLong(), anyLong());
     }
 
-    @DisplayName("Tag 삭제 - 성공")
+    @DisplayName("deleteTag - 태그 삭제 성공")
     @Test
     void testDeleteTag() {
-        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong())).thenReturn(sampleTagScheduleResponseDTO);
+        when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong()))
+                .thenReturn(sampleTagScheduleResponseDTO);
 
         ResponseEntity<?> response = tagController.deleteTag(1L, 1L);
 
@@ -336,7 +349,7 @@ public class TagControllerTest {
         verify(tagScheduleService).deleteTag(anyLong());
     }
 
-    @DisplayName("Tag 삭제 - 실패")
+    @DisplayName("deleteTag - 태그 삭제 실패")
     @Test
     void testDeleteTagFailure() {
         when(tagScheduleService.findByScheduleIdAndTagId(anyLong(), anyLong()))
