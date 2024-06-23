@@ -1,8 +1,8 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <button class="close-button" @click="$emit('close')">×</button>
-      <h2>{{ isEditMode ? '일정 수정하기' : '일정 추가하기' }}</h2>
+      <button class="close-button" @click="closeModal">✕</button>
+      <h2>일정 추가하기</h2>
       <div class="modal-body">
         <form @submit.prevent="submit">
           <!-- Form Fields -->
@@ -30,7 +30,7 @@
             <label for="endTime">종료 시간:</label>
             <input type="time" id="endTime" v-model="internalEvent.endTime" required>
           </div>
-          <div class="form-group timezone-group">
+          <div class="form-group">
             <label for="timezone">타임존:</label>
             <div class="timezone-value">
               {{ internalEvent.timezoneName }}
@@ -42,7 +42,7 @@
           <div class="form-group">
             <label for="category">카테고리</label>
             <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
-            <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <CategoryModal :show="showCategoryModal" :schedule-id="null" @close="showCategoryModal = false" @select="handleCategorySelect" />
             <div v-if="internalEvent.categoryName" class="selected-category">
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
@@ -89,7 +89,7 @@
             <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
-            <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
+            <button type="submit" class="update-button">추가</button>
           </div>
         </form>
       </div>
@@ -120,14 +120,6 @@ export default {
     show: {
       type: Boolean,
       required: true
-    },
-    isEditMode: {
-      type: Boolean,
-      default: false
-    },
-    scheduleId: {
-      type: Number,
-      default: null
     },
     initialDate: {
       type: String,
@@ -166,9 +158,6 @@ export default {
       } else {
         console.error('empNo not found in sessionStorage');
       }
-      if (props.isEditMode && props.scheduleId) {
-        fetchScheduleDetails(props.scheduleId);
-      }
     });
 
     watch(() => props.initialDate, (newDate) => {
@@ -187,31 +176,6 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching default timezone:', error);
-      }
-    };
-
-    const fetchScheduleDetails = async (scheduleId) => {
-      try {
-        const response = await axiosInstance.get(`/api/schedule/find/${scheduleId}`);
-        const schedule = response.data;
-        internalEvent.value = {
-          ...internalEvent.value,
-          ...schedule,
-          startDate: new Date(schedule.startTime).toISOString().split('T')[0],
-          startTime: new Date(schedule.startTime).toISOString().split('T')[1].substr(0, 5),
-          endDate: new Date(schedule.endTime).toISOString().split('T')[0],
-          endTime: new Date(schedule.endTime).toISOString().split('T')[1].substr(0, 5),
-          categoryNo: schedule.categoryNo,
-          tags: schedule.tags.map(tag => tag.name),
-          createdAt: schedule.createdAt || new Date().toISOString()
-        };
-        for (let tag of internalEvent.value.tags) {
-          if (!tagColors[tag]) {
-            tagColors[tag] = getRandomColor();
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching schedule details:', error);
       }
     };
 
@@ -240,36 +204,42 @@ export default {
           formattedEvent.routineId = null;
         }
 
+        // Fetch category details by categoryNo and update categoryId
+        const categoryResponse = await axiosInstance.get(`/api/category/find/${formattedEvent.categoryNo}`);
+        if (categoryResponse.data) {
+          formattedEvent.categoryNo = categoryResponse.data.categoryId;
+        }
+
         let apiUrl;
-        if (props.isEditMode) {
-          apiUrl = `/api/schedule/update/${props.scheduleId}`;
-        } else {
-          switch (formattedEvent.categoryNo) {
-            case 1:
-              apiUrl = `/api/schedule/add/company`;
-              break;
-            case 2:
-              apiUrl = `/api/schedule/add/dept/${formattedEvent.deptId}`;
-              break;
-            case 3:
-              apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
-              break;
-            case 4:
-              apiUrl = `/api/schedule/add`;
-              break;
-            default:
-              apiUrl = `/api/schedule/add`;
-          }
+        switch (formattedEvent.categoryNo) {
+          case 1:
+            apiUrl = `/api/schedule/add/company`;
+            break;
+          case 2:
+            apiUrl = `/api/schedule/add/dept/${formattedEvent.deptId}`;
+            break;
+          case 3:
+            apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
+            break;
+          case 4:
+            apiUrl = `/api/schedule/add`;
+            break;
+          default:
+            apiUrl = `/api/schedule/add`;
         }
 
         const response = await axiosInstance.post(apiUrl, formattedEvent);
         const scheduleId = response.data.scheduleId;
 
         for (let tag of internalEvent.value.tags) {
-          await axiosInstance.post(`/api/tag/add/${scheduleId}`, { name: tag });
+          await axiosInstance.post(`/api/tag/add/${scheduleId}`, { "tag": tag });
         }
 
-        if (formattedEvent.categoryNo === 4) {
+        if (formattedEvent.categoryNo === 2) {
+          await fetchAndAddDeptMembers(scheduleId, formattedEvent.deptId);
+        } else if (formattedEvent.categoryNo === 3) {
+          await fetchAndAddGroupMembers(scheduleId, formattedEvent.groupId);
+        } else if (formattedEvent.categoryNo === 4) {
           await addParticipants(scheduleId, formattedEvent.categoryNo);
         }
 
@@ -278,6 +248,34 @@ export default {
       } catch (error) {
         console.error('Error submitting form:', error.response ? error.response.data : error.message);
         alert('일정 추가에 실패했습니다.');
+      }
+    };
+
+    const fetchAndAddDeptMembers = async (scheduleId, deptId) => {
+      try {
+        const response = await axiosInstance.post(`/api/participant/add/dept/${deptId}`, null, {
+          params: {
+            scheduleId: scheduleId
+          }
+        });
+        console.log('fetchAndAddDeptMembers response:', response.data);
+      } catch (error) {
+        console.error('Error fetching and adding dept members:', error.response ? error.response.data : error.message);
+        alert('부서원 추가에 실패했습니다.');
+      }
+    };
+
+    const fetchAndAddGroupMembers = async (scheduleId, groupId) => {
+      try {
+        const response = await axiosInstance.post(`/api/participant/add/group/${groupId}`, null, {
+          params: {
+            scheduleId: scheduleId
+          }
+        });
+        console.log('fetchAndAddGroupMembers response:', response.data);
+      } catch (error) {
+        console.error('Error fetching and adding group members:', error.response ? error.response.data : error.message);
+        alert('그룹 구성원 추가에 실패했습니다.');
       }
     };
 
@@ -296,6 +294,7 @@ export default {
       } else if (selection.selectedOption === 3) {
         internalEvent.value.groupId = selection.selectedGroupId;
       }
+
       showCategoryModal.value = false;
     };
 
@@ -409,7 +408,8 @@ export default {
       handleRoutineClose,
       handleRoutineConfirm,
       tagColors,
-      addParticipant
+      addParticipant,
+      getRandomColor
     };
   }
 };

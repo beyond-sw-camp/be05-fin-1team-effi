@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <button class="close-button" @click="$emit('close')">×</button>
+      <button class="close-button" @click="handleClose">×</button>
       <!-- List of categories -->
       <ul>
         <li @click="selectCategory(1)">회사</li>
@@ -58,13 +58,14 @@ export default {
     },
     scheduleId: {
       type: Number,
-      required: true
+      required: false,
+      default: null
     }
   },
   watch: {
     show: {
       handler(newVal) {
-        if (newVal) {
+        if (newVal && this.scheduleId) {
           this.fetchCategory();
         }
       },
@@ -73,6 +74,8 @@ export default {
   },
   methods: {
     async fetchCategory() {
+      if (!this.scheduleId) return;
+      
       try {
         const response = await axios.get(`/api/schedule/find/${this.scheduleId}`);
         const categoryNo = response.data.categoryNo;
@@ -185,3 +188,4 @@ li {
   cursor: pointer;
 }
 </style>
+

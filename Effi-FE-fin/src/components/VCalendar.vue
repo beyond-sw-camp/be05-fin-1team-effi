@@ -32,7 +32,7 @@
         @click:date="onDateClick"
       >
         <template v-slot:event="{ event }">
-          <div class="my-event" :style="{ backgroundColor: event.color }" @click.stop="onEventClick(event)">
+          <div class="my-event" :style="{ backgroundColor: getCategoryColor(event.categoryNo) }" @click.stop="onEventClick(event)">
             <strong>{{ event.title }}</strong>
             <br>
             {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD HH:mm') : '' }}
@@ -100,8 +100,6 @@ export default {
     const showScheduleDialog = ref(false);
     const showEditDialog = ref(false);
     const selectedEventId = ref(null);
-    // const selectedDate = ref(null); -- 기존코드
-    // const selectedDate = ref(''); -- gpt
     const selectedDate = ref(dayjs().toDate());
 
     const fetchSchedules = async () => {
@@ -158,7 +156,7 @@ export default {
             content: schedule.context,
             start: dayjs(schedule.startTime),
             end: dayjs(schedule.endTime),
-            color: schedule.color,
+            categoryNo: schedule.categoryNo,
             open: ref(false),
           }));
         } else {
@@ -175,6 +173,21 @@ export default {
         } else {
           console.error('Error setting up the request:', error.message);
         }
+      }
+    };
+
+    const getCategoryColor = (categoryId) => {
+      switch (categoryId) {
+        case 1:
+          return 'red';
+        case 2:
+          return 'yellow';
+        case 3:
+          return 'green';
+        case 4:
+          return 'blue';
+        default:
+          return 'gray';
       }
     };
 
@@ -267,8 +280,6 @@ export default {
       showEditDialog.value = value;
     };
 
-
-
     const onEventClick = (event) => {
       if (event && event.id) {
         editEvent(event);
@@ -314,7 +325,8 @@ export default {
       updateShowDialog,
       handleEventSubmit,
       handleDayLabelClick,
-      editEvent
+      editEvent,
+      getCategoryColor,
     };
   },
 };
@@ -326,8 +338,6 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   border-radius: 2px;
-  background-color: #1867c0;
-  color: #ffffff;
   border: 1px solid #1867c0;
   width: 100%;
   font-size: 12px;
