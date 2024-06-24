@@ -9,14 +9,14 @@
     <span class="formatted-period">{{ formattedPeriod }}</span>
     <button @click="next" class="btn btn-outline-secondary ms-2">&gt;</button>
     <button @click="goToToday" class="btn btn-outline-primary ms-3">Today</button>
-    <button @click="goToHome" class="btn btn-outline-secondary ms-2">달력</button> <!-- 추가된 부분 -->
+    <button @click="goToHome" class="btn btn-outline-secondary ms-2">달력</button> 
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
-import { useRouter } from 'vue-router'; // 추가된 부분
+import { useRouter } from 'vue-router'; 
 
 const props = defineProps({
   currentPeriod: {

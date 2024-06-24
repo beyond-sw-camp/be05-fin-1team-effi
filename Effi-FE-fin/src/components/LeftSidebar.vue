@@ -1,4 +1,5 @@
 <template>
+
   <div class="left-sidebar">
     <button class="create-group-button" @click="showModal = true">
       <span class="plus-icon">+</span>
@@ -9,6 +10,7 @@
 
     <div class="content">
       <div v-if="!isMyPage">
+        <GotoAllSchedules />
         <SelectCategory @selectCategory="handleUpdateCategories" />
         <GroupNameList @selectedGroups="handleUpdateGroups" />
         <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
@@ -29,6 +31,7 @@ import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList.vue';
 import GroupNameListParticipants from './GroupNameListParticipants.vue';
+import GotoAllSchedules from './GotoAllSchedules.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 

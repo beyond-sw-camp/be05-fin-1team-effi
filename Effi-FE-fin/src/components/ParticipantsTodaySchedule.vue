@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-toolbar flat>
-          <v-toolbar-title>Today’s Schedule for {{ selectedUserNames.join(', ') }}</v-toolbar-title>
+          <v-toolbar-title>오늘의 일정: {{ selectedUserNames.join(', ') }}</v-toolbar-title>
         </v-toolbar>
         <v-data-table :headers="headers" :items="formattedSchedules" item-value="time" class="elevation-1"
           :items-per-page="-1" hide-default-footer>
@@ -13,8 +13,8 @@
               <td v-for="(schedule, index) in item.schedules" :key="index">
                 <div v-if="schedule" :class="['event', { first: schedule.isFirstSlot, last: schedule.isLastSlot }]">
                   <template v-if="schedule.isFirstSlot">
-                    <strong>{{ schedule.title }}</strong><br>
-                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }}
+                    <strong>{{schedule.userName}}의 일정 : {{ schedule.title }}</strong><br>
+                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }}<br>
                   </template>
                 </div>
               </td>
@@ -52,13 +52,11 @@ export default {
           throw new Error('No access token found');
         }
 
-        // 클라이언트의 현재 시간대 오프셋을 가져옴 (분 단위, 동부 시간대는 음수)
-        const timezoneOffset = new Date().getTimezoneOffset();
-
+        // 현재 날짜와 시간을 가져옴
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0); // 오늘의 00:00:00으로 설정
         const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
+        tomorrow.setDate(today.getDate() + 1); // 내일의 00:00:00으로 설정
 
         const schedulePromises = props.selectedUsers.map(user =>
           axiosInstance.get(`/api/schedule/find/other/${user.id}`, {
@@ -69,10 +67,6 @@ export default {
               const start = new Date(schedule.startTime);
               const end = new Date(schedule.endTime);
 
-              // UTC 시간을 로컬 시간으로 변환 (timezoneOffset을 시간 단위로 변환)
-              start.setMinutes(start.getMinutes() - timezoneOffset);
-              end.setMinutes(end.getMinutes() - timezoneOffset);
-
               console.log(`Checking schedule: ${schedule.title} (start: ${start}, end: ${end}) against today: ${today}, tomorrow: ${tomorrow}`);
               return (
                 (start < tomorrow && end > today) ||
@@ -82,10 +76,12 @@ export default {
             console.log(`Filtered schedules for user ${user.id}:`, todaySchedules);
             return {
               userId: user.id,
+              userName: user.name, // 유저 이름 저장
               schedules: todaySchedules.map(schedule => ({
                 title: schedule.title,
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
+                userName: user.name // 유저 이름 저장
               })),
             };
           })
@@ -108,7 +104,7 @@ export default {
         scheduleMap[time] = { time, schedules: Array(props.selectedUsers.length).fill(null) };
       });
 
-      schedules.value.forEach(({ userId, schedules }) => {
+      schedules.value.forEach(({ userId, schedules, userName }) => {
         schedules.forEach(schedule => {
           console.log(`Processing schedule: ${schedule.title} from ${schedule.start} to ${schedule.end}`);
           const startHour = schedule.start.getHours();
@@ -122,6 +118,7 @@ export default {
               if (scheduleMap[time]) {
                 scheduleMap[time].schedules[userIndex] = {
                   ...schedule,
+                  userName: userName, // 유저 이름 저장
                   isFirstSlot: currentHour === startHour,
                   isLastSlot: (currentHour + 1) % 24 === endHour
                 };

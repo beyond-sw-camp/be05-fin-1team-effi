@@ -371,4 +371,11 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleCountMap);
     }
 
+    // 내 스케줄 전체 (전체 리스트를 위해 tag, category 포함)
+    @GetMapping("/findAllForSearch")
+    public ResponseEntity<List<SearchResponseDTO>> findAllForSearch(){
+        List<SearchResponseDTO> lst = scheduleService.getAllSchedulesForSearch();
+        return ResponseEntity.ok(lst);
+    }
+
 }

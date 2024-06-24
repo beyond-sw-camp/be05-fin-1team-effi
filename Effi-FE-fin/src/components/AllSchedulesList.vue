@@ -11,16 +11,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="search in searches" :key="search.scheduleId">
-          <td>{{ formatDate(search.startTime) }}</td>
+        <tr v-for="schedule in schedules" :key="schedule.scheduleId">
+          <td>{{ formatDate(schedule.startTime) }}</td>
           <td>
-            <span :style="{ backgroundColor: getCategoryColor(search.categoryName) }" class="category-dot"></span>
-            {{ search.categoryName }}
+            <span :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }" class="category-dot"></span>
+            {{ schedule.categoryName }}
           </td>
-          <td><span :class="getStatusClass(search.status)">{{ getStatus(search.status) }}</span></td>
-          <td>{{ search.title }}</td>
+          <td><span :class="getStatusClass(schedule.status)">{{ getStatus(schedule.status) }}</span></td>
+          <td>{{ schedule.title }}</td>
           <td>
-            <span v-for="tag in search.tagNames" :key="tag" :style="{ backgroundColor: randomColor() }"
+            <span v-for="tag in parseTags(schedule.tagNames)" :key="tag" :style="{ backgroundColor: randomColor() }"
               class="badge me-1">#{{ tag }}</span>
           </td>
         </tr>
@@ -30,14 +30,15 @@
 </template>
 
 <script>
+
 export default {
-  props: ['searches'],
+  props: ['schedules'],
   mounted() {
-    console.log('Schedules received in SearchList:', this.searches);
+    console.log('Schedules received in AllSchedulesList (mounted):', this.schedules);
   },
   watch: {
-    searches(newVal) {
-      console.log('Schedules updated in SearchList:', newVal);
+    schedules(newVal) {
+      console.log('Schedules updated in AllSchedulesList:', newVal);
     }
   },
   methods: {
@@ -85,6 +86,10 @@ export default {
         default:
           return '#000000'; // 기본 색상 (필요한 경우)
       }
+    },
+    parseTags(tagNames) {
+      if (!tagNames) return [];
+      return tagNames.map(tag => tag.replace(/.*:"(.*)".*/, '$1'));
     }
   }
 };

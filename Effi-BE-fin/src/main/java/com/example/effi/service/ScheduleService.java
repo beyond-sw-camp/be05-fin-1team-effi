@@ -1,10 +1,7 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
-import com.example.effi.domain.Entity.Category;
-import com.example.effi.domain.Entity.Participant;
-import com.example.effi.domain.Entity.Routine;
-import com.example.effi.domain.Entity.Schedule;
+import com.example.effi.domain.Entity.*;
 import com.example.effi.repository.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +31,9 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final CategoryRepository categoryRepository;
     private final RoutineRepository routineRepository;
+
+    private final TagScheduleRepository tagScheduleRepository;
+
     private final ParticipantRepository participantRepository;
 //    private final EmployeeService employeeService;
     private final CategoryService categoryService;
@@ -41,6 +41,7 @@ public class ScheduleService {
 
     private final EmployeeService employeeService;
     private final GroupService groupService;
+
     
     @Autowired
     @Lazy
@@ -64,6 +65,18 @@ public class ScheduleService {
     private EmailService emailService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
+
+    // 여러개의 tagName 을 list 형식으로
+    private List<String> getTagNamesForSchedule(Long scheduleId) {
+        List<TagSchedule> tagSchedules = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
+        List<String> tagNames = new ArrayList<>();
+        for (TagSchedule ts : tagSchedules) {
+            tagNames.add(ts.getTag().getTagName());
+        }
+        return tagNames;
+    }
+
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -375,5 +388,24 @@ public class ScheduleService {
 //     empid로 직원 정보 조회
     public EmployeeDTO findById(Long empId) {
         return employeeService.findById(empId);
+    }
+
+    //empId로 내 schedule만 조회
+    public List<SearchResponseDTO> getAllSchedulesForSearch() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+        List<Participant> partiDTO = participantRepository.findAllByEmployee_Id(empId);
+        List<SearchResponseDTO> schedules = new ArrayList<>();
+
+        for (Participant p : partiDTO) {
+            Schedule schedule = p.getSchedule();
+            if (p.getSchedule().getDeleteYn() == false) {
+                List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
+                schedules.add(new SearchResponseDTO(p.getSchedule(), tagNames));
+            }
+        }
+        return schedules;
     }
 }

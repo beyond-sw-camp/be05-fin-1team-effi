@@ -39,6 +39,7 @@ public class SearchController {
     public ResponseEntity<List<SearchResponseDTO>> searchSchedulesByCategory(@RequestParam String categoryName){
         List<SearchResponseDTO> schedules = searchService.searchSchedulesByCategory(categoryName);
         return ResponseEntity.ok(schedules);
+
     }
 
     // deptId로 deptName 찾기
