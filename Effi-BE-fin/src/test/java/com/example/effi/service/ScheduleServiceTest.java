@@ -254,7 +254,8 @@
          newRequest.setStartTime(new Date());newRequest.setEndTime(new Date());
          newRequest.setRoutineId(null);newRequest.setCategoryNo(categoryNo);
 
-         ScheduleResponseDTO updateSchedule = scheduleService.updateSchedule(newRequest, responseDTO.getScheduleId());
+         CategoryResponseDTO responseDTO1 = new CategoryResponseDTO();
+         ScheduleResponseDTO updateSchedule = scheduleService.updateSchedule(newRequest, responseDTO.getScheduleId(), responseDTO1);
          assertThat(updateSchedule).isNotNull();
          assertThat(updateSchedule.getUpdatedAt()).isNotNull();
          assertThat(updateSchedule.getTitle()).isEqualTo("updated");
@@ -266,10 +267,11 @@
      public void updateScheduleWithInvalidIdTest() {
          Long invalidScheduleId = -1L; // 유효하지 않은 schedule_id
 
+         CategoryResponseDTO responseDTO1 = new CategoryResponseDTO();
          assertThrows(Exception.class, () -> {
              ScheduleRequestDTO scheduleRequestDTO = new ScheduleRequestDTO();
              // 업데이트할 내용 설정
-             scheduleService.updateSchedule(scheduleRequestDTO, invalidScheduleId);
+             scheduleService.updateSchedule(scheduleRequestDTO, invalidScheduleId, responseDTO1);
          });
      }
 

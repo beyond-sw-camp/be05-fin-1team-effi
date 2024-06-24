@@ -3,6 +3,7 @@
 
  import com.example.effi.domain.DTO.*;
  import com.example.effi.domain.Entity.*;
+ import com.example.effi.repository.CategoryRepository;
  import com.example.effi.repository.EmployeeRepository;
  import com.example.effi.repository.GroupEmpRepository;
  import com.example.effi.service.*;
@@ -64,6 +65,8 @@
      private GroupEmpRepository groupEmpRepository;
      @Autowired
      private CategoryService categoryService;
+     @Autowired
+     private CategoryRepository categoryRepository;
 
      @BeforeEach
      void setUp() {
@@ -73,7 +76,7 @@
          scheduleService = mock(ScheduleService.class);
          categoryService = mock(CategoryService.class);
          scheduleController = new ScheduleController(scheduleService, employeeService, participantService,employeeRepository,
-                 groupEmpRepository, categoryService);
+                 groupEmpRepository, categoryService, categoryRepository);
          mockMvc = MockMvcBuilders.standaloneSetup(scheduleController).build();
      }
 
@@ -262,7 +265,7 @@
          ScheduleRequestDTO scheduleRequestDTO = new ScheduleRequestDTO();
          ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO();
 
-         when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong())).thenReturn(scheduleResponseDTO);
+         when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong(), any(CategoryResponseDTO.class))).thenReturn(scheduleResponseDTO);
 
          mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/update/1")
                          .contentType(MediaType.APPLICATION_JSON)
@@ -273,7 +276,7 @@
      @DisplayName("Schedule 수정 - 실패")
      @Test
      void testUpdateScheduleNotFound() throws Exception {
-         when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong()))
+         when(scheduleService.updateSchedule(any(ScheduleRequestDTO.class), anyLong(), any(CategoryResponseDTO.class)))
                  .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
 
          mockMvc.perform(MockMvcRequestBuilders.post("/api/schedule/update/999")

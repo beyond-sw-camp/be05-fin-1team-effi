@@ -5,10 +5,7 @@ import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Participant;
 import com.example.effi.domain.Entity.Routine;
 import com.example.effi.domain.Entity.Schedule;
-import com.example.effi.repository.CategoryRepository;
-import com.example.effi.repository.ParticipantRepository;
-import com.example.effi.repository.RoutineRepository;
-import com.example.effi.repository.ScheduleRepository;
+import com.example.effi.repository.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,6 +45,10 @@ public class ScheduleService {
     @Autowired
     @Lazy
     private ParticipantService participantService;
+    @Autowired
+    private DeptRepository deptRepository;
+    @Autowired
+    private GroupRepository groupRepository;
 
     @PostConstruct
     public void init() {
@@ -219,9 +220,15 @@ public class ScheduleService {
     }
 
     // update schedule
-    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
+    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId, CategoryResponseDTO categoryResponseDTO) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryNo()).get();
+        Category category = Category.builder()
+                .categoryNo(categoryResponseDTO.getCategoryNo())
+                .categoryId(categoryResponseDTO.getCategoryId())
+                .categoryName(categoryResponseDTO.getCategoryName())
+                .dept(deptRepository.findByDeptId(categoryResponseDTO.getDeptId()))
+                .group(groupRepository.findById(categoryResponseDTO.getGroupId()).orElse(null))
+                .build();
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
