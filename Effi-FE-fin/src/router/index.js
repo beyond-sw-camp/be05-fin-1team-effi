@@ -12,6 +12,7 @@ import SearchView from '../views/SearchView.vue'
 import GroupParticipantsView from '../views/GroupParticipantsView.vue'
 
 import TagStatisticsView from '../views/TagStatisticsView.vue'
+import AllSchedulesView from '../views/AllSchedulesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +70,12 @@ const router = createRouter({
       path: '/groupparticipants',
       name: 'groupparticipants',
       component: GroupParticipantsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/allschedules',
+      name: 'allschedules',
+      component: AllSchedulesView,
       meta: { requiresAuth: true }
     }
   ]

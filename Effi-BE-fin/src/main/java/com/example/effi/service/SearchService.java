@@ -86,16 +86,6 @@ public class SearchService {
             }
         }
 
-        /*
-        for (Participant participant : participants) {
-        Schedule schedule = participant.getSchedule();
-        // 삭제되지 않은 일정
-        if (!schedule.getDeleteYn() && taggedSchedules.contains(schedule)) {
-            List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
-            schedules.add(new SearchResponseDTO(schedule, tagNames));
-        }
-    }
-         */
         return schedules;
     }
 
