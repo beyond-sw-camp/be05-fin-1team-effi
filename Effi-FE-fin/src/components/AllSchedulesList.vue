@@ -1,7 +1,7 @@
 <template>
   <div>
-    <table class="table table-striped table-bordered">
-      <thead class="table-dark">
+    <table class="table table-bordered">
+      <thead class="table-header">
         <tr>
           <th class="date">날짜</th>
           <th class="category">카테고리</th>
@@ -110,9 +110,13 @@ export default {
 }
 
 .table th {
-  background-color: #f4f4f4;
-  color: #333399;
+  background-color: #FBB584;
+  color: #333;
   text-align: center;
+}
+
+.table td {
+  background-color: #fff;
 }
 
 .table .category-dot {

@@ -7,19 +7,20 @@
           <i class="bi bi-globe me-2"></i>
           <span>{{ timezoneName }}</span>
         </div>
-        <button @click="toggleStatusSort" class="btn btn-outline-primary me-3 mb-2 mb-md-0">status</button>
+        <div class="d-flex align-items-center me-3 mb-2 mb-md-0 nowrap">
+          <span class="me-2">진행 상태</span>
+          <select v-model="selectedStatus" class="form-select" @change="filterByStatus">
+            <option value="all">전체</option>
+            <option value="0">예정됨</option>
+            <option value="1">진행중</option>
+            <option value="2">완료됨</option>
+          </select>
+        </div>
         <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
           @change-view-mode="changeViewMode" />
       </div>
-      <h1>전체 일정</h1>
-      <div v-if="sortedByStatus">
-        <div v-for="status in sortedStatuses" :key="status">
-          <h2 class="status-title">{{ getStatusLabel(status) }}</h2>
-          <AllSchedulesList :schedules="sortedSchedulesByStatus(status)" />
-        </div>
-      </div>
-      <div v-else>
-        <AllSchedulesList :schedules="filteredSchedules" />
+      <div>
+        <AllSchedulesList :schedules="filteredSchedulesByStatus" />
       </div>
     </div>
   </div>
@@ -38,8 +39,7 @@ const allSchedules = ref([]);
 const timezoneName = ref('');
 const currentPeriod = ref(new Date());
 const viewMode = ref('week');
-const sortedByStatus = ref(false);
-const sortStatus = ref(0); // 정렬 상태 변수: 0 = 원래 상태, 1 = 오름차순, 2 = 내림차순
+const selectedStatus = ref('all');
 const authStore = useAuthStore();
 
 const fetchAllSchedules = async () => {
@@ -100,35 +100,15 @@ const filteredSchedules = computed(() => {
   });
 });
 
-const sortedStatuses = computed(() => {
-  if (sortStatus.value === 1) {
-    return ['0', '1', '2']; // 예정됨, 진행중, 완료됨
-  } else if (sortStatus.value === 2) {
-    return ['2', '1', '0']; // 완료됨, 진행중, 예정됨
+const filteredSchedulesByStatus = computed(() => {
+  if (selectedStatus.value === 'all') {
+    return filteredSchedules.value;
   }
-  return ['0', '1', '2'];
+  return filteredSchedules.value.filter(schedule => schedule.status == selectedStatus.value);
 });
 
-const sortedSchedulesByStatus = (status) => {
-  return filteredSchedules.value.filter(schedule => schedule.status == status);
-};
-
-const getStatusLabel = (status) => {
-  switch (status) {
-    case '0':
-      return '예정됨';
-    case '1':
-      return '진행중';
-    case '2':
-      return '완료됨';
-    default:
-      return '알 수 없음';
-  }
-};
-
-const toggleStatusSort = () => {
-  sortStatus.value = (sortStatus.value + 1) % 3;
-  sortedByStatus.value = sortStatus.value !== 0;
+const filterByStatus = () => {
+  // 필터링 로직은 computed를 통해 반영되므로 여기서는 아무 작업도 필요 없습니다.
 };
 
 onMounted(() => {
@@ -174,20 +154,8 @@ watch(allSchedules, (newVal) => {
   flex-wrap: wrap;
 }
 
-.status-sort {
-  padding: 5px 15px;
-  border: 1px solid #333;
-  border-radius: 5px;
-  background-color: #f4f4f4;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s, border-color 0.3s;
-  margin-right: 10px;
-}
-
-.status-sort:hover {
-  background-color: #e0e0e0;
-  border-color: #000;
+.nowrap {
+  white-space: nowrap;
 }
 
 .status-title {
@@ -258,10 +226,6 @@ watch(allSchedules, (newVal) => {
   .controls>* {
     width: 100%;
     margin-bottom: 10px;
-  }
-
-  .status-sort {
-    margin-right: 0;
   }
 }
 </style>
