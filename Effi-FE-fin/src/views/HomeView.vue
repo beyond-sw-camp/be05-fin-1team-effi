@@ -1,27 +1,37 @@
 <template>
   <div class="container">
     <Navigation @update-categories="handleUpdateCategories" @update-groups="handleUpdateGroups" class="navigation" />
-    <div class="content">
-      <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId" :show="true" />
+    <div class="timezone-and-calendar">
+      <TimezoneComponent v-if="isTimezoneVisible" class="timezone-component" />
+      <VCalendar 
+        class="calendar" 
+        :selectedCategories="selectedCategories" 
+        :selectedGroupId="selectedGroupId" 
+        :show="true" 
+        @update-view-mode="updateViewMode" 
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import Navigation from '@/components/LeftSidebar.vue';
 import VCalendar from '@/components/VCalendar.vue';
+import TimezoneComponent from '@/components/TimezoneComponent.vue'; // 타임존 컴포넌트를 불러옵니다
 
 export default defineComponent({
   name: 'HomeView',
   components: {
     Navigation,
-    VCalendar
+    VCalendar,
+    TimezoneComponent // 타임존 컴포넌트를 등록합니다
   },
   setup() {
     const selectedCategories = ref([]);
     const selectedGroupId = ref([]);
     const calendarValue = ref([]);
+    const currentViewMode = ref('month');
 
     const handleUpdateCategories = (categories) => {
       selectedCategories.value = categories;
@@ -31,12 +41,21 @@ export default defineComponent({
       selectedGroupId.value = groups;
     };
 
+    const updateViewMode = (viewMode) => {
+      currentViewMode.value = viewMode;
+    };
+
+    const isTimezoneVisible = computed(() => currentViewMode.value === 'week' || currentViewMode.value === 'day');
+
     return {
       selectedCategories,
       handleUpdateCategories,
       selectedGroupId,
       handleUpdateGroups,
-      calendarValue
+      calendarValue,
+      currentViewMode,
+      updateViewMode,
+      isTimezoneVisible
     };
   },
 });
@@ -55,24 +74,25 @@ export default defineComponent({
   height: 100%; /* 전체 높이 사용 */
   padding: 20px;
   margin-right: 20px;
-  margin-left: -90px ;
   box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
 }
 
-.content {
+.timezone-and-calendar {
+  display: flex;
   flex-grow: 1; /* 남은 공간 모두 사용 */
   height: 100%; /* 전체 높이 사용 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 20px;
   box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
-  width: 100%;
-  margin-right: -100px;
+}
+
+.timezone-component {
+  width: 200px; /* 타임존 컴포넌트의 너비 고정 */
+  height: 100%; /* 전체 높이 사용 */
+  margin-right: 20px;
 }
 
 .calendar {
-  width: 100%;
+  flex-grow: 1; /* 남은 공간 모두 사용 */
   height: 100%;
   margin: 0 auto;
 }
@@ -83,7 +103,11 @@ export default defineComponent({
     display: none; /* 작은 화면에서는 네비게이션 숨김 */
   }
 
-  .content {
+  .timezone-component {
+    display: none; /* 작은 화면에서는 타임존 컴포넌트 숨김 */
+  }
+
+  .timezone-and-calendar {
     width: 100%;
     padding: 10px;
   }

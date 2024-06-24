@@ -288,11 +288,31 @@ export default {
           tags: [...new Set(internalEvent.value.tags.map(tag => tag.trim()))]  // 중복 제거
         };
 
+         // Fetch category details by categoryNo and update categoryId
         const categoryResponse = await axiosInstance.get(`/api/category/find/${formattedEvent.categoryNo}`);
-        const categoryId = categoryResponse.data.categoryId;
-        formattedEvent.categoryId = categoryId;
+        console.log('categoryResponse:', categoryResponse.data) // 카테고리 응답 확인
+        if (categoryResponse.data) {
+          formattedEvent.categoryId = categoryResponse.data.categoryId;
+        }
 
-        const apiUrl = `/api/schedule/update/${props.scheduleId}`;
+        let apiUrl;
+        switch (parseInt(internalEvent.value.categoryNo)) {
+          case 1:
+            apiUrl = `/api/schedule/update/company/${props.scheduleId}`;
+            break;
+          case 2:
+            apiUrl = `/api/schedule/update/dept/${internalEvent.value.deptId}/${props.scheduleId}`;
+            break;
+          case 3:
+            apiUrl = `/api/schedule/update/group/${internalEvent.value.groupId}/${props.scheduleId}`;
+            break;
+          case 4:
+            apiUrl = `/api/schedule/update/${props.scheduleId}`;
+            break;
+          default:
+            throw new Error('Invalid category number');
+        }
+
         await axiosInstance.post(apiUrl, formattedEvent);
 
         const newTags = new Set(formattedEvent.tags.map(tag => tag.trim()));
