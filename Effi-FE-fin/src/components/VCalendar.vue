@@ -29,21 +29,26 @@
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
+        :interval-count="intervalCount"
+        :interval-height="intervalHeight"
         @click:date="onDateClick"
       >
         <template v-slot:event="{ event }">
           <div
             class="my-event"
             :style="{
-              backgroundColor: getCategoryColor(event.categoryNo),
-              color: getCategoryTextColor(event.categoryNo)
+              backgroundColor: getCategoryColor(event.categoryId),
+              color: getCategoryTextColor(event.categoryId)
             }"
             @click.stop="onEventClick(event)"
           >
             <strong>{{ event.title }}</strong>
             <br>
-            {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD HH:mm') : '' }}
+            {{ event.start ? event.start.format('YYYY-MM-DD hh:mm A') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD hh:mm A') : '' }}
           </div>
+        </template>
+        <template v-slot:intervalFormat>
+          <TimezoneComponent v-if="isTimezoneVisible" />
         </template>
       </v-calendar>
     </v-sheet>
@@ -63,18 +68,19 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import dayjs from 'dayjs';
 import axiosInstance from '@/services/axios';
 import isBetween from 'dayjs/plugin/isBetween';
 import ScheduleModal from './ScheduleModal.vue';
 import EditScheduleModal from './EditScheduleModal.vue';
+import TimezoneComponent from '@/components/TimezoneComponent.vue'; // 타임존 컴포넌트를 불러옵니다
 
 dayjs.extend(isBetween);
 
 export default {
-  components: { ScheduleModal, EditScheduleModal },
+  components: { ScheduleModal, EditScheduleModal, TimezoneComponent },
   props: {
     show: {
       type: Boolean,
@@ -89,7 +95,7 @@ export default {
       default: () => [],
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const authStore = useAuthStore();
     authStore.loadSession();
 
@@ -100,7 +106,6 @@ export default {
       { title: 'Sun - Sat', value: [0, 1, 2, 3, 4, 5, 6] },
       { title: 'Mon - Sun', value: [1, 2, 3, 4, 5, 6, 0] },
       { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
-      { title: 'Mon, Wed, Fri', value: [1, 3, 5] },
     ]);
     const calendarValue = ref([dayjs().toDate()]);
     const events = ref([]);
@@ -108,6 +113,11 @@ export default {
     const showEditDialog = ref(false);
     const selectedEventId = ref(null);
     const selectedDate = ref(dayjs().toDate());
+
+    const intervalCount = computed(() => (type.value === 'week' || type.value === 'day' ? 24 : undefined));
+    const intervalHeight = computed(() => (type.value === 'week' || type.value === 'day' ? 60 : undefined));
+
+    const isTimezoneVisible = computed(() => type.value === 'week' || type.value === 'day');
 
     const fetchSchedules = async () => {
       try {
@@ -157,15 +167,22 @@ export default {
         }
 
         if (Array.isArray(schedules)) {
-          events.value = schedules.map((schedule) => ({
-            id: schedule.scheduleId,
-            title: schedule.title,
-            content: schedule.context,
-            start: dayjs(schedule.startTime),
-            end: dayjs(schedule.endTime),
-            categoryNo: schedule.categoryNo,
-            open: ref(false),
-          }));
+          events.value = schedules.map(async (schedule) => {
+            // Fetch category details by categoryNo and update categoryId
+            const categoryResponse = await axiosInstance.get(`/api/category/find/${schedule.categoryNo}`);            if (categoryResponse.data) {
+              schedule.categoryId = categoryResponse.data.categoryId; // Update categoryId
+            }
+            return {
+              id: schedule.scheduleId,
+              title: schedule.title,
+              content: schedule.context,
+              start: dayjs(schedule.startTime),
+              end: dayjs(schedule.endTime),
+              categoryId: schedule.categoryId,
+              open: ref(false),
+            };
+          });
+          events.value = await Promise.all(events.value); // 비동기 처리된 배열을 기다림
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -255,6 +272,7 @@ export default {
 
     const onViewModeChange = () => {
       console.log('View mode changed to:', type.value);
+      emit('update-view-mode', type.value);
     };
 
     const onWeekdayChange = () => {
@@ -344,6 +362,9 @@ export default {
       editEvent,
       getCategoryColor,
       getCategoryTextColor,
+      intervalCount,
+      intervalHeight,
+      isTimezoneVisible,
     };
   },
 };

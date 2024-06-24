@@ -2,19 +2,27 @@
   <div id="app">
     <div class="timezone">
       <button class="add-timezone-button" @click="showTimezoneModal = true">+</button>
-      <div class="timezone-display" v-if="selectedTimezones.length">
+      <div class="timezone-display">
         <div class="timezone-row">
-          <div class="timezone-column" v-for="timezone in selectedTimezones" :key="timezone.timezoneId">
+          <div v-for="timezone in selectedTimezones" :key="timezone.timezoneId" class="timezone-column">
             <div class="timezone-header">
               {{ timezone.timezoneName }}
             </div>
             <div class="timezone-time" v-for="hour in hours" :key="hour">
-              {{ formatTime(hour, timezone.offset) }}
+              {{ formatTime(hour, timezone.gmtOffset) }}
+            </div>
+          </div>
+          <div class="timezone-column">
+            <div class="timezone-header">
+              {{ defaultTimezone.timezoneName }}
+            </div>
+            <div class="timezone-time" v-for="hour in amPmHours" :key="hour">
+              {{ hour }}
             </div>
           </div>
         </div>
       </div>
-      <TimezoneModal :show="showTimezoneModal" @close="showTimezoneModal = false" @add-timezone="addTimezone" />
+      <TimezoneModal :show="showTimezoneModal" @close="showTimezoneModal = false" @add-timezone="handleAddTimezone" @remove-timezone="handleRemoveTimezone" />
     </div>
   </div>
 </template>
@@ -31,7 +39,12 @@ export default {
   setup() {
     const showTimezoneModal = ref(false);
     const selectedTimezones = ref([]);
+    const defaultTimezone = ref({});
     const hours = ref([...Array(24).keys()]); // 0 to 23 hours
+    const amPmHours = ref([
+      '01 AM', '02 AM', '03 AM', '04 AM', '05 AM', '06 AM', '07 AM', '08 AM', '09 AM', '10 AM', '11 AM', '12 PM',
+      '01 PM', '02 PM', '03 PM', '04 PM', '05 PM', '06 PM', '07 PM', '08 PM', '09 PM', '10 PM', '11 PM', '12 AM'
+    ]);
 
     const empId = sessionStorage.getItem('empNo');
 
@@ -40,17 +53,16 @@ export default {
         const response = await axiosInstance.get(`/api/timezone-emp/${empId}`);
         const allTimezones = response.data.data.timezones;
 
-        // 기본 타임존 제외 (기본 타임존이 "Asia/Seoul"인 경우만 제외)
+        // 기본 타임존 조회
         const defaultTimezoneResponse = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
-        const defaultTimezone = defaultTimezoneResponse.data.data;
+        defaultTimezone.value = defaultTimezoneResponse.data.data;
 
-        if (defaultTimezone.timezoneName === "Asia/Seoul") {
-          selectedTimezones.value = allTimezones.filter(
-            (timezone) => timezone.timezoneName !== "Asia/Seoul"
-          );
-        } else {
-          selectedTimezones.value = allTimezones;
-        }
+        selectedTimezones.value = allTimezones.filter(
+          (timezone) => timezone.timezoneId !== defaultTimezone.value.timezoneId
+        );
+
+        console.log("Selected Timezones:", selectedTimezones.value);
+        console.log("Default Timezone:", defaultTimezone.value);
       } catch (error) {
         console.error('타임존을 불러오는 데 실패했습니다:', error);
       }
@@ -61,34 +73,42 @@ export default {
     });
 
     const formatTime = (hour, offset) => {
-      const seoulTime = new Date();
-      seoulTime.setHours(hour);
+      const seoulOffset = 9 * 60 * 60; // Asia/Seoul 타임존의 오프셋 (초 단위)
+      const totalOffset = offset - seoulOffset; // 타임존 오프셋과 Seoul 오프셋의 차이
+      const targetTime = (hour * 60 * 60 + totalOffset) / 3600; // 초 단위를 시간 단위로 변환
 
-      const utcTime = seoulTime.getUTCHours(); // UTC 시간으로 변환
-      const targetTime = (utcTime + offset) % 24; // 타임존 오프셋 적용
+      let formattedTime = Math.floor(targetTime);
+      if (formattedTime < 0) formattedTime += 24;
+      if (formattedTime >= 24) formattedTime -= 24;
 
-      return targetTime.toString().padStart(2, '0');
+      const period = formattedTime < 12 ? 'AM' : 'PM';
+      const displayHour = formattedTime % 12 === 0 ? 12 : formattedTime % 12;
+      const formattedHour = displayHour.toString().padStart(2, '0');
+
+      console.log(`Hour: ${hour}, Offset: ${offset}, Target Time: ${formattedTime}, Display Hour: ${formattedHour} ${period}`);
+
+      return `${formattedHour} ${period}`;
     };
 
-    const addTimezone = async (timezone) => {
-      try {
-        await axiosInstance.post(`/api/timezone-emp/${empId}/add`, null, {
-          params: {
-            timezoneId: timezone.timezoneId
-          }
-        });
-        selectedTimezones.value.push(timezone);
-      } catch (error) {
-        console.error('타임존을 추가하는 데 실패했습니다:', error);
-      }
+    const handleAddTimezone = (timezone) => {
+      selectedTimezones.value.push(timezone);
+    };
+
+    const handleRemoveTimezone = (timezoneId) => {
+      selectedTimezones.value = selectedTimezones.value.filter(
+        timezone => timezone.timezoneId !== timezoneId
+      );
     };
 
     return {
       showTimezoneModal,
       selectedTimezones,
+      defaultTimezone,
       hours,
+      amPmHours,
       formatTime,
-      addTimezone
+      handleAddTimezone,
+      handleRemoveTimezone
     };
   }
 };
