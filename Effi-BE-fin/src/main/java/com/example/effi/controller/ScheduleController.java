@@ -56,8 +56,10 @@ public class ScheduleController {
     // 추가 - 부서 2 -> 카테고리 수정 필요
     @PostMapping("/add/dept/{deptId}")
     public ResponseEntity<?> addScheduleDept(@RequestBody ScheduleRequestDTO schedule, @PathVariable Long deptId) {
+        System.out.println("deptId = >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + deptId);
         try{
             CategoryResponseDTO byDeptId = categoryService.findByDeptId(deptId);
+            System.out.println("byDeptId = >>>>>>>>>>>>>>>>>>>>>>>>" + byDeptId);
             if (byDeptId == null){
                 byDeptId = categoryService.addCategoryByDept(deptId);
             }
@@ -65,14 +67,20 @@ public class ScheduleController {
 
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
             List<Employee> all = employeeRepository.findAllByDept_DeptId(deptId);
+            System.out.println("all = >>>>>>>>>>>>>>>>>>>>>>>>" + all.size());
             for (Employee e : all)
                 participantService.addParticipant(rtn.getScheduleId(), e.getId()); // 참여자 tbl에 추가
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            System.out.println("result `>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
             return ResponseEntity.ok(rtn);
         } catch (IllegalArgumentException e) {
+            System.out.println("IllegalArgumentException error >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
+            e.printStackTrace();
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
+            System.out.println("Exception error >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
+            e.printStackTrace();
             // 기타 예외로 인한 실패
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to add schedule: " + e.getMessage());
