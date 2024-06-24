@@ -1,8 +1,10 @@
 package com.example.effi.controller;
 
 import com.example.effi.domain.DTO.*;
+import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Employee;
 import com.example.effi.domain.Entity.GroupEmp;
+import com.example.effi.repository.CategoryRepository;
 import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.GroupEmpRepository;
 import com.example.effi.service.*;
@@ -31,6 +33,7 @@ public class ScheduleController {
     private final EmployeeRepository employeeRepository;
     private final GroupEmpRepository groupEmpRepository;
     private final CategoryService categoryService;
+    private final CategoryRepository categoryRepository;
 
     // 추가 - 회사 1
     @PostMapping("/add/company")
@@ -58,11 +61,13 @@ public class ScheduleController {
     public ResponseEntity<?> addScheduleDept(@RequestBody ScheduleRequestDTO schedule, @PathVariable Long deptId) {
         System.out.println("deptId = >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + deptId);
         try{
-            CategoryResponseDTO byDeptId = categoryService.findByDeptId(deptId);
+            Category tmp = categoryRepository.findByDept_DeptId(deptId);
+            CategoryResponseDTO byDeptId = null;
             System.out.println("byDeptId = >>>>>>>>>>>>>>>>>>>>>>>>" + byDeptId);
-            if (byDeptId == null){
+            if (tmp == null)
                 byDeptId = categoryService.addCategoryByDept(deptId);
-            }
+            else
+                byDeptId = new CategoryResponseDTO(tmp);
             schedule.setCategoryNo(byDeptId.getCategoryNo());
 
             ScheduleResponseDTO rtn = scheduleService.addSchedule(schedule);
