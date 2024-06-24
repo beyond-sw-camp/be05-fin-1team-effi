@@ -192,6 +192,9 @@ export default {
           tags: internalEvent.value.tags.map(tag => tag.name)
         };
 
+        // Log the formattedEvent to check its contents
+        console.log("Formatted Event: ", formattedEvent);
+
         if (internalEvent.value.repeat && !internalEvent.value.routineId) {
           const routineResponse = await axiosInstance.post('/api/routine/add', {
             routineStart: formattedEvent.startTime,
@@ -204,8 +207,9 @@ export default {
           formattedEvent.routineId = null;
         }
 
-        // Fetch category details by categoryNo and update categoryId
+        // // Fetch category details by categoryNo and update categoryId
         const categoryResponse = await axiosInstance.get(`/api/category/find/${formattedEvent.categoryNo}`);
+        console.log('categoryResponse:', categoryResponse.data) // 카테고리 응답 확인
         if (categoryResponse.data) {
           formattedEvent.categoryNo = categoryResponse.data.categoryId;
         }
@@ -230,52 +234,21 @@ export default {
 
         const response = await axiosInstance.post(apiUrl, formattedEvent);
         const scheduleId = response.data.scheduleId;
+        console.log("scheduleId: ", scheduleId);
 
         for (let tag of internalEvent.value.tags) {
           await axiosInstance.post(`/api/tag/add/${scheduleId}`, { "tag": tag });
         }
 
-        if (formattedEvent.categoryNo === 2) {
-          await fetchAndAddDeptMembers(scheduleId, formattedEvent.deptId);
-        } else if (formattedEvent.categoryNo === 3) {
-          await fetchAndAddGroupMembers(scheduleId, formattedEvent.groupId);
-        } else if (formattedEvent.categoryNo === 4) {
-          await addParticipants(scheduleId, formattedEvent.categoryNo);
-        }
+        // if (formattedEvent.categoryNo === 2) {
+        //   await fetchAndAddDeptMembers(scheduleId, formattedEvent.deptId);
+        // }
 
         alert('일정이 추가되었습니다.');
         closeModal();
       } catch (error) {
         console.error('Error submitting form:', error.response ? error.response.data : error.message);
         alert('일정 추가에 실패했습니다.');
-      }
-    };
-
-    const fetchAndAddDeptMembers = async (scheduleId, deptId) => {
-      try {
-        const response = await axiosInstance.post(`/api/participant/add/dept/${deptId}`, null, {
-          params: {
-            scheduleId: scheduleId
-          }
-        });
-        console.log('fetchAndAddDeptMembers response:', response.data);
-      } catch (error) {
-        console.error('Error fetching and adding dept members:', error.response ? error.response.data : error.message);
-        alert('부서원 추가에 실패했습니다.');
-      }
-    };
-
-    const fetchAndAddGroupMembers = async (scheduleId, groupId) => {
-      try {
-        const response = await axiosInstance.post(`/api/participant/add/group/${groupId}`, null, {
-          params: {
-            scheduleId: scheduleId
-          }
-        });
-        console.log('fetchAndAddGroupMembers response:', response.data);
-      } catch (error) {
-        console.error('Error fetching and adding group members:', error.response ? error.response.data : error.message);
-        alert('그룹 구성원 추가에 실패했습니다.');
       }
     };
 
@@ -291,6 +264,7 @@ export default {
 
       if (selection.selectedOption === 2) {
         internalEvent.value.deptId = selection.selectedDeptId;
+        console.log('selectedDeptId:', selection.selectedDeptId);
       } else if (selection.selectedOption === 3) {
         internalEvent.value.groupId = selection.selectedGroupId;
       }
@@ -341,33 +315,20 @@ export default {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
     };
 
-    const addParticipants = async (scheduleId, categoryNo) => {
-      try {
-        if (categoryNo === 4) {
-          for (let employee of selectedEmployees.value) {
-            await addParticipant(scheduleId, employee.empNo);
-          }
-        }
-      } catch (error) {
-        console.error('Error adding participants:', error.response ? error.response.data : error.message);
-        alert('참가자 추가에 실패했습니다.');
-      }
-    };
-
-    const addParticipant = async (scheduleId, empId) => {
-      try {
-        const response = await axiosInstance.post('/api/participant/add', null, {
-          params: {
-            scheduleId: scheduleId,
-            empId: empId
-          }
-        });
-        console.log('addParticipant response:', response.data);
-      } catch (error) {
-        console.error('Error adding participant:', error.response ? error.response.data : error.message);
-        alert('참가자 추가에 실패했습니다.');
-      }
-    };
+    // const fetchAndAddDeptMembers = async (scheduleId, deptId) => {
+    //   try {
+    //     console.log('fetchAndAddDeptMembers called');
+    //     const response = await axiosInstance.post(`/api/participant/add/dept/${deptId}`, null, {
+    //       params: {
+    //         scheduleId: scheduleId
+    //       }
+    //     });
+    //     console.log('fetchAndAddDeptMembers response:', response.data);
+    //   } catch (error) {
+    //     console.error('Error fetching and adding dept members:', error.response ? error.response.data : error.message);
+    //     alert('부서원 추가에 실패했습니다.');
+    //   }
+    // };
 
     const toggleRoutineModal = () => {
       console.log('toggleRoutineModal called');
@@ -408,7 +369,6 @@ export default {
       handleRoutineClose,
       handleRoutineConfirm,
       tagColors,
-      addParticipant,
       getRandomColor
     };
   }

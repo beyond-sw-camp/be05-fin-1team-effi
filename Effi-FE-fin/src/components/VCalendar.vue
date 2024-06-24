@@ -32,7 +32,14 @@
         @click:date="onDateClick"
       >
         <template v-slot:event="{ event }">
-          <div class="my-event" :style="{ backgroundColor: getCategoryColor(event.categoryNo) }" @click.stop="onEventClick(event)">
+          <div
+            class="my-event"
+            :style="{
+              backgroundColor: getCategoryColor(event.categoryNo),
+              color: getCategoryTextColor(event.categoryNo)
+            }"
+            @click.stop="onEventClick(event)"
+          >
             <strong>{{ event.title }}</strong>
             <br>
             {{ event.start ? event.start.format('YYYY-MM-DD HH:mm') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD HH:mm') : '' }}
@@ -191,6 +198,15 @@ export default {
       }
     };
 
+    const getCategoryTextColor = (categoryId) => {
+      switch (categoryId) {
+        case 2: // Yellow background for 부서
+          return 'black';
+        default:
+          return 'white';
+      }
+    };
+
     onMounted(() => {
       console.log('Component mounted');
       fetchSchedules();
@@ -327,6 +343,7 @@ export default {
       handleDayLabelClick,
       editEvent,
       getCategoryColor,
+      getCategoryTextColor,
     };
   },
 };

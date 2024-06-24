@@ -4,6 +4,8 @@ import com.example.effi.domain.Entity.Category;
 
 import com.example.effi.domain.Entity.Dept;
 import com.example.effi.domain.Entity.Group;
+
+import groovy.transform.ToString;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +13,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
+@ToString
 public class CategoryResponseDTO {
     private Long categoryNo;
     private Long categoryId;

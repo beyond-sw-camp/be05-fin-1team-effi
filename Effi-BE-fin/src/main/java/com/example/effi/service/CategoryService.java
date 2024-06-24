@@ -92,11 +92,14 @@ public class CategoryService {
 
     // 부서 입력 2
     public CategoryResponseDTO addCategoryByDept(Long deptId){
-        Dept dept = Optional.ofNullable(deptId)
-                .flatMap(deptRepository::findById)
-                .orElseThrow(() -> new IllegalArgumentException("부서 ID가 유효하지 않습니다."));
+        // Dept dept = Optional.ofNullable(deptId)
+        //         .flatMap(deptRepository::findById)
+        //         .orElseThrow(() -> new IllegalArgumentException("부서 ID가 유효하지 않습니다."));
 
-        if (findByDeptId(deptId) != null)
+        Dept dept = Optional.ofNullable(deptId)
+                .map(deptRepository::findByDeptId)
+                .orElseThrow(() -> new IllegalArgumentException("부서 ID가 유효하지 않습니다."));
+        if (categoryRepository.findByDept_DeptId(deptId) != null)
             return findByDeptId(deptId);
 
         return new CategoryResponseDTO(categoryRepository.save(
