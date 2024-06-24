@@ -19,8 +19,7 @@ import axiosInstance from "@/services/axios.js";
 
 export default {
   name: 'GroupNameListParticipants',
-  emits: ['selectedGroupsParticipants'],
-  setup( props , { emit }) {
+  setup() {
     const isOpen = ref(true);
     const groups = ref([]);
     const router = useRouter(); // useRouter 사용

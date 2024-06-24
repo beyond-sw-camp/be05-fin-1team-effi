@@ -11,7 +11,7 @@ import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
 import GroupParticipantsView from '../views/GroupParticipantsView.vue'
 
-import test from '../views/test.vue'
+import TagStatisticsView from '../views/TagStatisticsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,9 +54,9 @@ const router = createRouter({
 
     },
     {
-      path: '/test',
-      name: 'test',
-      component: test,
+      path: '/tagstatistics',
+      name: 'tagstatistics',
+      component: TagStatisticsView,
       meta: { requiresAuth: true }
     },
     {
