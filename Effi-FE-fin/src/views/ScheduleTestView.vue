@@ -1,40 +1,47 @@
 <template>
-  <div id="app">
-    <div class="timezone">
-      <button class="add-timezone-button" @click="showTimezoneModal = true">+</button>
-      <div class="timezone-display">
-        <div class="timezone-row">
-          <div v-for="timezone in selectedTimezones" :key="timezone.timezoneId" class="timezone-column">
-            <div class="timezone-header">
-              {{ timezone.timezoneName }}
-            </div>
-            <div class="timezone-time" v-for="hour in hours" :key="hour">
-              {{ formatTime(hour, timezone.gmtOffset) }}
+  <v-app>
+    <v-main>
+      <v-container>
+        <Sidebar />
+        <div class="timezone">
+          <button class="add-timezone-button" @click="showTimezoneModal = true">+</button>
+          <div class="timezone-display">
+            <div class="timezone-row">
+              <div v-for="timezone in selectedTimezones" :key="timezone.timezoneId" class="timezone-column">
+                <div class="timezone-header">
+                  {{ timezone.timezoneName }}
+                </div>
+                <div class="timezone-time" v-for="hour in hours" :key="hour">
+                  {{ formatTime(hour, timezone.gmtOffset) }}
+                </div>
+              </div>
+              <div class="timezone-column">
+                <div class="timezone-header">
+                  {{ defaultTimezone.timezoneName }}
+                </div>
+                <div class="timezone-time" v-for="hour in amPmHours" :key="hour">
+                  {{ hour }}
+                </div>
+              </div>
             </div>
           </div>
-          <div class="timezone-column">
-            <div class="timezone-header">
-              {{ defaultTimezone.timezoneName }}
-            </div>
-            <div class="timezone-time" v-for="hour in amPmHours" :key="hour">
-              {{ hour }}
-            </div>
-          </div>
+          <TimezoneModal :show="showTimezoneModal" @close="showTimezoneModal = false" @add-timezone="handleAddTimezone" @remove-timezone="handleRemoveTimezone" />
         </div>
-      </div>
-      <TimezoneModal :show="showTimezoneModal" @close="showTimezoneModal = false" @add-timezone="handleAddTimezone" @remove-timezone="handleRemoveTimezone" />
-    </div>
-  </div>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
 import TimezoneModal from '@/components/TimezoneModal.vue';
+import Sidebar from '@/components/VSidebar.vue'; // Sidebar 컴포넌트를 임포트합니다.
 import axiosInstance from '@/services/axios';
 import { ref, onMounted } from 'vue';
 
 export default {
   components: {
-    TimezoneModal
+    TimezoneModal,
+    Sidebar // Sidebar 컴포넌트를 등록합니다.
   },
   setup() {
     const showTimezoneModal = ref(false);
@@ -42,8 +49,8 @@ export default {
     const defaultTimezone = ref({});
     const hours = ref([...Array(24).keys()]); // 0 to 23 hours
     const amPmHours = ref([
-      '01 AM', '02 AM', '03 AM', '04 AM', '05 AM', '06 AM', '07 AM', '08 AM', '09 AM', '10 AM', '11 AM', '12 PM',
-      '01 PM', '02 PM', '03 PM', '04 PM', '05 PM', '06 PM', '07 PM', '08 PM', '09 PM', '10 PM', '11 PM', '12 AM'
+      'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'PM',
+      'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM'
     ]);
 
     const empId = sessionStorage.getItem('empNo');
