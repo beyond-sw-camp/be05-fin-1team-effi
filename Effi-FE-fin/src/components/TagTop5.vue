@@ -13,11 +13,13 @@
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
 import axiosInstance from '@/services/axios';
+import {useRouter} from 'vue-router'
 
 export default defineComponent({
   name: 'TagList',
   setup() {
     const tags = ref([]);
+    const router = useRouter();
 
     const fetchTopTags = async () => {
       try {
@@ -29,7 +31,7 @@ export default defineComponent({
     };
 
     const searchByTag = (tag) => {
-     /////////여기
+      router.push({ path: '/search', query: { criterion: 'tag', query: tag } });
     };
 
     const getColorClass = (index) => {
