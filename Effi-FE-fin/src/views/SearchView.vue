@@ -7,21 +7,23 @@
           <i class="bi bi-globe me-2"></i>
           <span>{{ timezoneName }}</span>
         </div>
-        <button @click="toggleStatusSort" class="btn btn-outline-primary me-3 mb-2 mb-md-0">status</button>
-        <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
-          @change-view-mode="changeViewMode" />
-      </div>
-      <div v-if="sortedByStatus">
-        <div v-for="status in sortedStatuses" :key="status">
-          <h2 class="status-title">{{ statusLabels[status] }}</h2>
-          <SearchList :searches="sortedSearchesByStatus(status)" />
+        <div class="d-flex align-items-center me-3 mb-2 mb-md-0 nowrap">
+          <span class="me-2">진행 상태</span>
+          <select v-model="selectedStatus" class="form-select">
+            <option value="all">전체</option>
+            <option value="0">예정됨</option>
+            <option value="1">진행중</option>
+            <option value="2">완료됨</option>
+          </select>
+          </div>
+          <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
+            @change-view-mode="changeViewMode" />
+        </div>
+        <div>
+          <SearchList :searches="filteredSearchesByStatus" />
         </div>
       </div>
-      <div v-else>
-        <SearchList :searches="filteredSearches" />
-      </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -36,20 +38,11 @@ import { useAuthStore } from '@/stores/auth';
 
 const searches = ref([]);
 const currentPeriod = ref(new Date());
-const sortedByStatus = ref(false);
 const viewMode = ref('week');
+const selectedStatus = ref('all'); // 선택된 상태
 const route = useRoute();
 const authStore = useAuthStore();
-const sortStatus = ref(0); // 정렬 상태 변수: 0 = 원래 상태, 1 = 오름차순, 2 = 내림차순
 const timezoneName = ref('');
-
-const statusLabels = {
-  '0': '예정됨',
-  '1': '진행중',
-  '2': '완료됨'
-};
-
-const allStatuses = ['0', '1', '2'];
 
 const filteredSearches = computed(() => {
   let start, end;
@@ -69,13 +62,11 @@ const filteredSearches = computed(() => {
   });
 });
 
-const sortedStatuses = computed(() => {
-  if (sortStatus.value === 1) {
-    return ['0', '1', '2']; // 예정됨, 진행중, 완료됨
-  } else if (sortStatus.value === 2) {
-    return ['2', '1', '0']; // 완료됨, 진행중, 예정됨
+const filteredSearchesByStatus = computed(() => {
+  if (selectedStatus.value === 'all') {
+    return filteredSearches.value;
   }
-  return allStatuses;
+  return filteredSearches.value.filter(schedule => schedule.status == selectedStatus.value);
 });
 
 const updateSearches = (newSearches) => {
@@ -138,10 +129,6 @@ watch(viewMode, (newVal) => {
   viewMode.value = newVal;
 });
 
-const sortedSearchesByStatus = (status) => {
-  return filteredSearches.value.filter(schedule => schedule.status == status);
-};
-
 const changePeriod = (newPeriod) => {
   currentPeriod.value = newPeriod;
 };
@@ -150,10 +137,6 @@ const changeViewMode = (mode) => {
   viewMode.value = mode;
 };
 
-const toggleStatusSort = () => {
-  sortStatus.value = (sortStatus.value + 1) % 3;
-  sortedByStatus.value = sortStatus.value !== 0;
-};
 </script>
 
 <style scoped>
@@ -190,27 +173,9 @@ const toggleStatusSort = () => {
   /* 컨트롤을 줄바꿈할 수 있도록 수정 */
 }
 
-.status-sort {
-  padding: 5px 15px;
-  border: 1px solid #333;
-  border-radius: 5px;
-  background-color: #f4f4f4;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s, border-color 0.3s;
-  margin-right: 10px;
-}
-
-.status-sort:hover {
-  background-color: #e0e0e0;
-  border-color: #000;
-}
-
-.status-title {
-  text-align: center;
-  font-size: 1.2rem;
-  margin: 20px 0;
-  font-weight: bold;
+.nowrap {
+  white-space: nowrap;
+  
 }
 
 .timezone-container {
