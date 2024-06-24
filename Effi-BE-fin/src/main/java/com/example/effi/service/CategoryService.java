@@ -118,7 +118,7 @@ public class CategoryService {
                 .flatMap(groupRepository::findById)
                 .orElseThrow(() -> new IllegalArgumentException("그룹 ID가 유효하지 않습니다."));
 
-        if (findByGroupId(groupId) != null)
+        if (categoryRepository.findByGroup_GroupId(groupId) != null)
             return findByGroupId(groupId);
 
         return new CategoryResponseDTO(categoryRepository.save(
