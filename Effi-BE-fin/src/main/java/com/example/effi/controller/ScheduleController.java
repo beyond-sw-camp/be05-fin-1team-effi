@@ -167,14 +167,14 @@ public class ScheduleController {
     public ResponseEntity<?> updateDeptSchedule(@PathVariable Long scheduleId, @PathVariable Long deptId,
                                             @RequestBody ScheduleRequestDTO schedule) {
         try {
-            CategoryResponseDTO category = categoryService.findByDeptId(deptId);
+            CategoryResponseDTO category = categoryService.addCategoryByDept(deptId);
             ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Failed to update schedule: " + e.getMessage());
@@ -186,7 +186,7 @@ public class ScheduleController {
     public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId, @PathVariable Long groupId,
                                             @RequestBody ScheduleRequestDTO schedule) {
         try {
-            CategoryResponseDTO category = categoryService.findByGroupId(groupId);
+            CategoryResponseDTO category = categoryService.addCategoryByGroup(groupId);
             ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));

@@ -222,13 +222,34 @@ public class ScheduleService {
     // update schedule
     public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId, CategoryResponseDTO categoryResponseDTO) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
-        Category category = Category.builder()
-                .categoryNo(categoryResponseDTO.getCategoryNo())
-                .categoryId(categoryResponseDTO.getCategoryId())
-                .categoryName(categoryResponseDTO.getCategoryName())
-                .dept(deptRepository.findByDeptId(categoryResponseDTO.getDeptId()))
-                .group(groupRepository.findById(categoryResponseDTO.getGroupId()).orElse(null))
-                .build();
+        Category category = null;
+        if (categoryResponseDTO.getGroupId() != null){
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(null)
+                    .group(groupRepository.findById(categoryResponseDTO.getGroupId()).orElse(null))
+                    .build();
+        }
+        else if (categoryResponseDTO.getDeptId() != null){
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(deptRepository.findByDeptId(categoryResponseDTO.getDeptId()))
+                    .group(null)
+                    .build();
+        }
+        else{
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(null)
+                    .group(null)
+                    .build();
+        }
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
