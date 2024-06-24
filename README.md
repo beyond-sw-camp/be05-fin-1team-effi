@@ -24,8 +24,8 @@ https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsB
 
 <details>
     <summary>ERD</summary>
-
-![1team-erd](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/121791324/7da954d5-aafe-419d-a5e1-5e530a6993ab)
+    
+![DataModeling](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/74529390/59877e76-8e03-409b-aa7b-48972d83ece1)
 https://www.erdcloud.com/d/LzhHdqfKbQiDiAqmG
 </details>
 
