@@ -97,7 +97,8 @@ public class ScheduleController {
     @PostMapping("/add/group/{groupId}")
     public ResponseEntity<?> addScheduleGroup(@RequestBody ScheduleRequestDTO schedule, @PathVariable Long groupId) {
         try{
-            CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+            // CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+            CategoryResponseDTO byGroupId = categoryService.addCategoryByGroup(groupId);
             if (byGroupId == null){
                 byGroupId = categoryService.addCategoryByGroup(groupId);
             }
