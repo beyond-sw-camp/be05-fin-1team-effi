@@ -143,12 +143,71 @@ public class ScheduleController {
         }
     }
 
-    // 수정 (어떤 수정인지) -> shcedule 내용만
+    // 수정 회사
+    @PostMapping("/update/company/{scheduleId}")
+    public ResponseEntity<?> updateCompanySchedule(@PathVariable Long scheduleId,
+                                            @RequestBody ScheduleRequestDTO schedule) {
+        try {
+            CategoryResponseDTO category = categoryService.findByCategoryNo(1L);
+            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Failed to update schedule: " + e.getMessage());
+        }
+    }
+
+    //수정 - 부서
+    @PostMapping("/update/dept/{deptId}/{scheduleId}")
+    public ResponseEntity<?> updateDeptSchedule(@PathVariable Long scheduleId, @PathVariable Long deptId,
+                                            @RequestBody ScheduleRequestDTO schedule) {
+        try {
+            CategoryResponseDTO category = categoryService.findByDeptId(deptId);
+            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Failed to update schedule: " + e.getMessage());
+        }
+    }
+
+    //수정 - 그룹
+    @PostMapping("/update/group/{groupId}/{scheduleId}")
+    public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId, @PathVariable Long groupId,
+                                            @RequestBody ScheduleRequestDTO schedule) {
+        try {
+            CategoryResponseDTO category = categoryService.findByGroupId(groupId);
+            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
+            if (schedule.getRoutineId() != null)
+                scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
+            return ResponseEntity.ok(rtn);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Failed to update schedule: " + e.getMessage());
+        }
+    }
+
+
+    // 수정 - 개인 (어떤 수정인지) -> shcedule 내용만
     @PostMapping("/update/{scheduleId}")
     public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId,
                                                               @RequestBody ScheduleRequestDTO schedule) {
         try {
-            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId);
+            CategoryResponseDTO category = categoryService.findByCategoryNo(4L);
+            ScheduleResponseDTO rtn = scheduleService.updateSchedule(schedule, scheduleId, category);
             if (schedule.getRoutineId() != null)
                 scheduleService.addRoutineSchedule(scheduleService.getSchedule(rtn.getScheduleId()));
             return ResponseEntity.ok(rtn);
