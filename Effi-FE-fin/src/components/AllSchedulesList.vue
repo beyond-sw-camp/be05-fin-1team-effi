@@ -76,13 +76,13 @@ export default {
     getCategoryColor(categoryName) {
       switch (categoryName) {
         case '회사':
-          return '#05CC6C';
-        case '개인':
           return '#FA0E0E';
+        case '개인':
+          return '#0100FF';
         case '부서':
-          return '#F2DB0C';
+          return '#FFFF00';
         case '그룹':
-          return '#060EDE';
+          return '#008001';
         default:
           return '#000000'; // 기본 색상 (필요한 경우)
       }
