@@ -11,9 +11,10 @@
             <tr>
               <td>{{ item.time }}</td>
               <td v-for="(schedule, index) in item.schedules" :key="index">
-                <div v-if="schedule" :class="['event', { first: schedule.isFirstSlot, last: schedule.isLastSlot }]">
+                <div v-if="schedule" :class="['event', { first: schedule.isFirstSlot, last: schedule.isLastSlot }]"
+                  :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }">
                   <template v-if="schedule.isFirstSlot">
-                    <strong>{{schedule.userName}}의 일정 : {{ schedule.title }}</strong><br>
+                    <strong>{{ schedule.userName }}의 일정 : {{ schedule.title }}</strong><br>
                     {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }}<br>
                   </template>
                 </div>
@@ -81,6 +82,7 @@ export default {
                 title: schedule.title,
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
+                categoryName: schedule.categoryName, // 카테고리 이름 추가
                 userName: user.name // 유저 이름 저장
               })),
             };
@@ -137,6 +139,21 @@ export default {
       selectedUserNames.value = props.selectedUsers.map(user => user.name);
     };
 
+    const getCategoryColor = (categoryName) => {
+      switch (categoryName) {
+        case '회사':
+          return '#FA0E0E';
+        case '개인':
+          return '#0100FF';
+        case '부서':
+          return '#FFFF00';
+        case '그룹':
+          return '#008001';
+        default:
+          return '#000000'; // 기본 색상 (필요한 경우)
+      }
+    };
+
     onMounted(() => {
       headers.value = [
         { text: 'Time', value: 'time' },
@@ -159,6 +176,7 @@ export default {
       headers,
       formattedSchedules,
       selectedUserNames,
+      getCategoryColor, // 메서드 반환
     };
   },
   methods: {
@@ -175,7 +193,6 @@ export default {
   border-radius: 4px;
   color: #fff;
   text-align: center;
-  background-color: #4682B4;
   height: 100%;
   width: 100%;
 }

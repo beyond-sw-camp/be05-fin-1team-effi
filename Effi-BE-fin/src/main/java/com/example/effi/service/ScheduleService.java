@@ -385,12 +385,27 @@ public class ScheduleService {
         }
     }
 
-//     empid로 직원 정보 조회
+    //empid로 직원 정보 조회
     public EmployeeDTO findById(Long empId) {
         return employeeService.findById(empId);
     }
 
-    //empId로 내 schedule만 조회
+
+    //scheduleId로 schedule 조회
+    public SearchResponseDTO getScheduleForSearch(Long scheduleId) {
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        List<String> tagNames = getTagNamesForSchedule(sch.getScheduleId());
+
+        if (sch == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found");
+        }
+        if (sch.getDeleteYn() == false)
+            return new SearchResponseDTO(sch, tagNames);
+        else
+            return null;
+    }
+
+    //empId로 내 schedule만 조회 -> return SearchResponseDTO
     public List<SearchResponseDTO> getAllSchedulesForSearch() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long creatorEmpNo = Long.valueOf(authentication.getName());

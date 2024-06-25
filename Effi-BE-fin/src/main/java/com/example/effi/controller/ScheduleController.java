@@ -325,17 +325,15 @@ public class ScheduleController {
     @GetMapping("/find/other/{empId}")
     public ResponseEntity<?> findOtherEmployee(@PathVariable("empId") Long empId) {
         List<ParticipantResponseDTO> allByEmpId = participantService.findAllByEmpId(empId);
-        List<ScheduleResponseDTO> scheduleList = new ArrayList<>();
+        List<SearchResponseDTO> scheduleList = new ArrayList<>();
         for (ParticipantResponseDTO participant : allByEmpId) {
             Long scheduleId = participant.getScheduleId();
-            ScheduleResponseDTO schedule = scheduleService.getSchedule(scheduleId);
+            SearchResponseDTO schedule = scheduleService.getScheduleForSearch(scheduleId);
             if (schedule != null && schedule.getDeleteYn() == false)
                 scheduleList.add(schedule);
         }
         return ResponseEntity.ok(scheduleList);
     }
-
-    ////////////////////////////////////////////////
 
     @GetMapping("/find/7days")
     public ResponseEntity<?> getScheduleCountForLast7Days() {
