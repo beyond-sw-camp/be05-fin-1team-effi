@@ -167,10 +167,10 @@ export default {
         }
 
         if (Array.isArray(schedules)) {
-          events.value = schedules.map(async (schedule) => {
-            // Fetch category details by categoryNo and update categoryId
-            const categoryResponse = await axiosInstance.get(`/api/category/find/${schedule.categoryNo}`);            if (categoryResponse.data) {
-              schedule.categoryId = categoryResponse.data.categoryId; // Update categoryId
+          events.value = await Promise.all(schedules.map(async (schedule) => {
+            const categoryResponse = await axiosInstance.get(`/api/category/find/${schedule.categoryNo}`);
+            if (categoryResponse.data) {
+              schedule.categoryId = categoryResponse.data.categoryId;
             }
             return {
               id: schedule.scheduleId,
@@ -178,11 +178,10 @@ export default {
               content: schedule.context,
               start: dayjs(schedule.startTime),
               end: dayjs(schedule.endTime),
-              categoryId: schedule.categoryId,
+              categoryId: schedule.categoryId || 0, // Ensure categoryId is set
               open: ref(false),
             };
-          });
-          events.value = await Promise.all(events.value); // 비동기 처리된 배열을 기다림
+          }));
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -201,6 +200,7 @@ export default {
     };
 
     const getCategoryColor = (categoryId) => {
+      console.log('getCategoryColor called for categoryId:', categoryId);
       switch (categoryId) {
         case 1:
           return 'red';
@@ -216,6 +216,7 @@ export default {
     };
 
     const getCategoryTextColor = (categoryId) => {
+      console.log('getCategoryTextColor called for categoryId:', categoryId);
       switch (categoryId) {
         case 2: // Yellow background for 부서
           return 'black';
@@ -273,6 +274,7 @@ export default {
     const onViewModeChange = () => {
       console.log('View mode changed to:', type.value);
       emit('update-view-mode', type.value);
+      updateEvents(); // 이벤트 강제 업데이트
     };
 
     const onWeekdayChange = () => {
@@ -298,7 +300,13 @@ export default {
       console.log('New Date:', newDate.toDate());
       calendarValue.value = [newDate.toDate()];
       console.log('Calendar Value Updated:', calendarValue.value);
+      updateEvents(); // 이벤트 강제 업데이트
     });
+
+    const updateEvents = () => {
+      // 기존 events 배열을 업데이트하여 다시 렌더링하도록 함
+      events.value = events.value.map(event => ({ ...event }));
+    };
 
     const editEvent = async (event) => {
       selectedEventId.value = event.id;

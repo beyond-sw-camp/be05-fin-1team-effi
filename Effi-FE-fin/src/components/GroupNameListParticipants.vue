@@ -1,15 +1,18 @@
 <template>
-  <div class="group-container">
-    <div class="group-header" @click="toggleGroups">
-      <h2>My Groups Participants </h2>
-      <span>{{ isOpen ? '▲' : '▼' }}</span>
-    </div>
-    <div v-if="isOpen" class="group-list">
-      <div v-for="group in groups" :key="group.id" class="group-item" @click="navigateToParticipants(group.id)">
-        <label :for="`participant-${group.id}`">{{ group.name }}</label>
-      </div>
-    </div>
-  </div>
+  <v-list>
+    <v-list-item
+      v-for="group in groups"
+      :key="group.id"
+      @click="navigateToParticipants(group.id)"
+    >
+      <template v-slot:prepend>
+        <v-list-item-action start>
+          <v-checkbox-btn :model-value="false" :disabled="true"></v-checkbox-btn>
+        </v-list-item-action>
+      </template>
+      <v-list-item-title>{{ group.name }}</v-list-item-title>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script>
@@ -20,13 +23,8 @@ import axiosInstance from "@/services/axios.js";
 export default {
   name: 'GroupNameListParticipants',
   setup() {
-    const isOpen = ref(true);
     const groups = ref([]);
     const router = useRouter(); // useRouter 사용
-
-    const toggleGroups = () => {
-      isOpen.value = !isOpen.value;
-    };
 
     const fetchGroups = async () => {
       const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
@@ -69,9 +67,7 @@ export default {
     });
 
     return {
-      isOpen,
       groups,
-      toggleGroups,
       fetchGroups,
       navigateToParticipants
     };
@@ -86,20 +82,10 @@ export default {
   width: 200px;
 }
 
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
-
-.group-header h2 {
-  font-size: 18px;
-  margin: 0;
-}
-
 .group-list {
   margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .group-item {
@@ -107,6 +93,10 @@ export default {
   align-items: center;
   margin-bottom: 5px;
   cursor: pointer;
+}
+
+.group-item:hover {
+  background-color: #e0e0e0;
 }
 
 .group-item label {

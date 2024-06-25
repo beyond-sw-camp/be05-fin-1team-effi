@@ -1,45 +1,35 @@
 <template>
-  <div class="category-container">
-    <div class="category-header" @click="toggleCategories">
-      <h2>Category</h2>
-      <span>{{ isOpen ? '▲' : '▼' }}</span>
-    </div>
-    <div v-if="isOpen" class="category-list">
-      <div
-          v-for="category in categories"
-          :key="category.name"
-          class="category-item"
-          @click="handleCategoryClick(category)"
-      >
-        <span :class="category.colorClass" class="category-dot"></span>
-        <label>{{ category.name }}</label>
-        <span v-if="category.selected" class="checkmark">✔️</span>
-      </div>
-    </div>
-  </div>
+  <v-list>
+    <v-list-item
+      v-for="category in categories"
+      :key="category.id"
+      @click="handleCategoryClick(category)"
+    >
+      <template v-slot:prepend>
+        <v-list-item-action start>
+          <v-checkbox-btn :model-value="category.selected"></v-checkbox-btn>
+        </v-list-item-action>
+      </template>
+      <v-list-item-title>{{ category.name }}</v-list-item-title>
+    </v-list-item>
+  </v-list>
 </template>
 
-<!--update-schedule 이벤트로 schedule 정보가 들어있는 array 넘겨줌 -->
-<!--scheduleTableWithCategory.vue랑 같이 사용하면 됌-->
 <script>
 import axiosInstance from "@/services/axios.js";
 
 export default {
   data() {
     return {
-      isOpen: true,
       categories: [
-        { id: 1, name: "회사", colorClass: "red", selected: false },
-        { id: 2, name: "부서", colorClass: "yellow", selected: false },
-        { id: 3, name: "그룹", colorClass: "green", selected: false },
-        { id: 4, name: "개인", colorClass: "blue", selected: false }
+        { id: 1, name: "회사", selected: false },
+        { id: 2, name: "부서", selected: false },
+        { id: 3, name: "그룹", selected: false },
+        { id: 4, name: "개인", selected: false }
       ]
     };
   },
   methods: {
-    toggleCategories() {
-      this.isOpen = !this.isOpen;
-    },
     async handleCategoryClick(category) {
       category.selected = !category.selected;
       console.log(`Category clicked: ${category.name}`);
@@ -146,26 +136,15 @@ export default {
 
 <style scoped>
 .category-container {
-  background-color: #f7d6c3;
   padding: 10px;
   border-radius: 5px;
   width: 200px;
 }
 
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
-
-.category-header h2 {
-  font-size: 18px;
-  margin: 0;
-}
-
 .category-list {
   margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .category-item {
@@ -175,27 +154,15 @@ export default {
   cursor: pointer;
 }
 
+.category-item:hover {
+  background-color: #e0e0e0;
+}
+
 .category-dot {
   width: 15px;
   height: 15px;
   border-radius: 50%;
   margin-right: 10px;
-}
-
-.red {
-  background-color: red;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
-.green {
-  background-color: green;
-}
-
-.blue {
-  background-color: blue;
 }
 
 .checkmark {

@@ -1,64 +1,101 @@
 <template>
-  <v-navigation-drawer expand-on-hover rail>
-    <v-list>
-      <v-list-item
-        :prepend-avatar="avatarUrl"
-        :subtitle="userEmail"
-        :rank="userRank"
-        :title="userName"
-      ></v-list-item>
-    </v-list>
+  <div>
+    <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;">
+      <v-list>
+        <v-list-item
+          :prepend-avatar="avatarUrl"
+          :subtitle="userEmail"
+          :title="`${userName} (${userRank})`"
+        ></v-list-item>
+      </v-list>
 
-    <v-divider></v-divider>
+      <v-divider></v-divider>
 
-    <v-list density="compact" nav>
-      <v-list-item @click="goToHome" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
-      <v-list-item prepend-icon="mdi-account-multiple" title="MyPage" @click="goToMyPage"></v-list-item>
-    </v-list>
+      <v-list color="transparent">
+        <v-list-item>
+          <v-select v-model="searchCriterion" :items="searchCriteria" label="Search By" class="mt-4" />
+          <v-text-field v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="search" />
+          <v-btn @click="search">
+            <v-icon>mdi-magnify</v-icon>
+          </v-btn>
+        </v-list-item>
+      </v-list>
 
-    <v-divider></v-divider>
+      <v-divider></v-divider>
 
-    <v-list color="transparent">
-      <v-list-item>
-        <v-btn @click="showModal = true" class="create-group-button">
-          <v-icon left>mdi-plus</v-icon>
-          <span>group<br>create</span>
-          <v-icon right>mdi-chevron-down</v-icon>
-        </v-btn>
-        <CreateGroupModal :show="showModal" @close="closeModal" />
-      </v-list-item>
-      <v-list-item v-if="!isMyPage">
-        <SelectCategory @selectCategory="handleUpdateCategories" />
-      </v-list-item>
-      <v-list-item v-if="!isMyPage">
-        <GroupNameList @selectedGroups="handleUpdateGroups" />
-      </v-list-item>
-      <v-list-item v-if="!isMyPage">
-        <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
-      </v-list-item>
-      <v-list-item>
-        <v-select v-model="searchCriterion" :items="searchCriteria" label="Search By" class="mt-4" />
-        <v-text-field v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="search" />
-        <v-btn @click="search">
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-      </v-list-item>
-    </v-list>
+      <v-list density="compact" nav>
+        <v-list-item @click="goToHome" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
+        <v-list-item @click="goToMyPage" prepend-icon="mdi-account" title="My Page" value="mypage"></v-list-item>
+        <v-list-item @click="goToAllSchedules" prepend-icon="mdi-calendar" title="All Schedules" value="allschedules"></v-list-item>
 
-    <template v-slot:append>
-      <div class="pa-2">
-        <v-btn block @click="logout">
-          Logout
-        </v-btn>
-        <v-img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image"></v-img>
-      </div>
-    </template>
-  </v-navigation-drawer>
+        <v-list-group v-model="openCategories">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-view-list"
+              title="Category"
+              @click="toggleGroup('openCategories')"
+            ></v-list-item>
+          </template>
+          <v-list v-show="openCategories" class="scrollable-list light-scroll">
+            <SelectCategory @selectCategory="handleUpdateCategories" />
+          </v-list>
+        </v-list-group>
+
+        <v-list-group v-model="openMyGroups">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-group"
+              title="My Groups"
+              @click="toggleGroup('openMyGroups')"
+            ></v-list-item>
+          </template>
+          <v-list v-show="openMyGroups" class="scrollable-list light-scroll">
+            <GroupNameList @selectedGroups="handleUpdateGroups" />
+          </v-list>
+        </v-list-group>
+
+        <v-list-group v-model="openMyGroupsParticipants">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-group"
+              title="My Groups Participants"
+              @click="toggleGroup('openMyGroupsParticipants')"
+            ></v-list-item>
+          </template>
+          <v-list v-show="openMyGroupsParticipants" class="scrollable-list light-scroll">
+            <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
+          </v-list>
+        </v-list-group>
+
+        <v-list-item
+          prepend-icon="mdi-plus"
+          title="Create Group"
+          @click="showModal = true"
+        ></v-list-item>
+      </v-list>
+
+      <v-divider></v-divider>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block @click="logout">
+            Logout
+          </v-btn>
+          <v-img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image"></v-img>
+        </div>
+      </template>
+    </v-navigation-drawer>
+
+    <CreateGroupModal :show="showModal" @close="closeModal" />
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineEmits } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList.vue';
@@ -68,17 +105,33 @@ import axiosInstance from '@/services/axios';
 
 const emit = defineEmits(['update-categories', 'update-groups', 'search-results']);
 const showModal = ref(false);
-const route = useRoute();
+const openCategories = ref(false);
+const openMyGroups = ref(false);
+const openMyGroupsParticipants = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
-const isMyPage = computed(() => route.path === '/mypage');
 
 const userName = ref(authStore.name);
-const userEmail = ref(authStore.empNo + '@company.com'); // 예시 이메일 생성, 필요 시 변경
-const avatarUrl = 'https://randomuser.me/api/portraits/women/85.jpg'; // 예시 아바타 URL
+const userEmail = ref('');
+const userRank = ref(authStore.rank);
+const avatarUrl = 'https://randomuser.me/api/portraits/women/85.jpg';
+
+const fetchUserEmail = async () => {
+  try {
+    const response = await axiosInstance.get('/api/mypage/me', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+    userEmail.value = response.data.email;
+  } catch (error) {
+    console.error('Failed to fetch user email:', error);
+  }
+};
 
 onMounted(() => {
   authStore.loadSession();
+  fetchUserEmail();
 });
 
 const closeModal = () => {
@@ -111,17 +164,17 @@ const logout = async () => {
 };
 
 const searchQuery = ref('');
-const searchCriterion = ref('title');
-const searchCriteria = ref(['title', 'tag', 'category']);
+const searchCriterion = ref('제목');
+const searchCriteria = ref(['제목', '태그', '카테고리']);
 
 const search = async () => {
   console.log(`Searching for ${searchQuery.value} by ${searchCriterion.value}`);
   let url = `/api/search/${searchCriterion.value}?${searchCriterion.value}=${encodeURIComponent(searchQuery.value)}`;
-  if (searchCriterion.value === 'title') {
+  if (searchCriterion.value === '제목') {
     url = `/api/search/title?title=${encodeURIComponent(searchQuery.value)}`;
-  } else if (searchCriterion.value === 'tag') {
+  } else if (searchCriterion.value === '태그') {
     url = `/api/search/tag?tagName=${encodeURIComponent(searchQuery.value)}`;
-  } else if (searchCriterion.value === 'category') {
+  } else if (searchCriterion.value === '카테고리') {
     url = `/api/search/category?categoryName=${encodeURIComponent(searchQuery.value)}`;
   }
 
@@ -146,6 +199,20 @@ const goToMyPage = () => {
 
 const goToHome = () => {
   router.push({ name: 'home' });
+};
+
+const goToAllSchedules = () => {
+  router.push({ name: 'allschedules' });
+};
+
+const toggleGroup = (group) => {
+  if (group === 'openCategories') {
+    openCategories.value = !openCategories.value;
+  } else if (group === 'openMyGroups') {
+    openMyGroups.value = !openMyGroups.value;
+  } else if (group === 'openMyGroupsParticipants') {
+    openMyGroupsParticipants.value = !openMyGroupsParticipants.value;
+  }
 };
 </script>
 
@@ -173,5 +240,36 @@ const goToHome = () => {
   width: 100px;
   height: auto;
   margin-top: 10px;
+}
+
+.scrollable-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #FBB584
+}
+
+.light-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.light-scroll::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.light-scroll::-webkit-scrollbar-thumb {
+  background-color: #888;
+}
+
+.light-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* 추가: 마우스 오버 효과 */
+.v-list-item:hover {
+  background-color: #e0e0e0 !important;
+}
+
+.v-dialog--active {
+  right: 250px !important; /* 사이드바의 너비 만큼 이동 */
 }
 </style>
