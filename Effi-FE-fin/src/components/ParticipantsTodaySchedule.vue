@@ -77,13 +77,13 @@ export default {
             console.log(`Filtered schedules for user ${user.id}:`, todaySchedules);
             return {
               userId: user.id,
-              userName: user.name, // 유저 이름 저장
+              userName: user.name, 
               schedules: todaySchedules.map(schedule => ({
                 title: schedule.title,
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
-                categoryName: schedule.categoryName, // 카테고리 이름 추가
-                userName: user.name // 유저 이름 저장
+                categoryName: schedule.categoryName, 
+                userName: user.name //
               })),
             };
           })
@@ -120,7 +120,7 @@ export default {
               if (scheduleMap[time]) {
                 scheduleMap[time].schedules[userIndex] = {
                   ...schedule,
-                  userName: userName, // 유저 이름 저장
+                  userName: userName, 
                   isFirstSlot: currentHour === startHour,
                   isLastSlot: (currentHour + 1) % 24 === endHour
                 };
@@ -156,9 +156,9 @@ export default {
 
     const getTextColor = (categoryName) => {
       if (categoryName === '부서') {
-        return '#000000'; // 검정색
+        return '#000000'; 
       }
-      return '#FFFFFF'; // 흰색
+      return '#FFFFFF'; 
     };
 
     onMounted(() => {
@@ -183,8 +183,8 @@ export default {
       headers,
       formattedSchedules,
       selectedUserNames,
-      getCategoryColor, // 메서드 반환
-      getTextColor, // 메서드 반환
+      getCategoryColor,
+      getTextColor, 
     };
   },
   methods: {
