@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <Navigation class="navigation" />
     <div class="content">
       <div class="controls d-flex align-items-center mb-3 flex-wrap">
         <div class="timezone-container d-flex align-items-center me-auto mb-2 mb-md-0">
@@ -28,7 +27,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import Navigation from '@/components/LeftSidebar.vue';
 import SearchNavigator from '../components/SearchNavigator.vue';
 import SearchList from '../components/SearchList.vue';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';

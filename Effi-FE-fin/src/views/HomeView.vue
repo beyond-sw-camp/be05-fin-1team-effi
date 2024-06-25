@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <Navigation @update-categories="handleUpdateCategories" @update-groups="handleUpdateGroups" class="navigation" />
     <div class="timezone-and-calendar">
       <TimezoneComponent v-if="isTimezoneVisible" class="timezone-component" />
       <VCalendar 
@@ -16,14 +15,12 @@
 
 <script>
 import { defineComponent, ref, computed } from 'vue';
-import Navigation from '@/components/LeftSidebar.vue';
 import VCalendar from '@/components/VCalendar.vue';
 import TimezoneComponent from '@/components/TimezoneComponent.vue'; // 타임존 컴포넌트를 불러옵니다
 
 export default defineComponent({
   name: 'HomeView',
   components: {
-    Navigation,
     VCalendar,
     TimezoneComponent // 타임존 컴포넌트를 등록합니다
   },
