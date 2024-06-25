@@ -1,96 +1,79 @@
 <template>
-  <div>
-    <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;">
-      <v-list>
-        <v-list-item
-          :prepend-avatar="avatarUrl"
-          :subtitle="userEmail"
-          :title="`${userName} (${userRank})`"
-        ></v-list-item>
-      </v-list>
+  <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;">
+    <v-list>
+      <v-list-item :prepend-avatar="avatarUrl" :subtitle="userEmail" :title="`${userName} (${userRank})`"></v-list-item>
+    </v-list>
 
-      <v-divider></v-divider>
+    <v-divider></v-divider>
 
-      <v-list color="transparent">
-        <v-list-item>
-          <v-select v-model="searchCriterion" :items="searchCriteria" label="Search By" class="mt-4" />
-          <v-text-field v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="search" />
-          <v-btn @click="search">
-            <v-icon>mdi-magnify</v-icon>
-          </v-btn>
-        </v-list-item>
-      </v-list>
+    <v-list color="transparent">
+      <v-list-item>
+        <select class="form-select me-2" v-model="searchCriterion">
+          <option value="title">제목</option>
+          <option value="tag">태그</option>
+          <option value="category">카테고리</option>
+        </select>
+        <v-text-field v-model="searchQuery" placeholder="검색어를 입력하세요" @keyup.enter="search" />
+        <v-btn @click="search">
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </v-list-item>
+    </v-list>
 
-      <v-divider></v-divider>
+    <v-divider></v-divider>
 
-      <v-list density="compact" nav>
-        <v-list-item @click="goToHome" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
-        <v-list-item @click="goToMyPage" prepend-icon="mdi-account" title="My Page" value="mypage"></v-list-item>
-        <v-list-item @click="goToAllSchedules" prepend-icon="mdi-calendar" title="All Schedules" value="allschedules"></v-list-item>
+    <v-list density="compact" nav>
+      <v-list-item @click="goToHome" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
+      <v-list-item @click="goToMyPage" prepend-icon="mdi-account" title="My Page" value="mypage"></v-list-item>
+      <v-list-item @click="goToAllSchedules" prepend-icon="mdi-calendar" title="All Schedules"
+        value="allschedules"></v-list-item>
 
-        <v-list-group v-model="openCategories">
-          <template v-slot:activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-view-list"
-              title="Category"
-              @click="toggleGroup('openCategories')"
-            ></v-list-item>
-          </template>
-          <v-list v-show="openCategories" class="scrollable-list light-scroll">
-            <SelectCategory @selectCategory="handleUpdateCategories" />
-          </v-list>
-        </v-list-group>
+      <v-list-group v-model="openCategories">
+        <template v-slot:activator="{ props }">
+          <v-list-item v-bind="props" prepend-icon="mdi-view-list" title="Category"
+            @click="toggleGroup('openCategories')"></v-list-item>
+        </template>
+        <v-list v-show="openCategories" class="scrollable-list light-scroll">
+          <SelectCategory @selectCategory="handleUpdateCategories" />
+        </v-list>
+      </v-list-group>
 
-        <v-list-group v-model="openMyGroups">
-          <template v-slot:activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-account-group"
-              title="My Groups"
-              @click="toggleGroup('openMyGroups')"
-            ></v-list-item>
-          </template>
-          <v-list v-show="openMyGroups" class="scrollable-list light-scroll">
-            <GroupNameList @selectedGroups="handleUpdateGroups" />
-          </v-list>
-        </v-list-group>
+      <v-list-group v-model="openMyGroups">
+        <template v-slot:activator="{ props }">
+          <v-list-item v-bind="props" prepend-icon="mdi-account-group" title="My Groups"
+            @click="toggleGroup('openMyGroups')"></v-list-item>
+        </template>
+        <v-list v-show="openMyGroups" class="scrollable-list light-scroll">
+          <GroupNameList @selectedGroups="handleUpdateGroups" />
+        </v-list>
+      </v-list-group>
 
-        <v-list-group v-model="openMyGroupsParticipants">
-          <template v-slot:activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-account-group"
-              title="My Groups Participants"
-              @click="toggleGroup('openMyGroupsParticipants')"
-            ></v-list-item>
-          </template>
-          <v-list v-show="openMyGroupsParticipants" class="scrollable-list light-scroll">
-            <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
-          </v-list>
-        </v-list-group>
+      <v-list-group v-model="openMyGroupsParticipants">
+        <template v-slot:activator="{ props }">
+          <v-list-item v-bind="props" prepend-icon="mdi-account-group" title="My Groups Participants"
+            @click="toggleGroup('openMyGroupsParticipants')"></v-list-item>
+        </template>
+        <v-list v-show="openMyGroupsParticipants" class="scrollable-list light-scroll">
+          <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
+        </v-list>
+      </v-list-group>
 
-        <v-list-item
-          prepend-icon="mdi-plus"
-          title="Create Group"
-          @click="showModal = true"
-        ></v-list-item>
-      </v-list>
+      <v-list-item prepend-icon="mdi-plus" title="Create Group" @click="showModal = true"></v-list-item>
+    </v-list>
 
-      <v-divider></v-divider>
+    <v-divider></v-divider>
 
-      <template v-slot:append>
-        <div class="pa-2">
-          <v-btn block @click="logout">
-            Logout
-          </v-btn>
-          <v-img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image"></v-img>
-        </div>
-      </template>
-    </v-navigation-drawer>
+    <template v-slot:append>
+      <div class="pa-2">
+        <v-btn block @click="logout">
+          Logout
+        </v-btn>
+        <v-img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image"></v-img>
+      </div>
+    </template>
+  </v-navigation-drawer>
 
-    <CreateGroupModal :show="showModal" @close="closeModal" />
-  </div>
+  <CreateGroupModal :show="showModal" @close="closeModal" />
 </template>
 
 <script setup>
@@ -164,25 +147,24 @@ const logout = async () => {
 };
 
 const searchQuery = ref('');
-const searchCriterion = ref('제목');
-const searchCriteria = ref(['제목', '태그', '카테고리']);
+const searchCriterion = ref('title');
 
 const search = async () => {
   console.log(`Searching for ${searchQuery.value} by ${searchCriterion.value}`);
   let url = `/api/search/${searchCriterion.value}?${searchCriterion.value}=${encodeURIComponent(searchQuery.value)}`;
-  if (searchCriterion.value === '제목') {
+  if (searchCriterion.value === 'title') {
     url = `/api/search/title?title=${encodeURIComponent(searchQuery.value)}`;
-  } else if (searchCriterion.value === '태그') {
+  } else if (searchCriterion.value === 'tag') {
     url = `/api/search/tag?tagName=${encodeURIComponent(searchQuery.value)}`;
-  } else if (searchCriterion.value === '카테고리') {
+  } else if (searchCriterion.value === 'category') {
     url = `/api/search/category?categoryName=${encodeURIComponent(searchQuery.value)}`;
   }
 
   try {
     const response = await axiosInstance.get(url, {
       headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-      },
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
     });
     const searches = response.data;
     console.log('Search results:', searches);
@@ -192,6 +174,7 @@ const search = async () => {
     console.error('Error during search:', error);
   }
 };
+
 
 const goToMyPage = () => {
   router.push({ name: 'mypage' });
@@ -215,6 +198,7 @@ const toggleGroup = (group) => {
   }
 };
 </script>
+
 
 <style scoped>
 .create-group-button {
