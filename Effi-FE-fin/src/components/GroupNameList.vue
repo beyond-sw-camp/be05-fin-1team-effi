@@ -1,21 +1,20 @@
 <template>
-  <div class="group-container">
-    <div class="group-header" @click="toggleGroups">
-      <h2>My Groups</h2>
-      <span>{{ isOpen ? '▲' : '▼' }}</span>
-    </div>
-    <div v-if="isOpen" class="group-list">
-      <div v-for="group in groups" :key="group.id" class="group-item">
-        <input
-          type="checkbox"
-          :id="group.id"
-          v-model="group.selected"
-        />
-        <label :for="group.id">{{ group.name }}</label>
-        <button v-if="group.selected" @click="removeGroup(group.id)" class="remove-button">━</button>
-      </div>
-    </div>
-  </div>
+  <v-list>
+    <v-list-item
+      v-for="group in groups"
+      :key="group.id"
+      @click="toggleGroupSelection(group)"
+    >
+      <template v-slot:prepend>
+        <v-list-item-action start>
+          <v-checkbox-btn :model-value="group.selected"></v-checkbox-btn>
+        </v-list-item-action>
+      </template>
+      <v-list-item-title>{{ group.name }}
+        <button v-if="group.selected" @click.stop="removeGroup(group.id)" class="remove-group-button">x</button>
+      </v-list-item-title>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script>
@@ -26,11 +25,10 @@ export default {
   name: 'GroupNameList',
   emits: ['selectedGroups'],
   setup(props, { emit }) {
-    const isOpen = ref(true);
     const groups = ref([]);
 
-    const toggleGroups = () => {
-      isOpen.value = !isOpen.value;
+    const toggleGroupSelection = (group) => {
+      group.selected = !group.selected;
     };
 
     const removeGroup = async (groupId) => {
@@ -100,9 +98,8 @@ export default {
     }, { deep: true });
 
     return {
-      isOpen,
       groups,
-      toggleGroups,
+      toggleGroupSelection,
       removeGroup,
       fetchGroups
     };
@@ -117,26 +114,20 @@ export default {
   width: 200px;
 }
 
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
-
-.group-header h2 {
-  font-size: 18px;
-  margin: 0;
-}
-
 .group-list {
   margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .group-item {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
+}
+
+.group-item:hover {
+  background-color: #e0e0e0;
 }
 
 .group-item input[type="checkbox"] {
@@ -148,12 +139,13 @@ export default {
   cursor: pointer;
 }
 
-.remove-button {
+.remove-group-button {
   background: none;
   border: none;
-  color: black;
   font-size: 20px;
-  font-weight: bold;
   cursor: pointer;
+  color: red;
+  padding: 5px;
+  margin-left: 80px;
 }
 </style>
