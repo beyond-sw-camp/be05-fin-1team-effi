@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <Navigation @update-categories="handleUpdateCategories" @update-groups="handleUpdateGroups" class="navigation" />
     <div class="main-content">
       <schedule-chart class="schedule-chart"/>
       <div class="side-charts">
@@ -13,7 +12,6 @@
 
 <script>
 import { defineComponent, ref } from 'vue';
-import Navigation from '@/components/LeftSidebar.vue';
 import TagPie from '@/components/TagPie.vue';
 import TagTop5 from '@/components/TagTop5.vue';
 import ScheduleChart from '@/components/ScheduleChart.vue';
@@ -21,7 +19,6 @@ import ScheduleChart from '@/components/ScheduleChart.vue';
 export default defineComponent({
   components: {
     ScheduleChart,
-    Navigation,
     TagPie,
     TagTop5
   },

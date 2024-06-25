@@ -12,7 +12,7 @@
               <td>{{ item.time }}</td>
               <td v-for="(schedule, index) in item.schedules" :key="index">
                 <div v-if="schedule" :class="['event', { first: schedule.isFirstSlot, last: schedule.isLastSlot }]"
-                  :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }">
+                  :style="{ backgroundColor: getCategoryColor(schedule.categoryName), color: getTextColor(schedule.categoryName) }">
                   <template v-if="schedule.isFirstSlot">
                     <strong>{{ schedule.userName }}의 일정 : {{ schedule.title }}</strong><br>
                     {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }}<br>
@@ -77,13 +77,13 @@ export default {
             console.log(`Filtered schedules for user ${user.id}:`, todaySchedules);
             return {
               userId: user.id,
-              userName: user.name, // 유저 이름 저장
+              userName: user.name, 
               schedules: todaySchedules.map(schedule => ({
                 title: schedule.title,
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
-                categoryName: schedule.categoryName, // 카테고리 이름 추가
-                userName: user.name // 유저 이름 저장
+                categoryName: schedule.categoryName, 
+                userName: user.name //
               })),
             };
           })
@@ -120,7 +120,7 @@ export default {
               if (scheduleMap[time]) {
                 scheduleMap[time].schedules[userIndex] = {
                   ...schedule,
-                  userName: userName, // 유저 이름 저장
+                  userName: userName, 
                   isFirstSlot: currentHour === startHour,
                   isLastSlot: (currentHour + 1) % 24 === endHour
                 };
@@ -154,6 +154,13 @@ export default {
       }
     };
 
+    const getTextColor = (categoryName) => {
+      if (categoryName === '부서') {
+        return '#000000'; 
+      }
+      return '#FFFFFF'; 
+    };
+
     onMounted(() => {
       headers.value = [
         { text: 'Time', value: 'time' },
@@ -176,7 +183,8 @@ export default {
       headers,
       formattedSchedules,
       selectedUserNames,
-      getCategoryColor, // 메서드 반환
+      getCategoryColor,
+      getTextColor, 
     };
   },
   methods: {
@@ -191,7 +199,6 @@ export default {
 .event {
   padding: 5px;
   border-radius: 4px;
-  color: #fff;
   text-align: center;
   height: 100%;
   width: 100%;
