@@ -1,34 +1,34 @@
 <!-- app.vue -->
 <template>
-  <div id="app">
-    <AppHeader v-if="showHeader" @search-results="handleSearchResults" />
+  <v-app>
+    <VSidebar v-if="showHeader" @search-results="handleSearchResults" />
     <div class="content" :search-results="searchResults">
       <router-view />
     </div>
-  </div>
+  </v-app>
 </template>
 
 <script>
 import { ref, defineComponent, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import AppHeader from '@/components/HomeHeader.vue';
+import VSidebar from '@/components/VSidebar.vue';
 
 export default defineComponent({
   components: {
-    AppHeader,
+    VSidebar,
   },
   setup() {
     const route = useRoute();
     const showHeader = computed(() => route.name !== 'login' && route.name !== 'test' && route.name !== 'schedule');
     const searchResults = ref([]);
 
-    const handleSearchResults = (results) => { 
+    const handleSearchResults = (results) => {
       searchResults.value = results;
     };
 
     return {
       showHeader,
-      searchResults, 
+      searchResults,
       handleSearchResults,
     };
   },
@@ -39,14 +39,16 @@ export default defineComponent({
 <style>
 #app {
   margin: 0;
-  padding-top: 10px; /* 헤더의 높이만큼 패딩 추가 */
+  padding-top: 10px;
+  /* 헤더의 높이만큼 패딩 추가 */
 }
 
 .header {
   width: 100%;
   position: fixed;
   top: 0;
-  z-index: 500; /* 헤더가 다른 요소 위에 위치하도록 설정 */
+  z-index: 500;
+  /* 헤더가 다른 요소 위에 위치하도록 설정 */
 }
 
 .content {
