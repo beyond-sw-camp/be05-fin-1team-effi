@@ -9,7 +9,16 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import axiosInstance from '@/services/axios';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale);
 
@@ -36,17 +45,31 @@ const renderChart = async () => {
     return;
   }
 
-  // 날짜를 이른 순서로 정렬
+  const today = new Date().toISOString().split('T')[0];  // 오늘 날짜 (YYYY-MM-DD 형식)
   const sortedDates = Object.keys(data).sort();
-  const sortedData = sortedDates.map(date => data[date]);
+  const labels = sortedDates.map(date => date === today ? 'TODAY' : date);
+
+  const confirmedData = sortedDates.map(date => data[date]["0"]);  // assuming 0 is for confirmed
+  const pendingData = sortedDates.map(date => data[date]["1"]);    // assuming 1 is for pending
+  const cancelledData = sortedDates.map(date => data[date]["2"]);  // assuming 2 is for cancelled
 
   const chartData = {
-    labels: sortedDates,
+    labels: labels,
     datasets: [
       {
-        label: 'Schedule Count',
+        label: 'Confirmed',
         backgroundColor: '#f87979',
-        data: sortedData
+        data: confirmedData
+      },
+      {
+        label: 'Pending',
+        backgroundColor: '#f8c879',
+        data: pendingData
+      },
+      {
+        label: 'Cancelled',
+        backgroundColor: '#79f879',
+        data: cancelledData
       }
     ]
   };
@@ -57,7 +80,6 @@ const renderChart = async () => {
     chart.destroy();
   }
 
-  // canvasReady를 true로 설정한 후에 chart를 생성하도록 순서 변경
   await nextTick(() => {
     if (canvas.value) {
       chart = new ChartJS(canvas.value, {
@@ -65,7 +87,11 @@ const renderChart = async () => {
         data: chartData,
         options: {
           responsive: true,
-          maintainAspectRatio: false
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+          }
         }
       });
     }
