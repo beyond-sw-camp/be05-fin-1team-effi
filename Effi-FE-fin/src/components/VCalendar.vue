@@ -24,31 +24,25 @@
     </v-sheet>
     <v-sheet>
       <v-calendar
+        :key="calendarKey"
         ref="calendar"
         v-model="calendarValue"
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
-        :interval-count="intervalCount"
-        :interval-height="intervalHeight"
         @click:date="onDateClick"
+        :event-color="getEventColor"
       >
         <template v-slot:event="{ event }">
           <div
-            class="my-event"
-            :style="{
-              backgroundColor: getCategoryColor(event.categoryId),
-              color: getCategoryTextColor(event.categoryId)
-            }"
+            class="v-sheet v-theme--light rounded-t v-calendar-internal-event"
+            :style="{ backgroundColor: event.color, color: event.textColor }"
             @click.stop="onEventClick(event)"
           >
             <strong>{{ event.title }}</strong>
             <br>
             {{ event.start ? event.start.format('YYYY-MM-DD hh:mm A') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD hh:mm A') : '' }}
           </div>
-        </template>
-        <template v-slot:intervalFormat>
-          <TimezoneComponent v-if="isTimezoneVisible" />
         </template>
       </v-calendar>
     </v-sheet>
@@ -68,19 +62,18 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import dayjs from 'dayjs';
 import axiosInstance from '@/services/axios';
 import isBetween from 'dayjs/plugin/isBetween';
 import ScheduleModal from './ScheduleModal.vue';
 import EditScheduleModal from './EditScheduleModal.vue';
-import TimezoneComponent from '@/components/TimezoneComponent.vue'; // 타임존 컴포넌트를 불러옵니다
 
 dayjs.extend(isBetween);
 
 export default {
-  components: { ScheduleModal, EditScheduleModal, TimezoneComponent },
+  components: { ScheduleModal, EditScheduleModal },
   props: {
     show: {
       type: Boolean,
@@ -104,7 +97,6 @@ export default {
     const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
     const weekdays = ref([
       { title: 'Sun - Sat', value: [0, 1, 2, 3, 4, 5, 6] },
-      { title: 'Mon - Sun', value: [1, 2, 3, 4, 5, 6, 0] },
       { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
     ]);
     const calendarValue = ref([dayjs().toDate()]);
@@ -113,11 +105,10 @@ export default {
     const showEditDialog = ref(false);
     const selectedEventId = ref(null);
     const selectedDate = ref(dayjs().toDate());
+    const calendarKey = ref(0);
 
     const intervalCount = computed(() => (type.value === 'week' || type.value === 'day' ? 24 : undefined));
     const intervalHeight = computed(() => (type.value === 'week' || type.value === 'day' ? 60 : undefined));
-
-    const isTimezoneVisible = computed(() => type.value === 'week' || type.value === 'day');
 
     const fetchSchedules = async () => {
       try {
@@ -167,20 +158,15 @@ export default {
         }
 
         if (Array.isArray(schedules)) {
-          events.value = await Promise.all(schedules.map(async (schedule) => {
-            const categoryResponse = await axiosInstance.get(`/api/category/find/${schedule.categoryNo}`);
-            if (categoryResponse.data) {
-              schedule.categoryId = categoryResponse.data.categoryId;
-            }
-            return {
-              id: schedule.scheduleId,
-              title: schedule.title,
-              content: schedule.context,
-              start: dayjs(schedule.startTime),
-              end: dayjs(schedule.endTime),
-              categoryId: schedule.categoryId || 0, // Ensure categoryId is set
-              open: ref(false),
-            };
+          events.value = schedules.map((schedule) => ({
+            id: schedule.scheduleId,
+            title: schedule.title,
+            content: schedule.context,
+            start: dayjs(schedule.startTime),
+            end: dayjs(schedule.endTime),
+            color: schedule.categoryColor,
+            textColor: schedule.categoryTextColor,
+            open: ref(false),
           }));
         } else {
           console.error('Expected an array but got:', schedules);
@@ -199,30 +185,8 @@ export default {
       }
     };
 
-    const getCategoryColor = (categoryId) => {
-      console.log('getCategoryColor called for categoryId:', categoryId);
-      switch (categoryId) {
-        case 1:
-          return 'red';
-        case 2:
-          return 'yellow';
-        case 3:
-          return 'green';
-        case 4:
-          return 'blue';
-        default:
-          return 'gray';
-      }
-    };
-
-    const getCategoryTextColor = (categoryId) => {
-      console.log('getCategoryTextColor called for categoryId:', categoryId);
-      switch (categoryId) {
-        case 2: // Yellow background for 부서
-          return 'black';
-        default:
-          return 'white';
-      }
+    const getEventColor = (event) => {
+      return event.color;
     };
 
     onMounted(() => {
@@ -238,6 +202,12 @@ export default {
       },
       { deep: true }
     );
+
+    watch(events, () => {
+      nextTick(() => {
+        applySlotStyles();
+      });
+    });
 
     const toToday = () => {
       calendarValue.value = [dayjs().toDate()];
@@ -274,11 +244,31 @@ export default {
     const onViewModeChange = () => {
       console.log('View mode changed to:', type.value);
       emit('update-view-mode', type.value);
-      updateEvents(); // 이벤트 강제 업데이트
+      updateEvents();
+      calendarKey.value++;
+      nextTick(() => {
+        applySlotStyles();
+      });
     };
 
     const onWeekdayChange = () => {
       console.log('Weekday changed to:', weekday.value);
+      updateCalendarForWeekday();
+    };
+
+    const updateCalendarForWeekday = () => {
+      let newDate = dayjs(calendarValue.value[0]);
+      if (type.value === 'week' || type.value === 'day') {
+        newDate = newDate.day(weekday.value[0]);
+      } else {
+        newDate = newDate.startOf('week').day(weekday.value[0]);
+      }
+      calendarValue.value = [newDate.toDate()];
+      console.log('Calendar updated for weekday:', calendarValue.value);
+      calendarKey.value++;
+      nextTick(() => {
+        applySlotStyles();
+      });
     };
 
     watch(type, (newType) => {
@@ -290,7 +280,7 @@ export default {
           newDate = newDate.startOf('month');
           break;
         case 'week':
-          newDate = newDate.startOf('week');
+          newDate = newDate.startOf('week').day(weekday.value[0]);
           break;
         case 'day':
           newDate = newDate.startOf('day');
@@ -300,12 +290,16 @@ export default {
       console.log('New Date:', newDate.toDate());
       calendarValue.value = [newDate.toDate()];
       console.log('Calendar Value Updated:', calendarValue.value);
-      updateEvents(); // 이벤트 강제 업데이트
+      updateEvents();
+      calendarKey.value++;
+      nextTick(() => {
+        applySlotStyles();
+      });
     });
 
     const updateEvents = () => {
-      // 기존 events 배열을 업데이트하여 다시 렌더링하도록 함
       events.value = events.value.map(event => ({ ...event }));
+      console.log('Events after update:', events.value);
     };
 
     const editEvent = async (event) => {
@@ -345,6 +339,19 @@ export default {
       }
     };
 
+    const applySlotStyles = () => {
+      const slotElements = document.querySelectorAll('.v-calendar-day__row-content .v-sheet.v-calendar-internal-event');
+      slotElements.forEach((el) => {
+        const eventId = el.getAttribute('data-event-id');
+        const event = events.value.find(e => e.id === Number(eventId));
+        if (event) {
+          el.style.backgroundColor = event.color;
+          el.style.color = event.textColor;
+          console.log('Slot element updated:', el);
+        }
+      });
+    };
+
     return {
       calendarValue,
       types,
@@ -367,19 +374,17 @@ export default {
       updateShowDialog,
       handleEventSubmit,
       handleDayLabelClick,
-      editEvent,
-      getCategoryColor,
-      getCategoryTextColor,
+      getEventColor,
       intervalCount,
       intervalHeight,
-      isTimezoneVisible,
+      calendarKey,
     };
   },
 };
 </script>
 
 <style scoped>
-.my-event {
+.v-calendar-internal-event {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

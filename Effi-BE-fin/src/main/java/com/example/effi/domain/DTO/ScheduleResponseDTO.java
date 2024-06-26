@@ -26,7 +26,11 @@ public class ScheduleResponseDTO {
     private Date updatedAt;
 
     private Long categoryNo;
+    private String categoryName;
     private Long routineId;
+
+    private String categoryColor; 
+    private String categoryTextColor; 
 
     public ScheduleResponseDTO(Schedule schedule) {
         this.scheduleId = schedule.getScheduleId();
@@ -40,10 +44,37 @@ public class ScheduleResponseDTO {
         this.updatedAt = schedule.getUpdatedAt();
         this.deleteYn = schedule.getDeleteYn();
         this.categoryNo = schedule.getCategory().getCategoryNo();
+        this.categoryName = schedule.getCategory().getCategoryName();
+        this.categoryColor = getCategoryColor(schedule.getCategory().getCategoryName());
+        this.categoryTextColor = getCategoryTextColor(schedule.getCategory().getCategoryName());
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else
             this.routineId = null;
+    }
+
+    private String getCategoryColor(String categoryName) {
+        switch (categoryName) {
+            case "회사":
+                return "red";
+            case "부서":
+                return "yellow";
+            case "그룹":
+                return "green";
+            case "개인":
+                return "blue";
+            default:
+                return "gray";
+        }
+    }
+
+    private String getCategoryTextColor(String categoryName) {
+        switch (categoryName) {
+            case "부서": // Yellow background
+                return "black";
+            default:
+                return "white";
+        }
     }
 
 
