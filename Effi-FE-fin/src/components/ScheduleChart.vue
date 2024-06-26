@@ -57,17 +57,17 @@ const renderChart = async () => {
     labels: labels,
     datasets: [
       {
-        label: 'Confirmed',
+        label: '예정됨',
         backgroundColor: '#f87979',
         data: confirmedData
       },
       {
-        label: 'Pending',
+        label: '진행중',
         backgroundColor: '#f8c879',
         data: pendingData
       },
       {
-        label: 'Cancelled',
+        label: '완료됨',
         backgroundColor: '#79f879',
         data: cancelledData
       }
