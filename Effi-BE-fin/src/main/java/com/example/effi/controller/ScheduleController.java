@@ -339,13 +339,12 @@ public class ScheduleController {
     public ResponseEntity<?> getScheduleCountForLast7Days() {
         LocalDate today = LocalDate.now();
 
-        // 7일간의 날짜 리스트 생성 (오늘 포함)
-        List<LocalDate> last7Days = IntStream.rangeClosed(0, 6)
-                .mapToObj(today::minusDays)
+        List<LocalDate> last7Days = IntStream.rangeClosed(-3, 3)
+                .mapToObj(today::plusDays)
                 .collect(Collectors.toList());
 
         // 날짜별 일정 개수를 저장할 맵 생성
-        Map<String, Long> scheduleCountMap = new LinkedHashMap<>();
+        Map<String, Map<Integer, Long>> scheduleCountMap = new LinkedHashMap<>();
 
         for (LocalDate date : last7Days) {
             // 해당 날짜의 시작과 끝 시간
@@ -354,16 +353,22 @@ public class ScheduleController {
 
             List<ScheduleResponseDTO> schedules = scheduleService.getAllSchedules();
 
-            // 해당 날짜에 해당하는 일정 개수 계산
-            long count = schedules.stream()
-                    .filter(schedule -> {
-                        LocalDateTime startTime = schedule.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                        return !startTime.isBefore(startOfDay) && !startTime.isAfter(endOfDay);
-                    })
-                    .count();
+            // 상태별 일정 개수를 저장할 맵
+            Map<Integer, Long> statusCountMap = new HashMap<>();
+            statusCountMap.put(0, 0L);
+            statusCountMap.put(1, 0L);
+            statusCountMap.put(2, 0L);
+
+            for (ScheduleResponseDTO schedule : schedules) {
+                LocalDateTime startTime = schedule.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                if (!startTime.isBefore(startOfDay) && !startTime.isAfter(endOfDay)) {
+                    Integer status = schedule.getStatus();
+                    statusCountMap.put(status, statusCountMap.getOrDefault(status, 0L) + 1);
+                }
+            }
 
             // 결과 맵에 추가
-            scheduleCountMap.put(date.toString(), count);
+            scheduleCountMap.put(date.toString(), statusCountMap);
         }
 
         return ResponseEntity.ok(scheduleCountMap);
