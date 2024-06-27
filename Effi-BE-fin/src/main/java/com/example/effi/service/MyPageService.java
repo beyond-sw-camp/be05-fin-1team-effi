@@ -80,4 +80,19 @@ public class MyPageService {
     public List<MyPageTimezoneDTO> getTimezones() {
         return myPageRepository.findAllTimezonesGroupedByName();
     }
+
+    public String getEmployeeTimezoneName(Long empNo) {
+        Optional<Employee> byemp = myPageRepository.findById(empNo);
+        if (!byemp.isPresent()) {
+            throw new IllegalArgumentException("사원이 검색되지 않습니다. id: " + empNo);
+        }
+
+        String timezoneName = myPageRepository.findDefaultTimezoneName(empNo);
+        if (timezoneName == null) {
+            throw new IllegalArgumentException("기본 타임존을 찾을 수 없습니다. 직원 ID: " + empNo);
+        }
+
+        return timezoneName;
+    }
+
 }

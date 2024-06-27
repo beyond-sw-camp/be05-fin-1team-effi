@@ -57,11 +57,11 @@
     <v-divider></v-divider>
 
     <template v-slot:append>
-      <div class="pa-2">
-        <v-btn block @click="logout">
+      <div class="logout-container">
+        <v-img :src="logoImage" alt="Rabbit" class="rabbit-image" @click="logout"></v-img>
+        <v-btn  class="logout-button" @click="logout">
           Logout
         </v-btn>
-        <v-img src="@/assets/logo.png" alt="Rabbit" class="rabbit-image"></v-img>
       </div>
     </template>
   </v-navigation-drawer>
@@ -77,6 +77,8 @@ import SelectCategory from '@/components/SelectCategory.vue';
 import GroupNameList from '@/components/GroupNameList1.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
+import logoImage from '@/assets/logo.png';
+
 
 const emit = defineEmits(['update-categories', 'update-groups', 'update-groupsParticipants', 'update-groupsSchedules', 'search-results']);
 const showModal = ref(false);
@@ -212,10 +214,24 @@ const toggleGroup = (group) => {
   background-color: #f1f1f1;
 }
 
+.logout-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
 .rabbit-image {
-  width: 100px;
-  height: auto;
-  margin-top: 10px;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.logout-button {
+  flex-shrink: 0;
+  margin-left:10px;
+  margin-right:10px;
+  max-width: 100px;
+  white-space: nowrap;
 }
 
 .scrollable-list {
