@@ -152,6 +152,7 @@ button:hover {
   flex-direction: column;
   align-items: center;
   margin-right: 16px;
+  margin-bottom: 30px;
 }
 
 .timezone-header {

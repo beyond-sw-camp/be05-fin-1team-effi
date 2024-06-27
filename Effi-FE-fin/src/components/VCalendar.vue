@@ -22,7 +22,7 @@
         @change="onWeekdayChange"
       ></v-select>
     </v-sheet>
-    <v-sheet>
+    <v-sheet class="calendar-and-timezone">
       <v-calendar
         :key="calendarKey"
         ref="calendar"
@@ -45,6 +45,7 @@
           </div>
         </template>
       </v-calendar>
+      <TimezoneComponent v-if="type === 'week' || type === 'day'" class="timezone-component" />
     </v-sheet>
     <schedule-modal
       :show="showScheduleDialog"
@@ -67,13 +68,19 @@ import { useAuthStore } from '@/stores/auth';
 import dayjs from 'dayjs';
 import axiosInstance from '@/services/axios';
 import isBetween from 'dayjs/plugin/isBetween';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { useSnackbar } from 'vue3-snackbar';
 import ScheduleModal from './ScheduleModal.vue';
 import EditScheduleModal from './EditScheduleModal.vue';
+import TimezoneComponent from './TimezoneComponent.vue';
 
 dayjs.extend(isBetween);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default {
-  components: { ScheduleModal, EditScheduleModal },
+  components: { ScheduleModal, EditScheduleModal, TimezoneComponent },
   props: {
     show: {
       type: Boolean,
@@ -106,6 +113,7 @@ export default {
     const selectedEventId = ref(null);
     const selectedDate = ref(dayjs().toDate());
     const calendarKey = ref(0);
+    const { showSnackbar } = useSnackbar();
 
     const intervalCount = computed(() => (type.value === 'week' || type.value === 'day' ? 24 : undefined));
     const intervalHeight = computed(() => (type.value === 'week' || type.value === 'day' ? 60 : undefined));
@@ -164,12 +172,15 @@ export default {
             id: schedule.scheduleId,
             title: schedule.title,
             content: schedule.context,
-            start: dayjs(schedule.startTime),
-            end: dayjs(schedule.endTime),
+            start: dayjs(schedule.startTime).tz(dayjs.tz.guess()), // 시간 변환
+            end: dayjs(schedule.endTime).tz(dayjs.tz.guess()), // 시간 변환
             color: schedule.categoryColor,
             textColor: schedule.categoryTextColor,
+            notificationYn: schedule.notificationYn,
             open: ref(false),
           }));
+
+          setNotificationTimers(events.value);
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -189,6 +200,48 @@ export default {
 
     const getEventColor = (event) => {
       return event.color;
+    };
+
+    const setNotificationTimers = (events) => {
+      console.log('Setting notification timers for events:', events); // 디버그 출력 추가
+      events.forEach((event) => {
+        if (event.notificationYn) {
+          const now = dayjs().tz(dayjs.tz.guess());
+          const startTime = event.start;
+          const diff = startTime.diff(now, 'minute');
+          
+          console.log(`Event: ${event.title}, Start Time: ${startTime.format()}, Now: ${now.format()}, Diff: ${diff} minutes`); // 디버그 출력 추가
+          
+          if (diff > 0 && diff <= 60 && !isNotified(event.id)) {
+            console.log('Setting timer for event: ', event.title); // 디버그 출력 추가
+            setTimeout(() => {
+              showToast(`일정 "${event.title}"이(가) 1시간 후에 시작됩니다.`);
+              markAsNotified(event.id);
+            }, (diff - 60) * 60 * 1000);
+          }
+        }
+      });
+    };
+
+    const isNotified = (eventId) => {
+      const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
+      return notifiedEvents.includes(eventId);
+    };
+
+    const markAsNotified = (eventId) => {
+      const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
+      notifiedEvents.push(eventId);
+      localStorage.setItem('notifiedEvents', JSON.stringify(notifiedEvents));
+    };
+
+    const showToast = (message) => {
+      console.log('Triggering Toast: ', message); // 콘솔 로그 추가
+      showSnackbar({
+        message,
+        type: 'success',
+        timeout: 60000, // 1분
+        closeable: true, // x 표시로 닫기 가능
+      });
     };
 
     onMounted(() => {
@@ -397,5 +450,13 @@ export default {
   padding: 3px;
   cursor: pointer;
   margin-bottom: 1px;
+}
+
+.calendar-and-timezone {
+  display: flex;
+}
+
+.timezone-component {
+  margin-left: 20px;
 }
 </style>
