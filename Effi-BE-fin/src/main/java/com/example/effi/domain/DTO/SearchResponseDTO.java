@@ -28,6 +28,8 @@ public class SearchResponseDTO {
     private Long categoryId;
     private String categoryName;
 
+    private Long groupId;
+
     private Long routineId;
 
     private List<String> tagNames;
@@ -48,6 +50,9 @@ public class SearchResponseDTO {
         this.categoryId = (schedule.getCategory() != null) ? schedule.getCategory().getCategoryId() : null; // null 체크
         this.categoryName = (schedule.getCategory() != null) ? schedule.getCategory().getCategoryName() : null; // null 체크
 
+        if(schedule.getCategory().getGroup() != null){
+            this.groupId=schedule.getCategory().getGroup().getGroupId();
+        }
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else
@@ -60,7 +65,7 @@ public class SearchResponseDTO {
     @Builder
     public SearchResponseDTO(Long scheduleId, String title, String context, Date startTime, Date endTime,
                              Integer status, Boolean notificationYn, Boolean deleteYn, Date createdAt,
-                             Date updatedAt, Long categoryId, String categoryName, Long routineId, List<String> tagNames) {
+                             Date updatedAt, Long categoryId, String categoryName,Long groupId, Long routineId, List<String> tagNames) {
         this.scheduleId = scheduleId;
         this.title = title;
         this.context = context;
@@ -73,6 +78,7 @@ public class SearchResponseDTO {
         this.updatedAt = updatedAt;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.groupId = groupId;
         this.routineId = routineId;
         this.tagNames = tagNames;
     }

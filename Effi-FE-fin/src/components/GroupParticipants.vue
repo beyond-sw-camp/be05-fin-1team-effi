@@ -32,7 +32,7 @@ export default {
   emits: ['selectedUsers'],
 
   setup(props, {emit}) {
-    const route = useRoute(); // useRoute 사용
+    const route = useRoute(); 
     const searchQuery = ref('');
     const users = ref([]);
     const groupId = ref(route.query.groupId); // 쿼리 파라미터에서 groupId 가져오기

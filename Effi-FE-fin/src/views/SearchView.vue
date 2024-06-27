@@ -7,7 +7,7 @@
           <span>{{ timezoneName }}</span>
         </div>
         <div class="d-flex align-items-center me-3 mb-2 mb-md-0 nowrap">
-          <span class="me-2">진행 상태</span>
+          <span class="me-2">상태</span>
           <select v-model="selectedStatus" class="form-select">
             <option value="all">전체</option>
             <option value="0">예정됨</option>
@@ -53,12 +53,17 @@ const filteredSearches = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
+  } else if (viewMode.value === 'all') {
+    return searches.value;
   }
+
   return searches.value.filter(schedule => {
     const startTime = new Date(schedule.startTime);
     return startTime >= start && startTime <= end;
   });
 });
+
+
 
 const filteredSearchesByStatus = computed(() => {
   if (selectedStatus.value === 'all') {

@@ -19,9 +19,8 @@
           @change-view-mode="changeViewMode" />
       </div>
       <div>
-        <AllSchedulesList :schedules="filteredSchedulesByStatus" @edit-schedule="showEditScheduleModal" />
+        <GroupSchedulesList :schedules="filteredSchedulesByStatus" />
       </div>
-      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedSchedule" @close="showModal = false" />
     </div>
   </div>
 </template>
@@ -29,10 +28,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import SearchNavigator from '@/components/SearchNavigator.vue';
-import AllSchedulesList from '@/components/AllSchedulesList.vue';
-import EditScheduleModal from '@/components/EditScheduleModal.vue';
+import GroupSchedulesList from '@/components/GroupSchedulesList.vue';
 import axiosInstance from '@/services/axios';
 import { useAuthStore } from '@/stores/auth';
+import { useRoute } from 'vue-router';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
 
 const allSchedules = ref([]);
@@ -40,18 +39,17 @@ const timezoneName = ref('');
 const currentPeriod = ref(new Date());
 const viewMode = ref('week');
 const selectedStatus = ref('all');
+const selectedGroupId = ref(null);
 const authStore = useAuthStore();
-const showModal = ref(false);
-const selectedSchedule = ref(null);
+const route = useRoute();
 
 const fetchAllSchedules = async () => {
   try {
-    const response = await axiosInstance.get('/api/schedule/findAllForSearch', {
+    const response = await axiosInstance.get(`/api/schedule/findAllForSearch`, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
       },
     });
-    console.log('Schedules fetched:', response.data); // 응답 데이터 구조 확인
     allSchedules.value = response.data;
   } catch (error) {
     console.error('Error fetching schedules:', error);
@@ -95,7 +93,7 @@ const filteredSchedules = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
-  } else if (viewMode.value === 'all') {
+  } else if(viewMode.value === 'all'){
     return allSchedules.value;
   }
 
@@ -106,18 +104,23 @@ const filteredSchedules = computed(() => {
 });
 
 const filteredSchedulesByStatus = computed(() => {
-  if (selectedStatus.value === 'all') {
-    return filteredSchedules.value;
+  let schedules = filteredSchedules.value;
+  if (selectedStatus.value !== 'all') {
+    schedules = schedules.filter(schedule => schedule.status == selectedStatus.value);
   }
-  return filteredSchedules.value.filter(schedule => schedule.status == selectedStatus.value);
+  if (selectedGroupId.value) {
+    schedules = schedules.filter(schedule => schedule.groupId == selectedGroupId.value);
+  }
+  return schedules;
 });
 
-const showEditScheduleModal = (schedule) => {
-  selectedSchedule.value = schedule;
-  showModal.value = true;
-};
-
 onMounted(() => {
+  const groupId = route.query.groupId;
+  if (groupId) {
+    selectedGroupId.value = groupId;
+  } else {
+    console.error('Group ID not found in query parameters');
+  }
   fetchAllSchedules();
   fetchTimezone();
 });
@@ -235,3 +238,4 @@ watch(allSchedules, (newVal) => {
   }
 }
 </style>
+

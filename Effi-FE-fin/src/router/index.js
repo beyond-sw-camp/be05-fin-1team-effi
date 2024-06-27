@@ -10,6 +10,7 @@ import ScheduleTestView from '../views/ScheduleTestView.vue'
 import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
 import GroupParticipantsView from '../views/GroupParticipantsView.vue'
+import GroupSchedulesView from '../views/GroupSchedulesView.vue'
 
 import TagStatisticsView from '../views/TagStatisticsView.vue'
 import AllSchedulesView from '../views/AllSchedulesView.vue'
@@ -31,7 +32,6 @@ const router = createRouter({
     {
       path: '/mypage',
       name: 'mypage',
-
       component: MyPageView,
       meta: { requiresAuth: true }
     },
@@ -76,6 +76,12 @@ const router = createRouter({
       path: '/allschedules',
       name: 'allschedules',
       component: AllSchedulesView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/groupschedules',
+      name: 'groupschedules',
+      component: GroupSchedulesView,
       meta: { requiresAuth: true }
     }
   ]
