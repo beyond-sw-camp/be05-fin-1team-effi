@@ -128,6 +128,7 @@ export default {
         } else if (props.selectedGroupId.length === 0 && props.selectedCategories.length > 0) {
           const scheduleResults = [];
           for (const categoryId of props.selectedCategories) {
+            console.log('categoryId', categoryId);
             try {
               const response = await axiosInstance.get(`/api/schedule/find/category/${categoryId}`, {
                 headers: {
@@ -141,6 +142,7 @@ export default {
           }
           schedules = scheduleResults;
         } else if (props.selectedGroupId.length > 0) {
+          console.log('groupId');
           const scheduleResults = [];
           for (const groupId of props.selectedGroupId) {
             try {

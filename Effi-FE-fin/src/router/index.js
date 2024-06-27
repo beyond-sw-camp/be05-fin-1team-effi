@@ -22,7 +22,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
+      props: (route) => ({
+        selectedCategories: route.query.selectedCategories || [],
+        searchResults: route.query.searchResults || [],
+        selectedGroupId: route.query.selectedGroupId || [],
+      }) //?
     },
     {
       path: '/login',
