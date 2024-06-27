@@ -37,12 +37,15 @@
             </div>
           </div>
           <div class="form-group checkbox-group">
-            <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat" @change="toggleRoutineModal"></label>
+            <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat"
+                @change="toggleRoutineModal"></label>
           </div>
           <div class="form-group">
             <label for="category">카테고리</label>
-            <button @click="showCategoryModal = true" type="button" class="category-btn" id="category">카테고리 추가하기</button>
-            <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <button @click="showCategoryModal = true" type="button" class="category-btn" id="category">카테고리
+              추가하기</button>
+            <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false"
+              @select="handleCategorySelect" />
             <div v-if="internalEvent.categoryName" class="selected-category">
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
@@ -50,11 +53,13 @@
           <div class="form-group">
             <label for="participants">참여자</label>
             <div class="input-group">
-              <input type="text" id="participants" placeholder="추가할 사원을 검색하세요" v-model="searchQuery" class="group-input" />
+              <input type="text" id="participants" placeholder="추가할 사원을 검색하세요" v-model="searchQuery"
+                class="group-input" />
               <button type="button" class="search-button" @click="searchEmployees">🔍</button>
             </div>
             <ul v-if="searchResults.length" class="search-results">
-              <li v-for="employee in searchResults" :key="employee.id" class="search-result-item" @click="selectEmployee(employee)">
+              <li v-for="employee in searchResults" :key="employee.id" class="search-result-item"
+                @click="selectEmployee(employee)">
                 {{ employee.name }}/{{ employee.deptName }}/{{ employee.rank }}
               </li>
             </ul>
@@ -63,7 +68,8 @@
               <ul>
                 <li v-for="emp in selectedEmployees" :key="emp.empNo">
                   {{ emp.name }}
-                  <button v-if="emp.empNo !== loggedInEmpNo" @click.stop.prevent="removeEmployee(emp)" class="remove-button">×</button>
+                  <button v-if="emp.empNo !== loggedInEmpNo" @click.stop.prevent="removeEmployee(emp)"
+                    class="remove-button">×</button>
                 </li>
               </ul>
             </div>
@@ -71,9 +77,10 @@
           <div class="form-group">
             <label for="tag">태그</label>
             <div>
-              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule" @remove-tag="removeTag"/>
+              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule" @remove-tag="removeTag" />
               <div class="tag-list">
-                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
+                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }"
+                  class="tag-item">{{ tag }}</span>
               </div>
             </div>
           </div>
@@ -86,20 +93,17 @@
             </select>
           </div>
           <div class="form-group checkbox-group">
-            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
+            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn"
+                v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="update-button">수정</button>
+            <button type="submit" @click="updateSchedule" class="update-button">수정</button>
             <button type="button" class="delete-button" @click="deleteSchedule">삭제</button>
           </div>
         </form>
       </div>
-      <RoutineModal
-        v-if="showRoutineModal"
-        :show="showRoutineModal"
-        @close-routine="handleRoutineClose"
-        @confirm-routine="handleRoutineConfirm"
-      />
+      <RoutineModal v-if="showRoutineModal" :show="showRoutineModal" @close-routine="handleRoutineClose"
+        @confirm-routine="handleRoutineConfirm"  />
     </div>
   </div>
 </template>
@@ -277,6 +281,9 @@ export default {
           tagColors[tag] = newTagColors[tag];
         }
       }
+
+      this.$emit('update-schedule');
+
     };
 
     const submit = async () => {

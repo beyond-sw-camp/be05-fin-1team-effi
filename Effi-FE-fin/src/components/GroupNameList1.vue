@@ -6,15 +6,17 @@
           <v-checkbox-btn :model-value="group.selected" @click.stop="toggleGroupSelection(group)"></v-checkbox-btn>
         </v-list-item-action>
       </template>
-      <v-list-item-title @click="navigateToParticipants(group.id)">
-        {{ group.name }}
-      </v-list-item-title>
-      <v-list-item-action>
-        <v-icon @click.stop="navigateToGroupSchedules(group.id)">mdi-calendar</v-icon>
-      </v-list-item-action>
-      <v-list-item-action>
-        <v-icon @click.stop="removeGroup(group.id)" class="remove-group-button">mdi-close</v-icon>
-      </v-list-item-action>
+      <div class="group-container">
+        <v-list-item-title @click="navigateToParticipants(group.id)">
+          {{ group.name }}
+        </v-list-item-title>
+        <v-list-item-action>
+          <v-icon @click.stop="navigateToGroupSchedules(group.id)">mdi-calendar</v-icon>
+        </v-list-item-action>
+        <v-list-item-action>
+          <v-icon @click.stop="removeGroup(group.id)" class="remove-group-button">mdi-close</v-icon>
+        </v-list-item-action>
+      </div>
     </v-list-item>
   </v-list>
 </template>
@@ -122,9 +124,12 @@ export default {
 
 <style scoped>
 .group-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px;
   border-radius: 5px;
-  width: 200px;
+  width: 100%;
 }
 
 .group-list {

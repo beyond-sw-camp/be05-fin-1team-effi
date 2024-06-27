@@ -19,8 +19,10 @@
           @change-view-mode="changeViewMode" />
       </div>
       <div>
-        <GroupSchedulesList :schedules="filteredSchedulesByStatus" />
+        <GroupSchedulesList :schedules="filteredSchedulesByStatus" @edit-schedule="showEditScheduleModal" />
       </div>
+      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedScheduleId" @close="showModal = false"
+        @update-schedule="handleScheduleUpdate" />
     </div>
   </div>
 </template>
@@ -29,6 +31,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import SearchNavigator from '@/components/SearchNavigator.vue';
 import GroupSchedulesList from '@/components/GroupSchedulesList.vue';
+import EditScheduleModal from '@/components/EditScheduleModal.vue';
 import axiosInstance from '@/services/axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router';
@@ -42,6 +45,8 @@ const selectedStatus = ref('all');
 const selectedGroupId = ref(null);
 const authStore = useAuthStore();
 const route = useRoute();
+const showModal = ref(false);
+const selectedScheduleId = ref(null);
 
 const fetchAllSchedules = async () => {
   try {
@@ -93,7 +98,7 @@ const filteredSchedules = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
-  } else if(viewMode.value === 'all'){
+  } else if (viewMode.value === 'all') {
     return allSchedules.value;
   }
 
@@ -113,6 +118,17 @@ const filteredSchedulesByStatus = computed(() => {
   }
   return schedules;
 });
+
+const showEditScheduleModal = (scheduleId) => {
+  selectedScheduleId.value = scheduleId;
+  showModal.value = true;
+};
+
+// 일정 업데이트 핸들러 추가
+const handleScheduleUpdate = () => {
+  fetchAllSchedules();
+  showModal.value = false;
+};
 
 onMounted(() => {
   const groupId = route.query.groupId;
@@ -238,4 +254,3 @@ watch(allSchedules, (newVal) => {
   }
 }
 </style>
-

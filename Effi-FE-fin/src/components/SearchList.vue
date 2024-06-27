@@ -11,7 +11,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="search in searches" :key="search.scheduleId">
+        <tr v-for="search in searches" :key="search.scheduleId" @click="editSchedule(search.scheduleId)">
           <td>{{ formatDate(search.startTime) }}</td>
           <td>
             <span :style="{ backgroundColor: getCategoryColor(search.categoryName) }" class="category-dot"></span>
@@ -32,14 +32,6 @@
 <script>
 export default {
   props: ['searches'],
-  mounted() {
-    console.log('Schedules received in SearchList:', this.searches);
-  },
-  watch: {
-    searches(newVal) {
-      console.log('Schedules updated in SearchList:', newVal);
-    }
-  },
   methods: {
     formatDate(date) {
       return new Date(date).toISOString().split('T')[0];
@@ -85,6 +77,9 @@ export default {
         default:
           return '#000000'; // 기본 색상 (필요한 경우)
       }
+    },
+    editSchedule(scheduleId) {
+      this.$emit('edit-schedule', scheduleId);
     }
   }
 };
