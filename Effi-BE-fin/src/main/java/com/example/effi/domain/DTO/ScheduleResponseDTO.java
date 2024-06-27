@@ -30,7 +30,6 @@ public class ScheduleResponseDTO {
     private Long routineId;
 
     private String categoryColor; 
-    private String categoryTextColor; 
 
     public ScheduleResponseDTO(Schedule schedule) {
         this.scheduleId = schedule.getScheduleId();
@@ -45,6 +44,10 @@ public class ScheduleResponseDTO {
         this.deleteYn = schedule.getDeleteYn();
         this.categoryNo = schedule.getCategory().getCategoryNo();
         this.categoryName = schedule.getCategory().getCategoryName();
+
+        if(schedule.getCategory().getGroup() != null){
+            this.groupId = schedule.getCategory().getGroup().getGroupId();
+        }
 
         this.categoryColor = getCategoryColor(schedule.getCategory().getCategoryName());
         if (schedule.getRoutine() != null)
@@ -67,6 +70,5 @@ public class ScheduleResponseDTO {
                 return "gray";
         }
     }
-
 
 }

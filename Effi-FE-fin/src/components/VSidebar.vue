@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;">
+  <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;" :width="300">
     <v-list>
       <v-list-item :prepend-avatar="avatarUrl" :subtitle="userEmail" :title="`${userName} (${userRank})`"></v-list-item>
     </v-list>
@@ -258,7 +258,7 @@ const toggleGroup = (group) => {
 
 /* 추가: 마우스 오버 효과 */
 .v-list-item:hover {
-  background-color: #e0e0e0 !important;
+  background-color: #FF7D2A !important;
 }
 
 .v-dialog--active {
