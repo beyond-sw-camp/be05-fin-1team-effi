@@ -1,10 +1,8 @@
 <template>
   <div class="container">
-    <div class="timezone-and-calendar">
-      <TimezoneComponent v-if="isTimezoneVisible" class="timezone-component" />
-      <VCalendar class="calendar" :selectedCategories="selectedCategories" :searchResults="searchResults"
-        :selectedGroupId="selectedGroupId" :show="true" @update-view-mode="updateViewMode" />
-    </div>
+    <TimezoneComponent v-if="isTimezoneVisible" class="timezone-component" />
+    <VCalendar class="calendar" :selectedCategories="selectedCategories" :selectedGroupId="selectedGroupId"
+      :searchResults="searchResults" :show="true" @update-view-mode="updateViewMode" />
   </div>
 </template>
 
@@ -35,7 +33,7 @@ export default defineComponent({
   },
   setup(props) {
     const currentViewMode = ref('month');
-    const isTimezoneVisible = computed(() => currentViewMode.value === 'week' || currentViewMode.value === 'day');
+    const calendarValue = ref([]);
 
     // Watchers for logging prop updates
     watch(() => props.selectedCategories, (newVal) => {
@@ -54,7 +52,10 @@ export default defineComponent({
       currentViewMode.value = viewMode;
     };
 
+    const isTimezoneVisible = computed(() => currentViewMode.value === 'week' || currentViewMode.value === 'day');
+
     return {
+      calendarValue,
       currentViewMode,
       isTimezoneVisible,
       updateViewMode
@@ -66,38 +67,40 @@ export default defineComponent({
 <style>
 .container {
   display: flex;
+  flex-direction: row;
   margin-top: 60px;
+  margin-left:80px;
+  /* 헤더 높이만큼의 여백을 추가 */
   height: calc(100vh - 60px);
+  /* 전체 높이에서 헤더 높이를 뺀 높이 */
   width: 100%;
-}
-
-.timezone-and-calendar {
-  display: flex;
-  flex-grow: 1;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
+  /* 전체 너비 사용 */
 }
 
 .timezone-component {
   width: 200px;
+  /* 타임존 컴포넌트의 너비 고정 */
   height: 100%;
-  margin-right: 20px;
+  /* 전체 높이 사용 */
+  margin-right: 0px;
+  margin-top: 70px;
 }
 
 .calendar {
   flex-grow: 1;
+  /* 남은 공간 모두 사용 */
   height: 100%;
-  margin: 0 auto;
 }
 
+/* 반응형 스타일 */
 @media (max-width: 768px) {
   .timezone-component {
     display: none;
+    /* 작은 화면에서는 타임존 컴포넌트 숨김 */
   }
 
-  .timezone-and-calendar {
-    width: 100%;
+  .container {
+    flex-direction: column;
     padding: 10px;
   }
 

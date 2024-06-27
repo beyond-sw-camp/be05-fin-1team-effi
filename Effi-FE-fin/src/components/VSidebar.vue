@@ -87,9 +87,9 @@ const openMyGroups = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
 
-const userName = ref(authStore.name);
+const userName = ref('');
 const userEmail = ref('');
-const userRank = ref(authStore.rank);
+const userRank = ref('');
 const avatarUrl = 'https://randomuser.me/api/portraits/women/85.jpg';
 
 const fetchUserEmail = async () => {
@@ -100,8 +100,10 @@ const fetchUserEmail = async () => {
       }
     });
     userEmail.value = response.data.email;
+    userName.value = response.data.name;
+    userRank.value = response.data.rank;
   } catch (error) {
-    console.error('Failed to fetch user email:', error);
+    console.error('Failed to fetch user data:', error);
   }
 };
 

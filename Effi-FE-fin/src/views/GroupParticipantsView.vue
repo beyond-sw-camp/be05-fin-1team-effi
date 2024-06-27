@@ -34,6 +34,7 @@ export default {
 
 <style>
 .main-container {
+    margin-left: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;

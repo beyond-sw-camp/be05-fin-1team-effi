@@ -48,6 +48,7 @@ export default defineComponent({
 .container {
   display: flex;
   margin-top: 60px; /* 헤더 높이만큼의 여백을 추가 */
+  margin-left: 80px;
   height: calc(100vh - 60px); /* 전체 높이에서 헤더 높이를 뺀 높이 */
   width: 100%;
 }

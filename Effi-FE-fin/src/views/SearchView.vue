@@ -161,6 +161,7 @@ const changeViewMode = (mode) => {
 .container {
   display: flex;
   margin-top: 60px;
+  margin-left: 80px;
   height: calc(100vh - 60px);
   width: 100%;
 }
