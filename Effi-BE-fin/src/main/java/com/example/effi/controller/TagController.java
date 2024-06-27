@@ -128,6 +128,8 @@ public class TagController {
             List<String> tagList = new ArrayList<>();
             for (Integer idx = 0 ; idx < 5 ; idx++){
                 Long l = Long.valueOf(indices.get(idx));
+                if (counts.get(indices.get(idx)) == 0)
+                    continue;
                 tagList.add(tagService.getTagName(l));
             }
 
