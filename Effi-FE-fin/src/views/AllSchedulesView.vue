@@ -21,7 +21,9 @@
       <div>
         <AllSchedulesList :schedules="filteredSchedulesByStatus" @edit-schedule="showEditScheduleModal" />
       </div>
-      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedSchedule" @close="showModal = false" />
+      <!-- EditScheduleModal에 update-schedule 이벤트 핸들러 추가 -->
+      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedScheduleId" @close="showModal = false"
+        @update-schedule="handleScheduleUpdate" />
     </div>
   </div>
 </template>
@@ -42,7 +44,7 @@ const viewMode = ref('week');
 const selectedStatus = ref('all');
 const authStore = useAuthStore();
 const showModal = ref(false);
-const selectedSchedule = ref(null);
+const selectedScheduleId = ref(null);
 
 const fetchAllSchedules = async () => {
   try {
@@ -51,7 +53,6 @@ const fetchAllSchedules = async () => {
         Authorization: `Bearer ${authStore.accessToken}`,
       },
     });
-    console.log('Schedules fetched:', response.data); // 응답 데이터 구조 확인
     allSchedules.value = response.data;
   } catch (error) {
     console.error('Error fetching schedules:', error);
@@ -112,9 +113,15 @@ const filteredSchedulesByStatus = computed(() => {
   return filteredSchedules.value.filter(schedule => schedule.status == selectedStatus.value);
 });
 
-const showEditScheduleModal = (schedule) => {
-  selectedSchedule.value = schedule;
+const showEditScheduleModal = (scheduleId) => {
+  selectedScheduleId.value = scheduleId;
   showModal.value = true;
+};
+
+// 일정 업데이트 핸들러 추가
+const handleScheduleUpdate = () => {
+  fetchAllSchedules();
+  showModal.value = false;
 };
 
 onMounted(() => {

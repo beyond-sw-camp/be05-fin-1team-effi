@@ -83,7 +83,7 @@ export default {
       return tagNames.map(tag => tag.replace(/.*:"(.*)".*/, '$1'));
     },
     editSchedule(schedule) {
-      this.$emit('edit-schedule', schedule);
+      this.$emit('edit-schedule', schedule.scheduleId);
     }
   }
 };

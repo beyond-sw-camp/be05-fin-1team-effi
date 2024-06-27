@@ -14,21 +14,24 @@
             <option value="1">진행중</option>
             <option value="2">완료됨</option>
           </select>
-          </div>
-          <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
-            @change-view-mode="changeViewMode" />
         </div>
-        <div>
-          <SearchList :searches="filteredSearchesByStatus" />
-        </div>
+        <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
+          @change-view-mode="changeViewMode" />
       </div>
+      <div>
+        <SearchList :searches="filteredSearchesByStatus" @edit-schedule="showEditScheduleModal" />
+      </div>
+      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedScheduleId" @close="showModal = false"
+        @update-schedule="handleScheduleUpdate" />
     </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import SearchNavigator from '../components/SearchNavigator.vue';
 import SearchList from '../components/SearchList.vue';
+import EditScheduleModal from '@/components/EditScheduleModal.vue';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
 import { useRoute } from 'vue-router';
 import axiosInstance from '@/services/axios';
@@ -41,6 +44,9 @@ const selectedStatus = ref('all'); // 선택된 상태
 const route = useRoute();
 const authStore = useAuthStore();
 const timezoneName = ref('');
+const showModal = ref(false);
+const selectedScheduleId = ref(null);
+
 
 const filteredSearches = computed(() => {
   let start, end;
@@ -62,8 +68,6 @@ const filteredSearches = computed(() => {
     return startTime >= start && startTime <= end;
   });
 });
-
-
 
 const filteredSearchesByStatus = computed(() => {
   if (selectedStatus.value === 'all') {
@@ -92,6 +96,17 @@ const fetchTimezone = async () => {
   } catch (error) {
     console.error('Error fetching timezone:', error.response ? error.response.data : error.message);
   }
+};
+
+const showEditScheduleModal = (scheduleId) => {
+  selectedScheduleId.value = scheduleId;
+  showModal.value = true;
+};
+
+// 일정 업데이트 핸들러 추가
+const handleScheduleUpdate = () => {
+  search(route.query.criterion, route.query.query); // 기존의 검색 조건으로 다시 검색하여 업데이트
+  showModal.value = false;
 };
 
 onMounted(() => {
@@ -178,7 +193,6 @@ const changeViewMode = (mode) => {
 
 .nowrap {
   white-space: nowrap;
-  
 }
 
 .timezone-container {
