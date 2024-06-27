@@ -2,106 +2,104 @@
   <div class="container">
     <div class="timezone-and-calendar">
       <TimezoneComponent v-if="isTimezoneVisible" class="timezone-component" />
-      <VCalendar 
-        class="calendar" 
-        :selectedCategories="selectedCategories" 
-        :selectedGroupId="selectedGroupId" 
-        :show="true" 
-        @update-view-mode="updateViewMode" 
+      <VCalendar
+        class="calendar"
+        :selectedCategories="selectedCategories"
+        :searchResults="searchResults"
+        :selectedGroupId="selectedGroupId"
+        :show="true"
+        @update-view-mode="updateViewMode"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
 import VCalendar from '@/components/VCalendar.vue';
-import TimezoneComponent from '@/components/TimezoneComponent.vue'; // 타임존 컴포넌트를 불러옵니다
+import TimezoneComponent from '@/components/TimezoneComponent.vue';
 
 export default defineComponent({
   name: 'HomeView',
   components: {
     VCalendar,
-    TimezoneComponent // 타임존 컴포넌트를 등록합니다
+    TimezoneComponent
   },
-  setup() {
-    const selectedCategories = ref([]);
-    const selectedGroupId = ref([]);
-    const calendarValue = ref([]);
+  props: {
+    selectedCategories: {
+      type: Array,
+      required: true
+    },
+    selectedGroupId: {
+      type: Array,
+      required: true
+    },
+    searchResults: {
+      type: Array,
+      required: true
+    }
+  },
+  setup(props) {
     const currentViewMode = ref('month');
+    const isTimezoneVisible = computed(() => currentViewMode.value === 'week' || currentViewMode.value === 'day');
 
-    const handleUpdateCategories = (categories) => {
-      selectedCategories.value = categories;
-    };
+    // Watchers for logging prop updates
+    watch(() => props.selectedCategories, (newVal) => {
+      console.log('Updated selectedCategories:', newVal);
+    });
 
-    const handleUpdateGroups = (groups) => {
-      selectedGroupId.value = groups;
-    };
+    watch(() => props.selectedGroupId, (newVal) => {
+      console.log('Updated selectedGroupId:', newVal);
+    });
+
+    watch(() => props.searchResults, (newVal) => {
+      console.log('Updated searchResults:', newVal);
+    });
 
     const updateViewMode = (viewMode) => {
       currentViewMode.value = viewMode;
     };
 
-    const isTimezoneVisible = computed(() => currentViewMode.value === 'week' || currentViewMode.value === 'day');
-
     return {
-      selectedCategories,
-      handleUpdateCategories,
-      selectedGroupId,
-      handleUpdateGroups,
-      calendarValue,
       currentViewMode,
-      updateViewMode,
-      isTimezoneVisible
+      isTimezoneVisible,
+      updateViewMode
     };
-  },
+  }
 });
 </script>
 
 <style>
 .container {
   display: flex;
-  margin-top: 60px; /* 헤더 높이만큼의 여백을 추가 */
-  height: calc(100vh - 60px); /* 전체 높이에서 헤더 높이를 뺀 높이 */
-  width: 100%; /* 전체 너비 사용 */
-}
-
-.navigation {
-  width: 200px; /* 네비게이션 너비 고정 */
-  height: 100%; /* 전체 높이 사용 */
-  padding: 20px;
-  margin-right: 20px;
-  box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
+  margin-top: 60px;
+  height: calc(100vh - 60px);
+  width: 100%;
 }
 
 .timezone-and-calendar {
   display: flex;
-  flex-grow: 1; /* 남은 공간 모두 사용 */
-  height: 100%; /* 전체 높이 사용 */
+  flex-grow: 1;
+  height: 100%;
   padding: 20px;
-  box-sizing: border-box; /* 패딩을 포함한 박스 크기 */
+  box-sizing: border-box;
 }
 
 .timezone-component {
-  width: 200px; /* 타임존 컴포넌트의 너비 고정 */
-  height: 100%; /* 전체 높이 사용 */
+  width: 200px;
+  height: 100%;
   margin-right: 20px;
 }
 
 .calendar {
-  flex-grow: 1; /* 남은 공간 모두 사용 */
+  flex-grow: 1;
   height: 100%;
   margin: 0 auto;
 }
 
-/* 반응형 스타일 */
 @media (max-width: 768px) {
-  .navigation {
-    display: none; /* 작은 화면에서는 네비게이션 숨김 */
-  }
-
   .timezone-component {
-    display: none; /* 작은 화면에서는 타임존 컴포넌트 숨김 */
+    display: none;
   }
 
   .timezone-and-calendar {
