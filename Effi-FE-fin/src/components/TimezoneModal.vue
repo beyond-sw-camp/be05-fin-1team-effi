@@ -2,7 +2,7 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
-      <h2>타임존</h2>
+      <h5>타임존</h5>
       <ul class="scrollable-list">
         <li
           v-for="timezone in availableTimezones"
@@ -14,7 +14,7 @@
         </li>
       </ul>
       <button class="add-button" @click="addTimezone">추가하기</button>
-      <h2 class="my-timezones-header">나의 타임존</h2>
+      <h5 class="my-timezones-header">나의 타임존</h5>
       <ul class="scrollable-list">
         <li v-for="timezone in myTimezones" :key="timezone.timezoneId" class="my-timezone-item">
           {{ timezone.timezoneName }}
@@ -123,7 +123,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
+
 
 .modal-container {
   background: white;
@@ -144,7 +146,7 @@ export default {
   right: 10px;
 }
 
-h2, p {
+h5, p {
   text-align: center; /* 텍스트 가운데 정렬 */
 }
 

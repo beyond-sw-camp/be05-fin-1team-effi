@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;">
+  <v-navigation-drawer expand-on-hover rail style="background-color: #FBB584;" :width="300">
     <v-list>
       <v-list-item :prepend-avatar="avatarUrl" :subtitle="userEmail" :title="`${userName} (${userRank})`"></v-list-item>
     </v-list>
@@ -87,9 +87,9 @@ const openMyGroups = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
 
-const userName = ref(authStore.name);
+const userName = ref('');
 const userEmail = ref('');
-const userRank = ref(authStore.rank);
+const userRank = ref('');
 const avatarUrl = 'https://randomuser.me/api/portraits/women/85.jpg';
 
 const fetchUserEmail = async () => {
@@ -100,8 +100,10 @@ const fetchUserEmail = async () => {
       }
     });
     userEmail.value = response.data.email;
+    userName.value = response.data.name;
+    userRank.value = response.data.rank;
   } catch (error) {
-    console.error('Failed to fetch user email:', error);
+    console.error('Failed to fetch user data:', error);
   }
 };
 
@@ -258,7 +260,7 @@ const toggleGroup = (group) => {
 
 /* 추가: 마우스 오버 효과 */
 .v-list-item:hover {
-  background-color: #e0e0e0 !important;
+  background-color: #FF7D2A !important;
 }
 
 .v-dialog--active {

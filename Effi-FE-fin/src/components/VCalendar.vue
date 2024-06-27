@@ -1,67 +1,31 @@
 <template>
   <div v-if="show">
     <v-sheet class="d-flex" height="54" tile>
-      <v-select
-        v-model="type"
-        :items="types"
-        class="ma-2"
-        label="View Mode"
-        variant="outlined"
-        dense
-        hide-details
-        @change="onViewModeChange"
-      ></v-select>
-      <v-select
-        v-model="weekday"
-        :items="weekdays"
-        class="ma-2"
-        label="Weekdays"
-        variant="outlined"
-        dense
-        hide-details
-        @change="onWeekdayChange"
-      ></v-select>
+      <v-select v-model="type" :items="types" class="ma-2" label="View Mode" variant="outlined" dense hide-details
+        @change="onViewModeChange"></v-select>
+      <v-select v-model="weekday" :items="weekdays" class="ma-2" label="Weekdays" variant="outlined" dense hide-details
+        @change="onWeekdayChange"></v-select>
     </v-sheet>
     <v-sheet class="calendar-and-timezone">
       <TimezoneComponent v-if="type === 'week' || type === 'day'" class="timezone-component" />
-      <v-calendar
-        :key="calendarKey"
-        ref="calendar"
-        v-model="calendarValue"
-        :events="events"
-        :view-mode="type"
-        :weekdays="weekday"
-        :interval-count="intervalCount"
-        :interval-height="intervalHeight"
-        @click:date="onDateClick"
-        :event-color="getEventColor"
-        class="calendar-component"
-      >
+      <v-calendar :key="calendarKey" ref="calendar" v-model="calendarValue" :events="events" :view-mode="type"
+        :weekdays="weekday" :interval-count="intervalCount" :interval-height="intervalHeight" @click:date="onDateClick"
+        :event-color="getEventColor" class="calendar-component">
         <template v-slot:event="{ event }">
-          <div
-            class="v-sheet v-theme--light rounded-t v-calendar-internal-event"
-            :style="{ backgroundColor: event.color }"
-            @click.stop="onEventClick(event)"
-          >
+          <div class="v-sheet v-theme--light rounded-t v-calendar-internal-event"
+            :style="{ backgroundColor: event.color }" @click.stop="onEventClick(event)">
             <strong>{{ event.title }}</strong>
             <br>
-            {{ event.start ? event.start.format('YYYY-MM-DD hh:mm A') : '' }} - {{ event.end ? event.end.format('YYYY-MM-DD hh:mm A') : '' }}
+            {{ event.start ? event.start.format('MM-DD hh:mm A') : '' }} - {{ event.end ?
+            event.end.format('MM-DD hh:mm A') : '' }}
           </div>
         </template>
       </v-calendar>
     </v-sheet>
-    <schedule-modal
-      :show="showScheduleDialog"
-      :selected-date="selectedDate"
-      @close="updateShowDialog(false)"
-      @submit="handleEventSubmit"
-    ></schedule-modal>
-    <edit-schedule-modal
-      :show="showEditDialog"
-      :schedule-id="selectedEventId"
-      @close="updateShowDialog(false)"
-      @submit="handleEventSubmit"
-    ></edit-schedule-modal>
+    <schedule-modal :show="showScheduleDialog" :selected-date="selectedDate" @close="updateShowDialog(false)"
+      @submit="handleEventSubmit"></schedule-modal>
+    <edit-schedule-modal :show="showEditDialog" :schedule-id="selectedEventId" @close="updateShowDialog(false)"
+      @submit="handleEventSubmit"></edit-schedule-modal>
     <vue3-snackbar bottom right :duration="5000" />
   </div>
 </template>
@@ -78,6 +42,7 @@ import { useSnackbar } from 'vue3-snackbar';
 import ScheduleModal from './ScheduleModal.vue';
 import EditScheduleModal from './EditScheduleModal.vue';
 import TimezoneComponent from './TimezoneComponent.vue';
+
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
@@ -119,6 +84,7 @@ export default {
     const calendarKey = ref(0);
     const { add: showSnackbar } = useSnackbar();
 
+
     const intervalCount = computed(() => (type.value === 'week' || type.value === 'day' ? 24 : undefined));
     const intervalHeight = computed(() => (type.value === 'week' || type.value === 'day' ? 60 : undefined));
 
@@ -140,6 +106,7 @@ export default {
         } else if (props.selectedGroupId.length === 0 && props.selectedCategories.length > 0) {
           const scheduleResults = [];
           for (const categoryId of props.selectedCategories) {
+            console.log('categoryId', categoryId);
             try {
               const response = await axiosInstance.get(`/api/schedule/find/category/${categoryId}`, {
                 headers: {
@@ -153,6 +120,7 @@ export default {
           }
           schedules = scheduleResults;
         } else if (props.selectedGroupId.length > 0) {
+          console.log('groupId');
           const scheduleResults = [];
           for (const groupId of props.selectedGroupId) {
             try {
@@ -180,7 +148,6 @@ export default {
             notificationYn: schedule.notificationYn,
             open: ref(false),
           }));
-
           setNotificationTimers(events.value);
         } else {
           console.error('Expected an array but got:', schedules);
@@ -202,7 +169,6 @@ export default {
     const getEventColor = (event) => {
       return event.color;
     };
-
     const setNotificationTimers = (events) => {
       console.log('Setting notification timers for events:', events);
       events.forEach((event) => {
@@ -210,7 +176,6 @@ export default {
           const now = dayjs().tz(dayjs.tz.guess());
           const startTime = event.start;
           const diff = startTime.diff(now, 'minute');
-
           if (diff > 0 && diff <= 60 && !isNotified(event.id)) {
             console.log('Event:', event.title, 'Start Time:', startTime.format(), 'Now:', now.format(), 'Diff:', diff, 'minutes');
             const timeout = (diff > 60) ? (diff - 60) * 60 * 1000 : 0;
@@ -222,18 +187,15 @@ export default {
         }
       });
     };
-
     const isNotified = (eventId) => {
       const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
       return notifiedEvents.includes(eventId);
     };
-
     const markAsNotified = (eventId) => {
       const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
       notifiedEvents.push(eventId);
       localStorage.setItem('notifiedEvents', JSON.stringify(notifiedEvents));
     };
-
     const showToast = (message) => {
       console.log('Triggering Snackbar:', message);
       showSnackbar({
@@ -453,7 +415,8 @@ export default {
 
 .calendar-and-timezone {
   display: flex;
-  height: 100vh; /* Full viewport height */
+  height: 100vh;
+  /* Full viewport height */
 }
 
 .timezone-component {
@@ -463,6 +426,7 @@ export default {
 .calendar-component {
   flex: 1;
 }
+
 /* v-calendar v-calendar-day calendar-component 를 클래스로 갖는 것의 위쪽 공간 띄우기 */
 .v-calendar.v-calendar-day.calendar-component {
   margin-top: 10px;

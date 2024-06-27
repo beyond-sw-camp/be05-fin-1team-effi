@@ -1,16 +1,13 @@
 <template>
   <v-list>
-    <v-list-item
-      v-for="category in categories"
-      :key="category.id"
-      @click="handleCategoryClick(category)"
-    >
-      <template v-slot:prepend>
-        <v-list-item-action start>
-          <v-checkbox-btn :model-value="category.selected"></v-checkbox-btn>
-        </v-list-item-action>
-      </template>
-      <v-list-item-title>{{ category.name }}</v-list-item-title>
+    <v-list-item v-for="category in categories" :key="category.id" @click="handleCategoryClick(category)"
+      class="category-item">
+      <div class="category-content">
+        <v-checkbox-btn :model-value="category.selected" class="custom-checkbox"></v-checkbox-btn>
+        <v-list-item-title>{{ category.name }}</v-list-item-title>
+        <div class="category-dot" :style="{ backgroundColor: getCategoryColor(category.name) }"></div>
+
+      </div>
     </v-list-item>
   </v-list>
 </template>
@@ -34,23 +31,20 @@ export default {
       category.selected = !category.selected;
       console.log(`Category clicked: ${category.name}`);
 
-      // 선택된 카테고리들의 ID를 수집합니다.
       const selectedCategories = this.categories
-          .filter(cat => cat.selected)
-          .map(cat => cat.id);
+        .filter(cat => cat.selected)
+        .map(cat => cat.id);
 
       console.log(selectedCategories);
       if (selectedCategories.length > 0) {
-        // 선택된 카테고리 ID를 서버에 전달하여 스케줄을 조회합니다.
         await this.fetchSchedulesForSelectedCategories(selectedCategories);
       } else {
-        // 선택된 카테고리가 없으면 전체 스케줄을 조회합니다.
         await this.fetchAllSchedules();
       }
-      this.$emit('selectCategory', selectedCategories); // id만 넘겨주기
+      this.$emit('selectCategory', selectedCategories);
     },
     async fetchSchedulesForSelectedCategories(categories) {
-      const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
+      const token = sessionStorage.getItem('accessToken');
       if (!token) {
         console.error('No token found');
         return;
@@ -67,13 +61,12 @@ export default {
         try {
           const response = await axiosInstance.get(`/api/schedule/find/category/${categoryId}`, config);
           console.log(`Schedules for category ${categoryId}:`, response.data);
-          scheduleResults.push(...response.data); // 각 카테고리의 스케줄을 결과 배열에 추가
+          scheduleResults.push(...response.data);
         } catch (error) {
           console.error(`Error fetching schedules for categoryId ${categoryId}:`, error);
         }
       }
 
-      // 태그 정보를 추가합니다.
       const scheduleWithTags = await Promise.all(scheduleResults.map(async item => {
         const tags = await this.fetchTagsForSchedule(item.scheduleId);
         return {
@@ -82,7 +75,7 @@ export default {
         };
       }));
 
-      this.$emit('update-schedule', scheduleWithTags); // 부모 컴포넌트로 데이터를 전달
+      this.$emit('update-schedule', scheduleWithTags);
     },
     async fetchTagsForSchedule(scheduleId) {
       try {
@@ -94,7 +87,7 @@ export default {
       }
     },
     async fetchAllSchedules() {
-      const token = sessionStorage.getItem('accessToken'); // 토큰을 sessionStorage에서 가져오기
+      const token = sessionStorage.getItem('accessToken');
       if (!token) {
         console.error('No token found');
         return;
@@ -118,13 +111,26 @@ export default {
           }));
 
           this.$emit('update-schedule', scheduleWithTags);
-
         } else {
           console.error('Expected an array but got an object:', data);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
         console.error('Error details:', error.response ? error.response.data : error.message);
+      }
+    },
+    getCategoryColor(categoryName) {
+      switch (categoryName) {
+        case '회사':
+          return '#EAFFCF';
+        case '부서':
+          return '#ABC4FF';
+        case '그룹':
+          return '#EAB9F0';
+        case '개인':
+          return '#FFB5C9';
+        default:
+          return '#000000'; // 기본 색상 
       }
     }
   },
@@ -136,8 +142,6 @@ export default {
 
 <style scoped>
 .category-container {
-  padding: 10px;
-  border-radius: 5px;
   width: 200px;
 }
 
@@ -148,8 +152,6 @@ export default {
 }
 
 .category-item {
-  display: flex;
-  align-items: center;
   margin-bottom: 10px;
   cursor: pointer;
 }
@@ -158,11 +160,42 @@ export default {
   background-color: #e0e0e0;
 }
 
+.category-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  margin: 0;
+  width: 100%;
+}
+
 .category-dot {
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  margin-right: 10px;
+}
+
+.category-title {
+  margin-left: 10px;
+}
+
+.custom-checkbox {
+  padding: 0;
+  margin: 0;
+  align-items: center;
+}
+
+.v-selection-control {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 auto !important;
+}
+.v-selection-control__input {
+  display: none;
+}
+
+.v-selection-control__ripple {
+  display: none;
 }
 
 .checkmark {
@@ -170,10 +203,5 @@ export default {
   color: black;
   font-size: 15px;
   font-weight: bold;
-}
-
-.category-item label {
-  cursor: pointer;
-  flex-grow: 1;
 }
 </style>

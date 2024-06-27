@@ -3,7 +3,7 @@
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
       <div class="align-center">
-        <h2>새 그룹 만들기</h2>
+        <h5>새 그룹 만들기</h5>
         <p>그룹장 : {{ groupLeader }}</p>
       </div>
       <div class="input-group">

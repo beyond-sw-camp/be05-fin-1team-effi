@@ -7,7 +7,7 @@
           <span>{{ timezoneName }}</span>
         </div>
         <div class="d-flex align-items-center me-3 mb-2 mb-md-0 nowrap">
-          <span class="me-2">상태</span>
+          <span class="me-2"><strong>상태</strong></span>
           <select v-model="selectedStatus" class="form-select" @change="filterByStatus">
             <option value="all">전체</option>
             <option value="0">예정됨</option>
@@ -150,6 +150,7 @@ watch(allSchedules, (newVal) => {
 .container {
   display: flex;
   margin-top: 60px;
+  margin-left:80px;
   height: calc(100vh - 60px);
   width: 100%;
 }
