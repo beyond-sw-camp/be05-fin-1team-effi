@@ -165,7 +165,7 @@ export default {
 }
 
 .modal-overlay {
-  position: absolute;
+  position:fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -174,7 +174,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10001;
+  z-index: 1000;
 }
 
 .modal-container {

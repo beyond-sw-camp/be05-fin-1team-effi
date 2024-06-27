@@ -67,15 +67,15 @@ export default {
     getCategoryColor(categoryName) {
       switch (categoryName) {
         case '회사':
-          return '#FA0E0E';
-        case '개인':
-          return '#0100FF';
+          return '#EAFFCF';
         case '부서':
-          return '#FFFF00';
+          return '#ABC4FF';
         case '그룹':
-          return '#008001';
+          return '#EAB9F0';
+        case '개인':
+          return '#FFB5C9';
         default:
-          return '#000000'; // 기본 색상 (필요한 경우)
+          return '#000000'; // 기본 색상 
       }
     },
     parseTags(tagNames) {

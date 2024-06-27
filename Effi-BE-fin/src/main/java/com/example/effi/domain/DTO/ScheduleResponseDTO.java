@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import java.util.Date;
 
-import com.example.effi.domain.Entity.Category;
-import com.example.effi.domain.Entity.Routine;
 import com.example.effi.domain.Entity.Schedule;
 
 @Setter
@@ -49,7 +47,6 @@ public class ScheduleResponseDTO {
         this.categoryName = schedule.getCategory().getCategoryName();
 
         this.categoryColor = getCategoryColor(schedule.getCategory().getCategoryName());
-        this.categoryTextColor = getCategoryTextColor(schedule.getCategory().getCategoryName());
         if (schedule.getRoutine() != null)
             this.routineId = schedule.getRoutine().getRoutineId();
         else
@@ -59,24 +56,15 @@ public class ScheduleResponseDTO {
     private String getCategoryColor(String categoryName) {
         switch (categoryName) {
             case "회사":
-                return "red";
+                return "#EAFFCF";
             case "부서":
-                return "yellow";
+                return "#ABC4FF";
             case "그룹":
-                return "green";
+                return "#EAB9F0";
             case "개인":
-                return "blue";
+                return "#FFB5C9";
             default:
                 return "gray";
-        }
-    }
-
-    private String getCategoryTextColor(String categoryName) {
-        switch (categoryName) {
-            case "부서": // Yellow background
-                return "black";
-            default:
-                return "white";
         }
     }
 
