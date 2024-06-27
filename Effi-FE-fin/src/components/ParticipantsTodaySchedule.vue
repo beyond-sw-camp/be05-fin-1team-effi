@@ -1,12 +1,12 @@
 <template>
-  <v-container>
+  <v-container class="main-container">
     <v-row>
       <v-col cols="12">
         <v-toolbar flat>
           <v-toolbar-title>오늘의 일정: {{ selectedUserNames.join(', ') }}</v-toolbar-title>
         </v-toolbar>
-        <v-data-table :headers="headers" :items="formattedSchedules" item-value="time" class="elevation-1"
-          :items-per-page="-1" hide-default-footer>
+        <v-data-table :headers="headers" :items="formattedSchedules" item-value="time"
+          class="elevation-1 schedule-table" :items-per-page="-1" hide-default-footer>
           <template v-slot:item="{ item }">
             <tr>
               <td>{{ item.time }}</td>
@@ -15,7 +15,7 @@
                   :style="{ backgroundColor: getCategoryColor(schedule.categoryName), color: getTextColor(schedule.categoryName) }">
                   <template v-if="schedule.isFirstSlot">
                     <strong>{{ schedule.userName }}의 일정 : {{ schedule.title }}</strong><br>
-                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }}<br>
+                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }} / {{ timezoneName }}<br>
                   </template>
                 </div>
               </td>
@@ -40,10 +40,11 @@ export default {
     },
   },
   setup(props) {
-    const headers = ref([]);
+    const headers = ref([{ text: 'Time', value: 'time' }]);
     const schedules = ref([]);
     const formattedSchedules = ref([]);
     const selectedUserNames = ref([]);
+    const timezoneName = ref('');
 
     const fetchTodaySchedules = async () => {
       console.log('Fetching schedules for users:', props.selectedUsers);
@@ -53,7 +54,6 @@ export default {
           throw new Error('No access token found');
         }
 
-        // 현재 날짜와 시간을 가져옴
         const today = new Date();
         today.setHours(0, 0, 0, 0); // 오늘의 00:00:00으로 설정
         const tomorrow = new Date(today);
@@ -63,27 +63,24 @@ export default {
           axiosInstance.get(`/api/schedule/find/other/${user.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           }).then(response => {
-            console.log(`Schedules for user ${user.id}:`, response.data);
             const todaySchedules = response.data.filter(schedule => {
               const start = new Date(schedule.startTime);
               const end = new Date(schedule.endTime);
 
-              console.log(`Checking schedule: ${schedule.title} (start: ${start}, end: ${end}) against today: ${today}, tomorrow: ${tomorrow}`);
               return (
                 (start < tomorrow && end > today) ||
                 (start.toDateString() === today.toDateString() || end.toDateString() === today.toDateString())
               );
             });
-            console.log(`Filtered schedules for user ${user.id}:`, todaySchedules);
             return {
               userId: user.id,
-              userName: user.name, 
+              userName: user.name,
               schedules: todaySchedules.map(schedule => ({
                 title: schedule.title,
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
-                categoryName: schedule.categoryName, 
-                userName: user.name //
+                categoryName: schedule.categoryName,
+                userName: user.name 
               })),
             };
           })
@@ -91,7 +88,6 @@ export default {
 
         const results = await Promise.all(schedulePromises);
         schedules.value = results;
-        console.log('Filtered today schedules:', schedules.value);
         formatSchedules();
       } catch (error) {
         console.error('Failed to fetch schedules:', error);
@@ -108,7 +104,6 @@ export default {
 
       schedules.value.forEach(({ userId, schedules, userName }) => {
         schedules.forEach(schedule => {
-          console.log(`Processing schedule: ${schedule.title} from ${schedule.start} to ${schedule.end}`);
           const startHour = schedule.start.getHours();
           const endHour = schedule.end.getHours();
           const userIndex = props.selectedUsers.findIndex(user => user.id === userId);
@@ -120,7 +115,7 @@ export default {
               if (scheduleMap[time]) {
                 scheduleMap[time].schedules[userIndex] = {
                   ...schedule,
-                  userName: userName, 
+                  userName: userName,
                   isFirstSlot: currentHour === startHour,
                   isLastSlot: (currentHour + 1) % 24 === endHour
                 };
@@ -132,8 +127,26 @@ export default {
       });
 
       formattedSchedules.value = Object.values(scheduleMap);
-      console.log('Formatted schedules:', JSON.stringify(formattedSchedules.value, null, 2));
     };
+
+    const fetchTimezone = async () => {
+      const accessToken = sessionStorage.getItem('accessToken');
+      if (!accessToken) {
+        console.error('Token not found');
+        return;
+      }
+      try {
+        const response = await axiosInstance.get('/api/mypage/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        timezoneName.value = response.data.timezoneName;
+      } catch (error) {
+        console.error('Error fetching timezone:', error.response ? error.response.data : error.message);
+      }
+    };
+
 
     const updateSelectedUserNames = () => {
       selectedUserNames.value = props.selectedUsers.map(user => user.name);
@@ -156,18 +169,15 @@ export default {
 
     const getTextColor = (categoryName) => {
       if (categoryName === '부서') {
-        return '#000000'; 
+        return '#000000';
       }
-      return '#FFFFFF'; 
+      return '#FFFFFF';
     };
 
     onMounted(() => {
-      headers.value = [
-        { text: 'Time', value: 'time' },
-        ...props.selectedUsers.map(user => ({ text: user.name, value: user.id })),
-      ];
       fetchTodaySchedules();
       updateSelectedUserNames();
+      fetchTimezone();
     });
 
     watch(() => props.selectedUsers, () => {
@@ -184,7 +194,7 @@ export default {
       formattedSchedules,
       selectedUserNames,
       getCategoryColor,
-      getTextColor, 
+      getTextColor,
     };
   },
   methods: {
@@ -217,5 +227,25 @@ export default {
 .event:not(.first):not(.last) {
   border-radius: 0;
   color: transparent;
+}
+
+.main-container {
+  max-width: 900px;
+  /* 고정된 최대 너비 */
+  margin: 0 auto;
+  /* 가운데 정렬 */
+  width: 100%;
+}
+
+.schedule-table {
+  width: 100%;
+  min-height: 600px;
+  /* 최소 높이 설정 */
+  table-layout: fixed;
+  /* 테이블 레이아웃 고정 */
+}
+
+.v-toolbar {
+  width: 100%;
 }
 </style>

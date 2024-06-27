@@ -27,6 +27,8 @@ public class ScheduleResponseDTO {
 
     private Long categoryNo;
     private String categoryName;
+
+    private Long groupId;
     private Long routineId;
 
     private String categoryColor; 
@@ -45,6 +47,7 @@ public class ScheduleResponseDTO {
         this.deleteYn = schedule.getDeleteYn();
         this.categoryNo = schedule.getCategory().getCategoryNo();
         this.categoryName = schedule.getCategory().getCategoryName();
+
         this.categoryColor = getCategoryColor(schedule.getCategory().getCategoryName());
         this.categoryTextColor = getCategoryTextColor(schedule.getCategory().getCategoryName());
         if (schedule.getRoutine() != null)

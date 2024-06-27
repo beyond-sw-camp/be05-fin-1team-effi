@@ -11,7 +11,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="schedule in schedules" :key="schedule.scheduleId" @click="editSchedule(schedule)">
+        <tr v-for="schedule in schedules" :key="schedule.scheduleId">
           <td>{{ formatDate(schedule.startTime) }}</td>
           <td>
             <span :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }" class="category-dot"></span>
@@ -30,8 +30,18 @@
 </template>
 
 <script>
+
 export default {
   props: ['schedules'],
+
+  mounted() {
+    console.log('Schedules received in GroupSchedulesList (mounted):', this.schedules);
+  },
+  watch: {
+    schedules(newVal) {
+      console.log('Schedules updated in GroupSchedulesList:', newVal);
+    }
+  },
   methods: {
     formatDate(date) {
       return new Date(date).toISOString().split('T')[0];
@@ -81,9 +91,6 @@ export default {
     parseTags(tagNames) {
       if (!tagNames) return [];
       return tagNames.map(tag => tag.replace(/.*:"(.*)".*/, '$1'));
-    },
-    editSchedule(schedule) {
-      this.$emit('edit-schedule', schedule);
     }
   }
 };

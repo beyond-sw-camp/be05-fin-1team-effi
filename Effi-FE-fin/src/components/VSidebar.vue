@@ -4,7 +4,7 @@
       <v-list-item :prepend-avatar="avatarUrl" :subtitle="userEmail" :title="`${userName} (${userRank})`"></v-list-item>
     </v-list>
 
-    <v-divider></v-divider>
+    <v-divider />
 
     <v-list color="transparent">
       <v-list-item>
@@ -20,14 +20,14 @@
       </v-list-item>
     </v-list>
 
-    <v-divider></v-divider>
+    <v-divider />
 
     <v-list density="compact" nav>
       <v-list-item @click="goToHome" prepend-icon="mdi-home" title="Home" value="home"></v-list-item>
       <v-list-item @click="goToMyPage" prepend-icon="mdi-account" title="My Page" value="mypage"></v-list-item>
       <v-list-item @click="goToAllSchedules" prepend-icon="mdi-calendar" title="All Schedules"
         value="allschedules"></v-list-item>
-
+      <!-- Category Selection -->
       <v-list-group v-model="openCategories">
         <template v-slot:activator="{ props }">
           <v-list-item v-bind="props" prepend-icon="mdi-view-list" title="Category"
@@ -38,23 +38,16 @@
         </v-list>
       </v-list-group>
 
+      <!-- Group Selection -->
       <v-list-group v-model="openMyGroups">
         <template v-slot:activator="{ props }">
           <v-list-item v-bind="props" prepend-icon="mdi-account-group" title="My Groups"
             @click="toggleGroup('openMyGroups')"></v-list-item>
         </template>
         <v-list v-show="openMyGroups" class="scrollable-list light-scroll">
-          <GroupNameList @selectedGroups="handleUpdateGroups" />
-        </v-list>
-      </v-list-group>
-
-      <v-list-group v-model="openMyGroupsParticipants">
-        <template v-slot:activator="{ props }">
-          <v-list-item v-bind="props" prepend-icon="mdi-account-group" title="My Groups Participants"
-            @click="toggleGroup('openMyGroupsParticipants')"></v-list-item>
-        </template>
-        <v-list v-show="openMyGroupsParticipants" class="scrollable-list light-scroll">
-          <GroupNameListParticipants @selectedGroups="handleUpdateGroupsParticipants" />
+          <GroupNameList @selectedGroups="handleUpdateGroups"
+            @update-groupsParticipants="handleUpdateGroupsParticipants"
+            @update-groupsSchedules="handleUpdateGroupsSchedules" />
         </v-list>
       </v-list-group>
 
@@ -81,16 +74,14 @@ import { ref, onMounted, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
-import GroupNameList from '@/components/GroupNameList.vue';
-import GroupNameListParticipants from './GroupNameListParticipants.vue';
+import GroupNameList from '@/components/GroupNameList1.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 
-const emit = defineEmits(['update-categories', 'update-groups', 'search-results']);
+const emit = defineEmits(['update-categories', 'update-groups', 'update-groupsParticipants', 'update-groupsSchedules', 'search-results']);
 const showModal = ref(false);
 const openCategories = ref(false);
 const openMyGroups = ref(false);
-const openMyGroupsParticipants = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -131,9 +122,14 @@ const handleUpdateGroups = (groups) => {
   emit('update-groups', groups);
 };
 
-const handleUpdateGroupsParticipants = (groups2) => {
-  console.log('Selected groupsParticipants:', groups2);
-  emit('update-groupsParticipants', groups2);
+const handleUpdateGroupsParticipants = (groups) => {
+  console.log('Selected groupsParticipants:', groups);
+  emit('update-groupsParticipants', groups);
+};
+
+const handleUpdateGroupsSchedules = (groups) => {
+  console.log('Selected groupsSchedules:', groups);
+  emit('update-groupsSchedules', groups);
 };
 
 const logout = async () => {
@@ -175,7 +171,6 @@ const search = async () => {
   }
 };
 
-
 const goToMyPage = () => {
   router.push({ name: 'mypage' });
 };
@@ -193,12 +188,9 @@ const toggleGroup = (group) => {
     openCategories.value = !openCategories.value;
   } else if (group === 'openMyGroups') {
     openMyGroups.value = !openMyGroups.value;
-  } else if (group === 'openMyGroupsParticipants') {
-    openMyGroupsParticipants.value = !openMyGroupsParticipants.value;
   }
 };
 </script>
-
 
 <style scoped>
 .create-group-button {
@@ -254,6 +246,7 @@ const toggleGroup = (group) => {
 }
 
 .v-dialog--active {
-  right: 250px !important; /* 사이드바의 너비 만큼 이동 */
+  right: 300px !important;
+  /* 사이드바의 너비 만큼 이동 */
 }
 </style>

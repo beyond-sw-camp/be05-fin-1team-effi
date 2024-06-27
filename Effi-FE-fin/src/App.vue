@@ -1,7 +1,7 @@
 <!-- app.vue -->
 <template>
   <v-app>
-    <VSidebar v-if="showHeader" @search-results="handleSearchResults" />
+    <VSidebar v-if="showVSidebar" @search-results="handleSearchResults" />
     <div class="content" :search-results="searchResults">
       <router-view />
     </div>
@@ -19,7 +19,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const showHeader = computed(() => route.name !== 'login' && route.name !== 'test' && route.name !== 'schedule');
+    const showVSidebar = computed(() => route.name !== 'login' && route.name !== 'test' && route.name !== 'schedule');
     const searchResults = ref([]);
 
     const handleSearchResults = (results) => {
@@ -27,7 +27,7 @@ export default defineComponent({
     };
 
     return {
-      showHeader,
+      showVSidebar,
       searchResults,
       handleSearchResults,
     };
