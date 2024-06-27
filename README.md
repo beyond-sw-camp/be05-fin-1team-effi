@@ -67,5 +67,6 @@
 <details>
     <summary>CI/CD 명세서</summary>
 
-[Google 스프레드시트 링크](https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1038554572#gid=1038554572)
+[CI/CD](https://github.com/user-attachments/files/16010835/cicdimg.pdf)
+
 </details>
