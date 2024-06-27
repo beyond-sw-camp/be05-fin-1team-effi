@@ -26,13 +26,15 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router'; // useRoute 임포트
 import axiosInstance from "@/services/axios.js";
+import userImage from '@/assets/logo.png';
+
 
 export default {
   name: 'GroupParticipants',
   emits: ['selectedUsers'],
 
-  setup(props, {emit}) {
-    const route = useRoute(); 
+  setup(props, { emit }) {
+    const route = useRoute();
     const searchQuery = ref('');
     const users = ref([]);
     const groupId = ref(route.query.groupId); // 쿼리 파라미터에서 groupId 가져오기
@@ -70,7 +72,7 @@ export default {
             extensionNum: user.extensionNum,
             rank: user.rank,
             deptId: user.deptId,
-            image: '@/src/assets/logo.png', // 실제 이미지 경로로 수정
+            image: userImage, // require로 이미지 경로 설정
             selected: false
           }));
           console.log('Processed Users:', users.value);

@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-toolbar flat>
-          <v-toolbar-title>오늘의 일정: {{ selectedUserNames.join(', ') }}</v-toolbar-title>
+          <v-toolbar-title>{{ todayDate }}의 일정</v-toolbar-title>
         </v-toolbar>
         <v-data-table :headers="headers" :items="formattedSchedules" item-value="time"
           class="elevation-1 schedule-table" :items-per-page="-1" hide-default-footer>
@@ -15,7 +15,7 @@
                   :style="{ backgroundColor: getCategoryColor(schedule.categoryName), color: getTextColor(schedule.categoryName) }">
                   <template v-if="schedule.isFirstSlot">
                     <strong>{{ schedule.userName }}의 일정 : {{ schedule.title }}</strong><br>
-                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }} / {{ timezoneName }}<br>
+                    {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }} / {{ schedule.timezoneName }}<br>
                   </template>
                 </div>
               </td>
@@ -44,7 +44,16 @@ export default {
     const schedules = ref([]);
     const formattedSchedules = ref([]);
     const selectedUserNames = ref([]);
-    const timezoneName = ref('');
+    const timezoneNames = ref({});
+    const todayDate = ref('');
+
+    const fetchTodayDate = () => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      todayDate.value = `${year}-${month}-${day}`;
+    };
 
     const fetchTodaySchedules = async () => {
       console.log('Fetching schedules for users:', props.selectedUsers);
@@ -80,7 +89,7 @@ export default {
                 start: new Date(schedule.startTime),
                 end: new Date(schedule.endTime),
                 categoryName: schedule.categoryName,
-                userName: user.name 
+                userName: user.name,
               })),
             };
           })
@@ -117,7 +126,8 @@ export default {
                   ...schedule,
                   userName: userName,
                   isFirstSlot: currentHour === startHour,
-                  isLastSlot: (currentHour + 1) % 24 === endHour
+                  isLastSlot: (currentHour + 1) % 24 === endHour,
+                  timezoneName: timezoneNames.value[userId] // 추가된 부분
                 };
               }
               currentHour = (currentHour + 1) % 24;
@@ -129,24 +139,23 @@ export default {
       formattedSchedules.value = Object.values(scheduleMap);
     };
 
-    const fetchTimezone = async () => {
+    const fetchTimezone = async (userId) => {
       const accessToken = sessionStorage.getItem('accessToken');
       if (!accessToken) {
         console.error('Token not found');
         return;
       }
       try {
-        const response = await axiosInstance.get('/api/mypage/me', {
+        const response = await axiosInstance.get(`/api/mypage/timezone/${userId}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        timezoneName.value = response.data.timezoneName;
+        timezoneNames.value[userId] = response.data;
       } catch (error) {
         console.error('Error fetching timezone:', error.response ? error.response.data : error.message);
       }
     };
-
 
     const updateSelectedUserNames = () => {
       selectedUserNames.value = props.selectedUsers.map(user => user.name);
@@ -175,9 +184,10 @@ export default {
     };
 
     onMounted(() => {
+      fetchTodayDate();
+      props.selectedUsers.forEach(user => fetchTimezone(user.id));
       fetchTodaySchedules();
       updateSelectedUserNames();
-      fetchTimezone();
     });
 
     watch(() => props.selectedUsers, () => {
@@ -185,6 +195,7 @@ export default {
         { text: 'Time', value: 'time' },
         ...props.selectedUsers.map(user => ({ text: user.name, value: user.id })),
       ];
+      props.selectedUsers.forEach(user => fetchTimezone(user.id));
       fetchTodaySchedules();
       updateSelectedUserNames();
     }, { deep: true });
@@ -195,6 +206,7 @@ export default {
       selectedUserNames,
       getCategoryColor,
       getTextColor,
+      todayDate,
     };
   },
   methods: {
@@ -231,18 +243,24 @@ export default {
 
 .main-container {
   max-width: 900px;
-  /* 고정된 최대 너비 */
   margin: 0 auto;
-  /* 가운데 정렬 */
   width: 100%;
 }
 
 .schedule-table {
   width: 100%;
-  min-height: 600px;
-  /* 최소 높이 설정 */
+  height: 600px;
+  /* 고정된 높이 설정 */
+  min-width: 600px;
+  /* 최소 너비 설정 */
   table-layout: fixed;
-  /* 테이블 레이아웃 고정 */
+  overflow-y: auto;
+  /* 세로 스크롤 추가 */
+}
+
+.v-data-table {
+  height: 100%;
+  /* 테이블이 부모의 전체 높이를 차지하도록 설정 */
 }
 
 .v-toolbar {

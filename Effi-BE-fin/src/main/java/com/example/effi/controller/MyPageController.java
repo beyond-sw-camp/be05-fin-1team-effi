@@ -43,4 +43,14 @@ public class MyPageController {
         List<MyPageTimezoneDTO> timezones = myPageService.getTimezones();
         return ResponseEntity.ok(timezones);
     }
+
+    @GetMapping("/timezone/{empNo}")
+    public ResponseEntity<String> getEmployeeTimezone(@PathVariable Long empNo) {
+        try {
+            String timezoneName = myPageService.getEmployeeTimezoneName(empNo);
+            return ResponseEntity.ok(timezoneName);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
