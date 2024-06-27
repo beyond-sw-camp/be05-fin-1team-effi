@@ -42,8 +42,8 @@ export default {
     const defaultTimezone = ref({});
     const hours = ref([...Array(24).keys()]); // 0 to 23 hours
     const amPmHours = ref([
-      '01 AM', '02 AM', '03 AM', '04 AM', '05 AM', '06 AM', '07 AM', '08 AM', '09 AM', '10 AM', '11 AM', '12 PM',
-      '01 PM', '02 PM', '03 PM', '04 PM', '05 PM', '06 PM', '07 PM', '08 PM', '09 PM', '10 PM', '11 PM', '12 AM'
+      'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'AM', 'PM',
+      'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'PM', 'AM'
     ]);
 
     const empId = sessionStorage.getItem('empNo');
@@ -115,9 +115,11 @@ export default {
 </script>
 
 <style scoped>
+.timezone{
+  margin-top: 80px;
+}
 button {
   padding: 10px 20px;
-  background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
@@ -126,7 +128,6 @@ button {
 button:hover {
   background-color: #0056b3;
 }
-
 .add-timezone-button {
   background-color: #FBB584;
   border: none;
@@ -140,11 +141,13 @@ button:hover {
 
 .timezone-display {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .timezone-row {
   display: flex;
+  margin-right: 0;
+  margin-top:10px;
 }
 
 .timezone-column {
@@ -156,11 +159,13 @@ button:hover {
 
 .timezone-header {
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 15px;
+  font-size: 0.8rem;
 }
 
 .timezone-time {
-  margin-bottom: 4px;
+  margin-bottom: 40px;
   text-align: center;
+  font-size: 0.7rem;
 }
 </style>

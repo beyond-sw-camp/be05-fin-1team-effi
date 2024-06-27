@@ -22,7 +22,8 @@
         @change="onWeekdayChange"
       ></v-select>
     </v-sheet>
-    <v-sheet>
+    <v-sheet class="calendar-and-timezone">
+      <TimezoneComponent v-if="type === 'week' || type === 'day'" class="timezone-component" />
       <v-calendar
         :key="calendarKey"
         ref="calendar"
@@ -30,13 +31,16 @@
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
+        :interval-count="intervalCount"
+        :interval-height="intervalHeight"
         @click:date="onDateClick"
         :event-color="getEventColor"
+        class="calendar-component"
       >
         <template v-slot:event="{ event }">
           <div
             class="v-sheet v-theme--light rounded-t v-calendar-internal-event"
-            :style="{ backgroundColor: event.color, color: event.textColor }"
+            :style="{ backgroundColor: event.color }"
             @click.stop="onEventClick(event)"
           >
             <strong>{{ event.title }}</strong>
@@ -58,6 +62,7 @@
       @close="updateShowDialog(false)"
       @submit="handleEventSubmit"
     ></edit-schedule-modal>
+    <vue3-snackbar bottom right :duration="5000" />
   </div>
 </template>
 
@@ -67,13 +72,19 @@ import { useAuthStore } from '@/stores/auth';
 import dayjs from 'dayjs';
 import axiosInstance from '@/services/axios';
 import isBetween from 'dayjs/plugin/isBetween';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { useSnackbar } from 'vue3-snackbar';
 import ScheduleModal from './ScheduleModal.vue';
 import EditScheduleModal from './EditScheduleModal.vue';
+import TimezoneComponent from './TimezoneComponent.vue';
 
 dayjs.extend(isBetween);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default {
-  components: { ScheduleModal, EditScheduleModal },
+  components: { ScheduleModal, EditScheduleModal, TimezoneComponent },
   props: {
     show: {
       type: Boolean,
@@ -106,6 +117,7 @@ export default {
     const selectedEventId = ref(null);
     const selectedDate = ref(dayjs().toDate());
     const calendarKey = ref(0);
+    const { add: showSnackbar } = useSnackbar();
 
     const intervalCount = computed(() => (type.value === 'week' || type.value === 'day' ? 24 : undefined));
     const intervalHeight = computed(() => (type.value === 'week' || type.value === 'day' ? 60 : undefined));
@@ -128,7 +140,6 @@ export default {
         } else if (props.selectedGroupId.length === 0 && props.selectedCategories.length > 0) {
           const scheduleResults = [];
           for (const categoryId of props.selectedCategories) {
-            console.log('categoryId', categoryId);
             try {
               const response = await axiosInstance.get(`/api/schedule/find/category/${categoryId}`, {
                 headers: {
@@ -142,7 +153,6 @@ export default {
           }
           schedules = scheduleResults;
         } else if (props.selectedGroupId.length > 0) {
-          console.log('groupId');
           const scheduleResults = [];
           for (const groupId of props.selectedGroupId) {
             try {
@@ -164,12 +174,14 @@ export default {
             id: schedule.scheduleId,
             title: schedule.title,
             content: schedule.context,
-            start: dayjs(schedule.startTime),
-            end: dayjs(schedule.endTime),
+            start: dayjs(schedule.startTime).tz(dayjs.tz.guess()), // 시간 변환
+            end: dayjs(schedule.endTime).tz(dayjs.tz.guess()), // 시간 변환
             color: schedule.categoryColor,
-            textColor: schedule.categoryTextColor,
+            notificationYn: schedule.notificationYn,
             open: ref(false),
           }));
+
+          setNotificationTimers(events.value);
         } else {
           console.error('Expected an array but got:', schedules);
         }
@@ -189,6 +201,47 @@ export default {
 
     const getEventColor = (event) => {
       return event.color;
+    };
+
+    const setNotificationTimers = (events) => {
+      console.log('Setting notification timers for events:', events);
+      events.forEach((event) => {
+        if (event.notificationYn) {
+          const now = dayjs().tz(dayjs.tz.guess());
+          const startTime = event.start;
+          const diff = startTime.diff(now, 'minute');
+
+          if (diff > 0 && diff <= 60 && !isNotified(event.id)) {
+            console.log('Event:', event.title, 'Start Time:', startTime.format(), 'Now:', now.format(), 'Diff:', diff, 'minutes');
+            const timeout = (diff > 60) ? (diff - 60) * 60 * 1000 : 0;
+            setTimeout(() => {
+              showToast(`일정 "${event.title}"이(가) 1시간 후에 시작됩니다.`);
+              markAsNotified(event.id);
+            }, timeout);
+          }
+        }
+      });
+    };
+
+    const isNotified = (eventId) => {
+      const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
+      return notifiedEvents.includes(eventId);
+    };
+
+    const markAsNotified = (eventId) => {
+      const notifiedEvents = JSON.parse(localStorage.getItem('notifiedEvents') || '[]');
+      notifiedEvents.push(eventId);
+      localStorage.setItem('notifiedEvents', JSON.stringify(notifiedEvents));
+    };
+
+    const showToast = (message) => {
+      console.log('Triggering Snackbar:', message);
+      showSnackbar({
+        text: message,
+        type: 'success',
+        timeout: 60000,
+        showClose: true,
+      });
     };
 
     onMounted(() => {
@@ -302,6 +355,7 @@ export default {
     const updateEvents = () => {
       events.value = events.value.map(event => ({ ...event }));
       console.log('Events after update:', events.value);
+      setNotificationTimers(events.value);
     };
 
     const editEvent = async (event) => {
@@ -348,7 +402,6 @@ export default {
         const event = events.value.find(e => e.id === Number(eventId));
         if (event) {
           el.style.backgroundColor = event.color;
-          el.style.color = event.textColor;
           console.log('Slot element updated:', el);
         }
       });
@@ -391,11 +444,27 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   border-radius: 2px;
-  border: 1px solid #1867c0;
   width: 100%;
   font-size: 12px;
   padding: 3px;
   cursor: pointer;
   margin-bottom: 1px;
+}
+
+.calendar-and-timezone {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+}
+
+.timezone-component {
+  margin-right: 5px;
+}
+
+.calendar-component {
+  flex: 1;
+}
+/* v-calendar v-calendar-day calendar-component 를 클래스로 갖는 것의 위쪽 공간 띄우기 */
+.v-calendar.v-calendar-day.calendar-component {
+  margin-top: 10px;
 }
 </style>
