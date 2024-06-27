@@ -115,7 +115,7 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
             Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
-            if (dto != null && dto.getDeleteYn() == false)
+            if (dto != null && sch.getDeleteYn() == false)
                 res.add(new ScheduleResponseDTO(sch));
         }
         return res;
