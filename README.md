@@ -43,3 +43,32 @@ https://www.erdcloud.com/d/LzhHdqfKbQiDiAqmG
 https://drive.google.com/file/d/1xyGxCYz9oYFy-n2zXlV-mUb_1uDdMmnc/view?usp=drive_link
 </details>
 
+<details>
+    <summary>
+        API 명세서
+    </summary>
+    https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1955962199#gid=1955962199
+</details>
+
+<details>
+    <summary>
+        백엔드 테스트 케이스
+    </summary>
+    https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1586565566#gid=1586565566
+</details>
+
+<details>
+    <summary>
+        UI/UX 테스트
+    </summary>
+    https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1939439079#gid=1939439079
+</details>
+
+<details>
+    <summary>
+        CI/CD 명세서
+    </summary>
+    https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1038554572#gid=1038554572
+</details>
+
+
