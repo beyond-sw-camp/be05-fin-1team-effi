@@ -5,9 +5,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
 
-import ModalTest from '@/views/ModalTest.vue';
 import ScheduleTestView from '../views/ScheduleTestView.vue'
-import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
 import GroupParticipantsView from '../views/GroupParticipantsView.vue'
 import GroupSchedulesView from '../views/GroupSchedulesView.vue'
@@ -41,23 +39,10 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/modaltest',
-      name: 'modaltest',
-      component: ModalTest
-
-    },
-    {
-      path: '/category',
-      name: 'category',
-      component: CategoryScheduleView,
-      meta: { requiresAuth: true }
-    },
-    {
       path: '/search',
       name: 'search',
       component: SearchView,
       meta: { requiresAuth: true }
-
     },
     {
       path: '/tagstatistics',

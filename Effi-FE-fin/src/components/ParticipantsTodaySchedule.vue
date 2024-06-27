@@ -12,7 +12,7 @@
               <td>{{ item.time }}</td>
               <td v-for="(schedule, index) in item.schedules" :key="index">
                 <div v-if="schedule" :class="['event', { first: schedule.isFirstSlot, last: schedule.isLastSlot }]"
-                  :style="{ backgroundColor: getCategoryColor(schedule.categoryName), color: getTextColor(schedule.categoryName) }">
+                  :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }">
                   <template v-if="schedule.isFirstSlot">
                     <strong>{{ schedule.userName }}의 일정 : {{ schedule.title }}</strong><br>
                     {{ formatTime(schedule.start) }} - {{ formatTime(schedule.end) }} / {{ schedule.timezoneName }}<br>
@@ -164,24 +164,19 @@ export default {
     const getCategoryColor = (categoryName) => {
       switch (categoryName) {
         case '회사':
-          return '#FA0E0E';
-        case '개인':
-          return '#0100FF';
+          return '#EAFFCF';
         case '부서':
-          return '#FFFF00';
+          return '#ABC4FF';
         case '그룹':
-          return '#008001';
+          return '#EAB9F0';
+        case '개인':
+          return '#FFB5C9';
         default:
-          return '#000000'; // 기본 색상 (필요한 경우)
+          return '#000000'; // 기본 색상 
       }
     };
 
-    const getTextColor = (categoryName) => {
-      if (categoryName === '부서') {
-        return '#000000';
-      }
-      return '#FFFFFF';
-    };
+
 
     onMounted(() => {
       fetchTodayDate();
@@ -205,7 +200,6 @@ export default {
       formattedSchedules,
       selectedUserNames,
       getCategoryColor,
-      getTextColor,
       todayDate,
     };
   },

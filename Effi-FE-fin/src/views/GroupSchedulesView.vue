@@ -98,7 +98,7 @@ const filteredSchedules = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
-  } else if (viewMode.value === 'all') {
+  } else if(viewMode.value === 'all'){
     return allSchedules.value;
   }
 
