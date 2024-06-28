@@ -47,7 +47,6 @@ const timezoneName = ref('');
 const showModal = ref(false);
 const selectedScheduleId = ref(null);
 
-
 const filteredSearches = computed(() => {
   let start, end;
   if (viewMode.value === 'day') {
@@ -60,13 +59,13 @@ const filteredSearches = computed(() => {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
   } else if (viewMode.value === 'all') {
-    return searches.value;
+    return [...searches.value].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
 
-  return searches.value.filter(schedule => {
+  return [...searches.value].filter(schedule => {
     const startTime = new Date(schedule.startTime);
     return startTime >= start && startTime <= end;
-  });
+  }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 });
 
 const filteredSearchesByStatus = computed(() => {
@@ -103,7 +102,6 @@ const showEditScheduleModal = (scheduleId) => {
   showModal.value = true;
 };
 
-// 일정 업데이트 핸들러 추가
 const handleScheduleUpdate = () => {
   search(route.query.criterion, route.query.query); // 기존의 검색 조건으로 다시 검색하여 업데이트
   showModal.value = false;
