@@ -21,7 +21,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const showVSidebar = computed(() => route.name !== 'login' && route.name !== 'test' && route.name !== 'schedule');
+    const showVSidebar = computed(() => route.name !== 'login');
     const selectedCategories = ref([]);
     const selectedGroupId = ref([]);
     const searchResults = ref([]);

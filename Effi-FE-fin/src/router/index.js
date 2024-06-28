@@ -5,7 +5,6 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
 
-import ScheduleTestView from '../views/ScheduleTestView.vue'
 import SearchView from '../views/SearchView.vue'
 import GroupParticipantsView from '../views/GroupParticipantsView.vue'
 import GroupSchedulesView from '../views/GroupSchedulesView.vue'
@@ -48,12 +47,6 @@ const router = createRouter({
       path: '/tagstatistics',
       name: 'tagstatistics',
       component: TagStatisticsView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/schedule',
-      name: 'schedule',
-      component: ScheduleTestView,
       meta: { requiresAuth: true }
     },
     {

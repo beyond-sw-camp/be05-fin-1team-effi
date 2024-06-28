@@ -74,7 +74,7 @@ import { ref, onMounted, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import SelectCategory from '@/components/SelectCategory.vue';
-import GroupNameList from '@/components/GroupNameList1.vue';
+import GroupNameList from '@/components/GroupNameList.vue';
 import { useAuthStore } from '@/stores/auth';
 import axiosInstance from '@/services/axios';
 import logoImage from '@/assets/logo.png';
