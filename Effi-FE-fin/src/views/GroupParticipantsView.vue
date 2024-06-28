@@ -52,9 +52,7 @@ export default {
 .schedule-container {
   width: 100%;
   max-width: 900px;
-  /* 일정 컴포넌트의 최대 너비 설정 */
   min-height: 600px;
-  /* 최소 높이 설정 */
   margin: 10px;
   flex: 1;
 }
@@ -68,12 +66,10 @@ export default {
 
   .participants-container {
     margin-right: 20px;
-    /* 간격 추가 */
   }
 
   .schedule-container {
     max-width: 100%;
-    /* 최대 너비를 100%로 설정 */
   }
 }
 </style>

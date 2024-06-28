@@ -72,7 +72,7 @@ export default {
             extensionNum: user.extensionNum,
             rank: user.rank,
             deptId: user.deptId,
-            image: userImage, // require로 이미지 경로 설정
+            image: userImage, 
             selected: false
           }));
           console.log('Processed Users:', users.value);

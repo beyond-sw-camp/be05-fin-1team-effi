@@ -11,7 +11,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="schedule in schedules" :key="schedule.scheduleId" @click="editSchedule(schedule.scheduleId)">
+        <tr v-for="schedule in paginatedSchedules" :key="schedule.scheduleId"
+          @click="editSchedule(schedule.scheduleId)">
           <td>{{ formatDate(schedule.startTime) }}</td>
           <td>
             <span :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }" class="category-dot"></span>
@@ -26,12 +27,41 @@
         </tr>
       </tbody>
     </table>
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button class="page-link" @click="changePage(currentPage - 1)"> &lt; </button>
+        </li>
+        <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
+          <button class="page-link" @click="changePage(page)">{{ page }}</button>
+        </li>
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <button class="page-link" @click="changePage(currentPage + 1)"> &gt; </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
 
 <script>
 export default {
   props: ['schedules'],
+  data() {
+    return {
+      currentPage: 1,
+      pageSize: 10
+    };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.schedules.length / this.pageSize);
+    },
+    paginatedSchedules() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.schedules.slice(start, end);
+    }
+  },
   methods: {
     formatDate(date) {
       return new Date(date).toISOString().split('T')[0];
@@ -84,6 +114,15 @@ export default {
     },
     editSchedule(scheduleId) {
       this.$emit('edit-schedule', scheduleId);
+    },
+    changePage(page) {
+      if (page < 1) {
+        this.currentPage = 1;
+      } else if (page > this.totalPages) {
+        this.currentPage = this.totalPages;
+      } else {
+        this.currentPage = page;
+      }
     }
   }
 };
@@ -124,5 +163,24 @@ export default {
 .badge {
   color: #000;
   /* 태그의 글자 색상을 흰색으로 설정 */
+}
+
+.pagination {
+  margin-top: 20px;
+}
+
+.page-item .page-link {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.page-item.disabled .page-link {
+  cursor: not-allowed;
+}
+
+.page-item.active .page-link {
+  background-color: #FF7D2A;
+  color: white;
+  border-color: #FF7D2A;
 }
 </style>
