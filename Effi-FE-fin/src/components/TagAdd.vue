@@ -41,7 +41,7 @@
                       :key="index"
                       :style="{ backgroundColor: getTagColor(tag) }"
                       close
-                      @click="removeTag(index)"
+                      @click="removeTag(tag)" 
                     >
                       {{ tag }}
                     </v-chip>
@@ -103,7 +103,7 @@ export default {
     const tagColors = reactive({});
     const message = ref('');
     const errorMessage = ref('');
-
+    const tagMap = ref({}); // 태그 이름과 ID를 매핑하기 위한 객체
 
     watch(
       () => [props.schedule.title, props.schedule.context],
@@ -111,6 +111,27 @@ export default {
         message.value = `${newTitle} ${newContext}`;
       }
     );
+
+    watch(() => dialog.value, async (newVal) => {
+      if (newVal && props.schedule.scheduleId) {
+        await fetchTags(props.schedule.scheduleId);
+      }
+    });
+
+    const fetchTags = async (scheduleId) => {
+      try {
+        const response = await axiosInstance.get(`/api/tag/find/schedule/${scheduleId}`);
+        tags.value = response.data.map(tag => tag.tagName);
+        response.data.forEach(tag => {
+          tagMap.value[tag.tagName] = tag.tagId; // 태그 이름과 ID를 매핑
+          if (!tagColors[tag.tagName]) {
+            tagColors[tag.tagName] = getRandomColor();
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
 
     const addTag = () => {
       errorMessage.value = '';
@@ -130,23 +151,30 @@ export default {
       }
     };
 
-    const removeTag = (index) => {
-      tags.value.splice(index, 1);
+    const removeTag = async (tag) => {
+      tags.value = tags.value.filter(t => t !== tag);
       emitTags();
+      try {
+        const tagId = tagMap.value[tag]; // 태그 ID 가져오기
+        await axiosInstance.post(`/api/tag/delete/${props.schedule.scheduleId}/${tagId}`);
+      } catch (error) {
+        console.error('Error removing tag:', error);
+      }
     };
 
     const addTagFromAi = (tag) => {
-      if (!tags.value.includes(tag)) {
-        tags.value.push(tag);
-        if (!tagColors[tag]) {
-          tagColors[tag] = getRandomColor();
+      const trimmedTag = tag.trim();
+      if (!tags.value.includes(trimmedTag)) {
+        tags.value.push(trimmedTag);
+        if (!tagColors[trimmedTag]) {
+          tagColors[trimmedTag] = getRandomColor();
         }
         emitTags();
       }
     };
 
     const emitTags = () => {
-      emit('update-schedule', { tags: tags.value, tagColors: { ...tagColors } });
+      emit('update-schedule', { tags: tags.value.map(tag => tag.trim()), tagColors: { ...tagColors } });
     };
 
     const aiTags = async () => {
@@ -154,8 +182,7 @@ export default {
         const response = await axiosInstance.post('/api/aiTags', {
           message: message.value
         });
-        console.log('AI Tags:', response.data);
-        aiResponseTags.value = response.data.tags;
+        aiResponseTags.value = response.data.tags.map(tag => tag.trim());
       } catch (error) {
         console.error('Error fetching AI tags:', error);
       }
@@ -196,7 +223,7 @@ export default {
 </script>
 
 <style scoped>
-button{
+button {
   display: inline-block;
   margin-top: 10px;
   padding: 10px;
@@ -205,21 +232,20 @@ button{
   border: none;
   cursor: pointer;
   border-radius: 5px;
-
 }
 .chip-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px; /* 칩 사이의 간격을 설정합니다 */
+  gap: 8px;
 }
 .chip-wrapper .v-chip {
-  flex: 0 1 auto; /* 칩이 콘텐츠 크기에 맞게 설정되도록 함 */
+  flex: 0 1 auto;
   box-sizing: border-box;
-  cursor: pointer; /* 클릭 가능한 요소로 변경 */
+  cursor: pointer;
 }
 .error-message {
-    color: red;
-    margin-top: 10px;
-    font-size: 12px;
-  }
+  color: red;
+  margin-top: 10px;
+  font-size: 12px;
+}
 </style>

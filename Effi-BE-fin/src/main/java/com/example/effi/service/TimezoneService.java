@@ -2,6 +2,7 @@ package com.example.effi.service;
 
 import com.example.effi.domain.DTO.GlobalResponse;
 import com.example.effi.domain.DTO.TimezoneDTO;
+import com.example.effi.domain.DTO.TimezoneListDTO;
 import com.example.effi.domain.Entity.Timezone;
 import com.example.effi.repository.TimezoneRepository;
 
@@ -120,4 +121,11 @@ public class TimezoneService {
             return new GlobalResponse<>(400, e.getMessage(), null);
         }
     }
+
+    // 타임존 리스트 출력
+    @Transactional
+    public List<TimezoneListDTO> getTimezones() {
+        return timezoneRepository.findAllTimezonesGroupedByName();
+    }
+
 }

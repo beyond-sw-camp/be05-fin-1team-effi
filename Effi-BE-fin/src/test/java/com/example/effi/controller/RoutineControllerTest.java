@@ -71,6 +71,17 @@ public class RoutineControllerTest {
         assertThat(result.getRoutineCycle()).isEqualTo("weekly");
     }
 
+    @DisplayName("Find Routine by ID - Failure")
+    @Test
+    public void testFindByRoutineIdFailure() {
+        Long nonExistingRoutineId = -1L;
+
+        // Then
+        assertThatThrownBy(() -> routineService.findRoutineById(nonExistingRoutineId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("루틴 ID가 유효하지 않습니다.");
+    }
+
     @DisplayName("Add Routine")
     @Test
     public void testAddRoutine() {
@@ -94,36 +105,18 @@ public class RoutineControllerTest {
     @Test
     public void testAddRoutineAndUpdateSchedule() {
         SecurityContextHolder.getContext().getAuthentication();
-
         categoryRepository.save(Category.builder()
-                .categoryId(1L)
-                .categoryName("hi").build());
-
+                .categoryId(1L).categoryName("hi").build());
         employeeRepository.save(Employee.builder()
-                .id(1L)
-                .empNo(1L)
-                .password("password1")
-                .company("Example Company")
-                .name("John Doe")
-                .email("john@example.com")
-                .phoneNum("123-456-7890")
-                .extensionNum("123")
-                .rank("Manager")
-                .build()
-        );
-
+                .id(1L).empNo(1L).password("password1").company("Example Company").name("John Doe")
+                .email("john@example.com").phoneNum("123-456-7890").extensionNum("123").rank("Manager").build());
         ScheduleRequestDTO scheduleRequest = new ScheduleRequestDTO();
-        scheduleRequest.setTitle("bye");
-        scheduleRequest.setContext("hello");
-        scheduleRequest.setStatus(0);
-        scheduleRequest.setNotificationYn(false);
-        scheduleRequest.setDeleteYn(false);
-        scheduleRequest.setCreatedAt(new Date());
-        scheduleRequest.setUpdatedAt(null);
-        scheduleRequest.setStartTime(new Date());
-        scheduleRequest.setEndTime(new Date());
-        scheduleRequest.setRoutineId(null);
-      
+        scheduleRequest.setTitle("bye");scheduleRequest.setContext("hello");
+        scheduleRequest.setStatus(0);scheduleRequest.setNotificationYn(false);
+        scheduleRequest.setDeleteYn(false);scheduleRequest.setCreatedAt(new Date());
+        scheduleRequest.setUpdatedAt(null);scheduleRequest.setStartTime(new Date());
+        scheduleRequest.setEndTime(new Date());scheduleRequest.setRoutineId(null);
+        scheduleRequest.setCategoryNo(1L);
 
         ScheduleResponseDTO responseDTO = scheduleService.addSchedule(scheduleRequest);
         assertThat(responseDTO).isNotNull();
@@ -146,84 +139,6 @@ public class RoutineControllerTest {
         assertThat(result.getRoutineCycle()).isEqualTo("weekly");
     }
 
-    @DisplayName("Update Routine")
-    @Test
-    public void testUpdateRoutine() {
-        RoutineRequestDTO routineRequest = new RoutineRequestDTO();
-        routineRequest.setRoutineCycle("weekly");
-        routineRequest.setRoutineStart(new Date());
-        routineRequest.setRoutineEnd(new Date());
-
-        // When
-        Long routineId = routineService.addRoutine(routineRequest);
-
-        RoutineRequestDTO updateRoutine = new RoutineRequestDTO();
-        updateRoutine.setRoutineCycle("monthly");
-        updateRoutine.setRoutineStart(new Date());
-        updateRoutine.setRoutineEnd(new Date());
-
-        // When
-        RoutineResponseDTO result = routineService.updateRoutine(routineId, updateRoutine);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getRoutineCycle()).isEqualTo("monthly");
-    }
-
-    @DisplayName("Delete Routine")
-    @Test
-    public void testDeleteRoutine() {
-        RoutineRequestDTO routineRequest = new RoutineRequestDTO();
-        routineRequest.setRoutineCycle("weekly");
-        routineRequest.setRoutineStart(new Date());
-        routineRequest.setRoutineEnd(new Date());
-
-        // When
-        Long routineId = routineService.addRoutine(routineRequest);
-
-        // When
-        routineService.deleteRoutine(routineId);
-        List<ScheduleResponseDTO> schedules = routineService.findAllByRoutineId(routineId);
-
-        for (ScheduleResponseDTO s : schedules) {
-            scheduleService.updateRoutine(null, s.getScheduleId());
-        }
-
-        RoutineResponseDTO result = routineService.findRoutineById(routineId);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getDeleteYn()).isTrue();
-    }
-
-    @DisplayName("Find Routine by ID - Failure")
-    @Test
-    public void testFindByRoutineIdFailure() {
-        // When
-        Long nonExistingRoutineId = 9999L;
-
-        // Then
-        assertThatThrownBy(() -> routineService.findRoutineById(nonExistingRoutineId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Routine not found with ID: " + nonExistingRoutineId);
-    }
-
-    @DisplayName("Update Non-Existing Routine - Failure")
-    @Test
-    public void testUpdateNonExistingRoutine() {
-        // When
-        Long nonExistingRoutineId = 9999L;
-        RoutineRequestDTO updateRoutine = new RoutineRequestDTO();
-        updateRoutine.setRoutineCycle("monthly");
-        updateRoutine.setRoutineStart(new Date());
-        updateRoutine.setRoutineEnd(new Date());
-
-        // Then
-        assertThatThrownBy(() -> routineService.updateRoutine(nonExistingRoutineId, updateRoutine))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Routine not found with ID: " + nonExistingRoutineId);
-    }
-
     @DisplayName("Add Routine and Update Schedule - Invalid Schedule")
     @Test
     public void testAddRoutineAndUpdateScheduleInvalidSchedule() {
@@ -239,7 +154,7 @@ public class RoutineControllerTest {
         Long routineId = routineService.addRoutine(routineRequest);
 
         // Attempt to update with invalid scheduleId
-           assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             scheduleService.updateRoutine(routineId, scheduleId);
         });
 
@@ -255,21 +170,73 @@ public class RoutineControllerTest {
         assertThat(result).size().isEqualTo(0);
     }
 
+    @DisplayName("Update Routine")
+    @Test
+    public void testUpdateRoutine() {
+        RoutineRequestDTO routineRequest = new RoutineRequestDTO();
+        routineRequest.setRoutineCycle("weekly");
+        routineRequest.setRoutineStart(new Date());
+        routineRequest.setRoutineEnd(new Date());
+
+        Long routineId = routineService.addRoutine(routineRequest);
+
+        RoutineRequestDTO updateRoutine = new RoutineRequestDTO();
+        updateRoutine.setRoutineCycle("monthly");
+        updateRoutine.setRoutineStart(new Date());
+        updateRoutine.setRoutineEnd(new Date());
+
+        RoutineResponseDTO result = routineService.updateRoutine(routineId, updateRoutine);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getRoutineCycle()).isEqualTo("monthly");
+    }
+
+    @DisplayName("Update Non-Existing Routine - Failure")
+    @Test
+    public void testUpdateNonExistingRoutine() {
+        // When
+        Long nonExistingRoutineId = 9999L;
+        RoutineRequestDTO updateRoutine = new RoutineRequestDTO();
+        updateRoutine.setRoutineCycle("monthly");
+        updateRoutine.setRoutineStart(new Date());
+        updateRoutine.setRoutineEnd(new Date());
+
+        // Then
+        assertThatThrownBy(() -> routineService.updateRoutine(nonExistingRoutineId, updateRoutine))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("루틴 ID가 유효하지 않습니다.");
+    }
+
+    @DisplayName("Delete Routine")
+    @Test
+    public void testDeleteRoutine() {
+        RoutineRequestDTO routineRequest = new RoutineRequestDTO();
+        routineRequest.setRoutineCycle("weekly");
+        routineRequest.setRoutineStart(new Date());
+        routineRequest.setRoutineEnd(new Date());
+
+        // When
+        Long routineId = routineService.addRoutine(routineRequest);
+
+        // When
+        routineService.deleteRoutine(routineId);
+
+        RoutineResponseDTO result = routineService.findRoutineById(routineId);
+
+        // Then
+        assertThat(result.getDeleteYn()).isEqualTo(true);
+    }
+
     @DisplayName("Delete Routine - Invalid Routine id")
     @Test
     public void testDeleteRoutineInvalidRoutineId() {
-        // Given
-        // 잘못된 routineId 지정
         Long invalidRoutineId = 999L;
 
-        // When
-        // Attempt to delete with invalid routineId
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             routineService.deleteRoutine(invalidRoutineId);
         });
 
-        // Then
-        // Assert no changes are made
-        assertThat(exception.getMessage()).isEqualTo("Routine not found with ID: " + invalidRoutineId);
+        assertThat(exception.getMessage()).isEqualTo("루틴 ID가 유효하지 않습니다.");
     }
+
 }

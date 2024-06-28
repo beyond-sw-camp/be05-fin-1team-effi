@@ -21,7 +21,6 @@ import java.util.List;
 public class ParticipantController {
     private final ParticipantService participantService;
     private final EmployeeService employeeService;
-    private final GroupRepository groupRepository;
     private final GroupService groupService;
 
     // 추가 (scheduleId & empId)
@@ -42,12 +41,15 @@ public class ParticipantController {
     public ResponseEntity<?> addParticipantDept(@PathVariable("deptId") Long deptId, Long scheduleId) {
         try {
             List<Long> lst = employeeService.findEmpIdByDept(deptId);
+            System.out.println("lst >>>>>>>>>>>>>>> "+lst);
             List<ParticipantResponseDTO> rtn = new ArrayList<>();
             for (Long empId : lst) {
                 rtn.add(participantService.addParticipant(scheduleId, empId));
             }
+            System.out.println("rtn >>>>>>>>>>>>>>> "+rtn);
             return ResponseEntity.ok(rtn);
         }catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to add participant: " + e.getMessage());
         }

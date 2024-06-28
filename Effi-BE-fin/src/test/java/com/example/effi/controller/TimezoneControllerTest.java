@@ -42,7 +42,8 @@ public class TimezoneControllerTest {
   @Test
   @DisplayName("새로운 타임존 추가 테스트 - 성공")
   public void testAddTimezoneSuccess() throws Exception {
-    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US", "UTC", 0L, 0, "N/A");
+    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US",
+            "UTC", 0L, 0, "N/A");
     given(timezoneService.addTimezone(any(TimezoneDTO.class)))
         .willReturn(GlobalResponse.<TimezoneDTO>builder()
             .status(200)
@@ -53,7 +54,8 @@ public class TimezoneControllerTest {
     mockMvc.perform(post("/api/timezones")
         .contentType(MediaType.APPLICATION_JSON)
         .content(
-            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
+            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\"," +
+                    "\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status", is(200)))
         .andExpect(jsonPath("$.message", is("새로운 타임존을 추가했습니다")))
@@ -73,7 +75,8 @@ public class TimezoneControllerTest {
     mockMvc.perform(post("/api/timezones")
         .contentType(MediaType.APPLICATION_JSON)
         .content(
-            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
+            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\"," +
+                    "\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status", is(400)))
         .andExpect(jsonPath("$.message", is("중복된 타임존을 추가할 수 없습니다")));
@@ -82,8 +85,10 @@ public class TimezoneControllerTest {
   @Test
   @DisplayName("모든 타임존 조회 테스트 - 성공")
   public void testGetAllTimezonesSuccess() throws Exception {
-    TimezoneDTO timezone1 = new TimezoneDTO(1L, "UTC", "US", "UTC", 0L, 0, "N/A");
-    TimezoneDTO timezone2 = new TimezoneDTO(2L, "PST", "US", "PST", 0L, -28800, "N/A");
+    TimezoneDTO timezone1 = new TimezoneDTO(1L, "UTC", "US",
+            "UTC", 0L, 0, "N/A");
+    TimezoneDTO timezone2 = new TimezoneDTO(2L, "PST", "US",
+            "PST", 0L, -28800, "N/A");
     List<TimezoneDTO> timezones = Arrays.asList(timezone1, timezone2);
 
     given(timezoneService.getAllTimezones())
@@ -123,7 +128,8 @@ public class TimezoneControllerTest {
   @Test
   @DisplayName("ID로 타임존 조회 테스트 - 성공")
   public void testGetTimezoneByIdSuccess() throws Exception {
-    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US", "UTC", 0L, 0, "N/A");
+    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US",
+            "UTC", 0L, 0, "N/A");
     given(timezoneService.getTimezoneById(anyLong()))
         .willReturn(GlobalResponse.<TimezoneDTO>builder()
             .status(200)
@@ -159,7 +165,8 @@ public class TimezoneControllerTest {
   @Test
   @DisplayName("타임존 업데이트 테스트 - 성공")
   public void testUpdateTimezoneSuccess() throws Exception {
-    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US", "UTC", 0L, 0, "N/A");
+    TimezoneDTO timezoneDTO = new TimezoneDTO(1L, "UTC", "US",
+            "UTC", 0L, 0, "N/A");
     given(timezoneService.updateTimezone(anyLong(), any(TimezoneDTO.class)))
         .willReturn(GlobalResponse.<TimezoneDTO>builder()
             .status(200)
@@ -170,7 +177,8 @@ public class TimezoneControllerTest {
     mockMvc.perform(put("/api/timezones/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(
-            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
+            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\"," +
+                    "\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status", is(200)))
         .andExpect(jsonPath("$.message", is("타임존을 업데이트했습니다")))
@@ -190,7 +198,8 @@ public class TimezoneControllerTest {
     mockMvc.perform(put("/api/timezones/1")
         .contentType(MediaType.APPLICATION_JSON)
         .content(
-            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\",\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
+            "{\"timezoneId\":1,\"timezoneName\":\"UTC\",\"countryCode\":\"US\",\"abbreviation\":\"UTC\"," +
+                    "\"timeStart\":0,\"gmtOffset\":0,\"dst\":\"N/A\"}"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.status", is(404)))
         .andExpect(jsonPath("$.message", is("해당 ID의 타임존을 찾을 수 없습니다")));

@@ -7,6 +7,7 @@ import com.example.effi.repository.EmployeeRepository;
 import com.example.effi.repository.ParticipantRepository;
 import com.example.effi.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -19,12 +20,22 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
     private final EmployeeRepository employeeRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ScheduleService scheduleService;
 
     // add - schedule && user가 있다는 가정
     public ParticipantResponseDTO addParticipant(Long scheduleId, Long empId) {
+        if (scheduleId == null || scheduleService.getSchedule(scheduleId) == null)
+            throw new IllegalArgumentException("Schedule이 존재하지 않습니다.");
+        if (empId == null || employeeRepository.findById(empId) == null)
+            throw new IllegalArgumentException("사원 ID가 유효하지 않습니다.");
         Participant check = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
-        if (check != null && check.getDeleteYn() == false) {
-            throw new RuntimeException("Participant already exists");
+        if (check != null) {
+            if (check.getDeleteYn() == false) {
+                throw new RuntimeException("Participant already exists");
+            } else {
+                check.setDeleteYn(false);
+                return new ParticipantResponseDTO(participantRepository.save(check));
+            }
         }
         return new ParticipantResponseDTO(participantRepository.save(
                 Participant.builder()
@@ -61,12 +72,6 @@ public class ParticipantService {
     public ParticipantResponseDTO findByParticipantId(Long participantId) {
         Participant parti = participantRepository.findById(participantId).get();
         return new ParticipantResponseDTO(parti);
-    }
-
-    //select empId && scheduleId
-    public ParticipantResponseDTO findByEmpIdAndScheduleId(Long empId, Long scheduleId) {
-        Participant byEmployeeIdAndScheduleScheduleId = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, scheduleId);
-        return new ParticipantResponseDTO(byEmployeeIdAndScheduleScheduleId);
     }
 
     // delete

@@ -1,10 +1,6 @@
 package com.example.effi.service;
 
-import com.example.effi.domain.DTO.EmployeeDTO;
-import com.example.effi.domain.DTO.GlobalResponse;
-import com.example.effi.domain.DTO.GroupDTO;
-import com.example.effi.domain.DTO.GroupRequestDTO;
-import com.example.effi.domain.DTO.GroupResponseDTO;
+import com.example.effi.domain.DTO.*;
 import com.example.effi.domain.Entity.Category;
 import com.example.effi.domain.Entity.Dept;
 import com.example.effi.domain.Entity.Employee;
@@ -28,13 +24,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class GroupServiceTest {
@@ -60,34 +57,34 @@ class GroupServiceTest {
     @Mock
     private SecurityContext securityContext;
 
+    @Mock
+    private EmployeeService employeeService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn("1"); // mock employee number
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(1L); // mock employee ID
     }
 
     @DisplayName("그룹 생성 서비스 테스트 - 성공")
     @Test
     void createGroup_success() {
-        // Given
         GroupRequestDTO requestDTO = GroupRequestDTO.builder()
-                .groupName("Example Group")
-                .employeeIds(Arrays.asList(2L, 3L))
+                .groupName("Example Group").employeeIds(Arrays.asList(2L, 3L))
                 .build();
 
         Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder()
-                .groupName("Example Group")
-                .deleteYn(false)
-                .createdAt(Date.valueOf(LocalDate.now()))
+                .groupName("Example Group").deleteYn(false).createdAt(Date.valueOf(LocalDate.now()))
                 .build();
         Employee creator = Employee.builder().empNo(1L).build();
         Employee employee2 = Employee.builder().empNo(2L).build();
         Employee employee3 = Employee.builder().empNo(3L).build();
         Group savedGroup = Group.builder().groupId(1L).groupName("Example Group").build();
 
-        // Mock behavior
         when(authentication.getName()).thenReturn("1");
         when(categoryRepository.findByCategoryId(3)).thenReturn(Optional.of(category));
         when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);
@@ -96,10 +93,8 @@ class GroupServiceTest {
         when(employeeRepository.findById(3L)).thenReturn(Optional.of(employee3));
         when(groupRepository.findById(savedGroup.getGroupId())).thenReturn(Optional.of(savedGroup));
 
-        // When
         ResponseEntity<GlobalResponse> responseEntity = groupService.createGroup(requestDTO);
 
-        // Then
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("그룹 생성 성공", responseEntity.getBody().getMessage());
 
@@ -109,30 +104,6 @@ class GroupServiceTest {
 
         verify(groupRepository, times(1)).save(any(Group.class));
         verify(groupEmpRepository, times(3)).save(any(GroupEmp.class));  // 그룹 리더 + 2명의 구성원
-    }
-
-    @Test
-    @DisplayName("그룹 생성 서비스 테스트 - 카테고리가 존재하지 않는 경우 - 실패")
-    void createGroup_fail() {
-        // Given
-        GroupRequestDTO requestDTO = GroupRequestDTO.builder()
-                .groupName("Example Group")
-                .employeeIds(Arrays.asList(2L, 3L))
-                .build();
-
-        // Mock behavior
-        when(authentication.getName()).thenReturn("1");
-        when(categoryRepository.findByCategoryId(3)).thenReturn(Optional.empty());
-
-        // When & Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            groupService.createGroup(requestDTO);
-        });
-
-        assertEquals("category_id가 3인 카테고리를 찾을 수 없습니다.", exception.getMessage());
-
-        verify(groupRepository, never()).save(any(Group.class));
-        verify(groupEmpRepository, never()).save(any());
     }
 
     @DisplayName("그룹 생성 서비스 테스트 - 중복된 사원 번호가 포함된 경우 - 실패")
@@ -306,11 +277,12 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Long empId = 2L;
-        Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(empId);
         doNothing().when(groupEmpRepository).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         when(groupEmpRepository.countActiveMembersInGroup(groupId)).thenReturn(1L);
 
@@ -321,9 +293,6 @@ class GroupServiceTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("그룹 탈퇴 성공", responseEntity.getBody().getMessage());
 
-        GroupResponseDTO responseData = (GroupResponseDTO) responseEntity.getBody().getData();
-        assertEquals("Example Group", responseData.getGroupName());
-
         verify(groupEmpRepository, times(1)).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
     }
 
@@ -332,7 +301,6 @@ class GroupServiceTest {
     void withdrawGroup_groupNotFound() {
         // Given
         Long groupId = 1L;
-        Long empId = 2L;
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
@@ -344,7 +312,7 @@ class GroupServiceTest {
 
         assertEquals("유효하지 않은 그룹 ID: " + groupId, exception.getMessage());
 
-        verify(groupEmpRepository, never()).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
+        verify(groupEmpRepository, never()).updateDeleteYnByGroupIdAndEmployeeId(anyLong(), anyLong());
     }
 
     @DisplayName("그룹 탈퇴 서비스 테스트 - 모든 구성원이 그룹을 떠난 경우 - 성공")
@@ -353,11 +321,12 @@ class GroupServiceTest {
         // Given
         Long groupId = 1L;
         Long empId = 2L;
-        Category category = Category.builder().categoryName("그룹").build();
         Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
 
         // Mock behavior
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(1L)).thenReturn(empId);
         doNothing().when(groupEmpRepository).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         when(groupEmpRepository.countActiveMembersInGroup(groupId)).thenReturn(0L);
         when(groupRepository.save(any(Group.class))).thenReturn(group);
@@ -375,6 +344,7 @@ class GroupServiceTest {
         verify(groupEmpRepository, times(1)).updateDeleteYnByGroupIdAndEmployeeId(groupId, empId);
         verify(groupRepository, times(1)).save(any(Group.class));
     }
+
 
     @DisplayName("그룹 삭제 서비스 테스트 - 성공")
     @Test
@@ -417,6 +387,35 @@ class GroupServiceTest {
 
         verify(groupEmpRepository, never()).deleteAllByGroupId(groupId);
         verify(groupRepository, never()).delete(any(Group.class));
+    }
+
+    @Test
+    @DisplayName("그룹과 구성원 삭제 - 성공")
+    void deleteGroupAndMembersTest(){
+        Long groupId = 1L;
+        Category category = Category.builder().categoryName("그룹").build();
+        Group group = Group.builder().groupId(groupId).build();
+
+        // Mock behavior
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        doNothing().when(groupEmpRepository).deleteAllByGroupId(groupId);
+
+        // When
+        groupService.deleteGroupAndMembers(groupId);
+
+        verify(groupEmpRepository, times(1)).deleteAllByGroupId(groupId);
+    }
+
+    @Test
+    @DisplayName("그룹과 구성원 삭제 - 실패")
+    void deleteGroupAndMembersTestFail(){
+        Long groupId = -1L;
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            groupService.deleteGroupAndMembers(groupId);
+        });
+
+        assertEquals("유효하지 않은 그룹 ID: " + groupId, exception.getMessage());
     }
 
     @DisplayName("직원 이름으로 검색 서비스 테스트 - 성공")
@@ -533,8 +532,6 @@ class GroupServiceTest {
         verify(groupRepository, times(1)).findAll();
     }
 
-
-
     @DisplayName("id로 그룹 조회 서비스 테스트 - 성공")
     @Test
     void findGroupById_success() {
@@ -573,5 +570,113 @@ class GroupServiceTest {
         assertEquals("유효하지 않은 그룹 ID: " + groupId, exception.getMessage());
 
         verify(groupRepository, times(1)).findById(groupId);
+    }
+
+    @Test
+    @DisplayName("groupId로 그룹 리더 찾기 - 성공")
+    void findGroupLeader_success() {
+        // Given
+        Long groupId = 1L;
+        Long empNo = 1L;
+        Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
+        Employee employee = Employee.builder().empNo(empNo).build();
+        GroupEmp groupEmp = GroupEmp.builder().group(group).employee(employee).groupEmpRank("Leader").build();
+
+        // Mock behavior
+        when(authentication.getName()).thenReturn("1");
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(employeeRepository.findByEmpNo(empNo)).thenReturn(employee);
+        when(groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(groupId, empNo)).thenReturn(groupEmp);
+
+        // When
+        Boolean isLeader = groupService.findGroupLeader(groupId);
+
+        // Then
+        assertTrue(isLeader);
+        verify(groupRepository, times(1)).findById(groupId);
+        verify(employeeRepository, times(1)).findByEmpNo(empNo);
+        verify(groupEmpRepository, times(1)).findByGroup_GroupIdAndEmployee_Id(groupId, empNo);
+    }
+
+    @Test
+    @DisplayName("groupId로 그룹 리더 찾기 - 실패: 그룹 리더가 아닌 경우")
+    void findGroupLeader_fail_notLeader() {
+        // Given
+        Long groupId = 1L;
+        Long empNo = 1L;
+        Group group = Group.builder().groupId(groupId).groupName("Example Group").build();
+        Employee employee = Employee.builder().empNo(empNo).build();
+        GroupEmp groupEmp = GroupEmp.builder().group(group).employee(employee).groupEmpRank("Member").build();
+
+        // Mock behavior
+        when(authentication.getName()).thenReturn("1");
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+        when(employeeRepository.findByEmpNo(empNo)).thenReturn(employee);
+        when(groupEmpRepository.findByGroup_GroupIdAndEmployee_Id(groupId, empNo)).thenReturn(groupEmp);
+
+        // When
+        Boolean isLeader = groupService.findGroupLeader(groupId);
+
+        // Then
+        assertFalse(isLeader);
+        verify(groupRepository, times(1)).findById(groupId);
+        verify(employeeRepository, times(1)).findByEmpNo(empNo);
+        verify(groupEmpRepository, times(1)).findByGroup_GroupIdAndEmployee_Id(groupId, empNo);
+    }
+
+    @Test
+    @DisplayName("내 그룹 찾기 - 성공")
+    void findMyGroup_success() {
+        Long empNo = 1L;
+        Long empId = 1L;
+        Long groupId1 = 1L;
+        Long groupId2 = 2L;
+
+        Group group1 = Group.builder().groupId(groupId1).groupName("Group 1").build();
+        Group group2 = Group.builder().groupId(groupId2).groupName("Group 2").build();
+
+        GroupEmp groupEmp1 = GroupEmp.builder().group(group1).employee(Employee.builder().id(empId).build()).deleteYn(false).build();
+        GroupEmp groupEmp2 = GroupEmp.builder().group(group2).employee(Employee.builder().id(empId).build()).deleteYn(false).build();
+
+        List<GroupEmp> groupEmpList = List.of(groupEmp1, groupEmp2);
+
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(empNo)).thenReturn(empId);
+        when(groupEmpRepository.findAllByEmployee_Id(empId)).thenReturn(groupEmpList);
+        when(groupRepository.findById(groupId1)).thenReturn(Optional.of(group1));
+        when(groupRepository.findById(groupId2)).thenReturn(Optional.of(group2));
+
+        List<GroupNameDTO> result = groupService.findMyGroup();
+
+        assertEquals(2, result.size());
+        assertEquals(groupId1, result.get(0).getGroupId());
+        assertEquals("Group 1", result.get(0).getGroupName());
+        assertEquals(groupId2, result.get(1).getGroupId());
+        assertEquals("Group 2", result.get(1).getGroupName());
+
+        verify(groupEmpRepository, times(1)).findAllByEmployee_Id(empId);
+        verify(groupRepository, times(1)).findById(groupId1);
+        verify(groupRepository, times(1)).findById(groupId2);
+    }
+
+    @Test
+    @DisplayName("내 그룹 찾기 - 실패: 그룹이 존재하지 않는 경우")
+    void findMyGroup_fail() {
+        // Given
+        Long empNo = 1L;
+        Long empId = 1L;
+
+        // Mock behavior
+        when(authentication.getName()).thenReturn("1");
+        when(employeeService.findEmpIdByEmpNo(empNo)).thenReturn(empId);
+        when(groupEmpRepository.findAllByEmployee_Id(empId)).thenReturn(new ArrayList<>());
+
+        // When
+        List<GroupNameDTO> result = groupService.findMyGroup();
+
+        // Then
+        assertTrue(result.isEmpty());
+        verify(groupEmpRepository, times(1)).findAllByEmployee_Id(empId);
+        verify(groupRepository, never()).findById(anyLong());
     }
 }

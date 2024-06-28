@@ -5,13 +5,12 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import MyPageView from '../views/MyPageView.vue'
 
-import ModalTest from '@/views/ModalTest.vue';
-import ScheduleTestView from '../views/ScheduleTestView.vue'
-import CategoryScheduleView from '../views/CategoryScheduleView.vue'
 import SearchView from '../views/SearchView.vue'
+import GroupParticipantsView from '../views/GroupParticipantsView.vue'
+import GroupSchedulesView from '../views/GroupSchedulesView.vue'
 
-import test from '../views/test.vue'
-
+import TagStatisticsView from '../views/TagStatisticsView.vue'
+import AllSchedulesView from '../views/AllSchedulesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,7 +19,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
+      props: (route) => ({
+        selectedCategories: route.query.selectedCategories || [],
+        searchResults: route.query.searchResults || [],
+        selectedGroupId: route.query.selectedGroupId || [],
+      }) //?
     },
     {
       path: '/login',
@@ -30,20 +34,7 @@ const router = createRouter({
     {
       path: '/mypage',
       name: 'mypage',
-
       component: MyPageView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/modaltest',
-      name: 'modaltest',
-      component: ModalTest
-
-    },
-    {
-      path: '/category',
-      name: 'category',
-      component: CategoryScheduleView,
       meta: { requiresAuth: true }
     },
     {
@@ -51,18 +42,29 @@ const router = createRouter({
       name: 'search',
       component: SearchView,
       meta: { requiresAuth: true }
-
     },
     {
-      path: '/test',
-      name: 'test',
-      component: test,
+      path: '/tagstatistics',
+      name: 'tagstatistics',
+      component: TagStatisticsView,
       meta: { requiresAuth: true }
     },
     {
-      path: '/schedule',
-      name: 'schedule',
-      component: ScheduleTestView,
+      path: '/groupparticipants',
+      name: 'groupparticipants',
+      component: GroupParticipantsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/allschedules',
+      name: 'allschedules',
+      component: AllSchedulesView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/groupschedules',
+      name: 'groupschedules',
+      component: GroupSchedulesView,
       meta: { requiresAuth: true }
     }
   ]

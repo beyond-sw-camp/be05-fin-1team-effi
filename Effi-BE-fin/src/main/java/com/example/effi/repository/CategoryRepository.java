@@ -28,5 +28,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Category findByDept_DeptId(Long deptId);
 
     Category findByGroup_GroupId(Long groupId);
+
+    List<Category> findAllByCategoryId(Long categoryId);
 }
 

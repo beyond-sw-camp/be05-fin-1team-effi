@@ -1,6 +1,7 @@
 <template>
   <div class="search-navigator">
     <select class="form-select short-select" v-model="viewMode">
+      <option value="all">전체</option>
       <option value="day">일</option>
       <option value="week">주</option>
       <option value="month">월</option>
@@ -9,14 +10,14 @@
     <span class="formatted-period">{{ formattedPeriod }}</span>
     <button @click="next" class="btn btn-outline-secondary ms-2">&gt;</button>
     <button @click="goToToday" class="btn btn-outline-primary ms-3">Today</button>
-    <button @click="goToHome" class="btn btn-outline-secondary ms-2">달력</button> <!-- 추가된 부분 -->
+    <button @click="goToHome" class="btn btn-outline-secondary ms-2">달력</button>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
-import { useRouter } from 'vue-router'; // 추가된 부분
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   currentPeriod: {
@@ -45,6 +46,8 @@ const formattedPeriod = computed(() => {
     const start = startOfMonth(currentPeriod.value);
     const end = endOfMonth(currentPeriod.value);
     return `${format(start, 'yyyy년 MM월 dd일')} ~ ${format(end, 'yyyy년 MM월 dd일')}`;
+  } else if (viewMode.value === 'all') {
+    return '전체 일정';
   } else {
     return format(currentPeriod.value, 'yyyy년 MM월 dd일');
   }
@@ -95,10 +98,10 @@ const next = () => {
   }
 };
 
-const router = useRouter(); 
+const router = useRouter();
 
-const goToHome = () => { 
-  router.push({ name: 'home' }); 
+const goToHome = () => {
+  router.push({ name: 'home' });
 };
 </script>
 
@@ -109,7 +112,7 @@ const goToHome = () => {
 }
 
 .form-select.short-select {
-  width: 50px;
+  width: 60px;
   padding: 5px;
   margin: 0 10px;
 }

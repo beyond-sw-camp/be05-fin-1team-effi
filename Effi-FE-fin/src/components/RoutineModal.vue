@@ -18,7 +18,7 @@
             <option value="daily">매일</option>
             <option value="weekly">매주</option>
             <option value="monthly">매월</option>
-            <option value="yearly">매년</option> <!-- 매년 옵션 추가 -->
+            <option value="yearly">매년</option>
           </select>
         </div>
         <div class="modal-footer">
@@ -40,14 +40,14 @@ export default {
       required: true
     }
   },
-  emits: ['close', 'confirm'],
+  emits: ['confirm-routine'],
   setup(props, { emit }) {
     const routineStart = ref('');
     const routineEnd = ref('');
     const routineCycle = ref('daily');
 
     const close = () => {
-      emit('close');
+      emit('close-routine');
     };
 
     const submitRoutine = async () => {
@@ -57,7 +57,8 @@ export default {
           routineEnd: routineEnd.value,
           routineCycle: routineCycle.value
         });
-        emit('confirm', response.data);
+        console.log('Routine added:', response.data);
+        emit('confirm-routine', response.data);
         close();
       } catch (error) {
         console.error('Error adding routine:', error);

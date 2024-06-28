@@ -5,6 +5,8 @@ import com.example.effi.domain.DTO.ScheduleResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -17,7 +19,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Async
-@Transactional
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -31,6 +32,7 @@ public class EmailService {
     // 인증 코드 대신 상황에 맞는 문구 추기
 
     // 그룹 추가 -> 그룹 구성원들에게 (groupId, empId-email)
+    @Transactional
     public void addGroupMail(String email, Long groupId){
         MessageBody = groupService.findGroupById(groupId).getGroupName();
 
@@ -47,6 +49,7 @@ public class EmailService {
     }
 
     // 그룹 편집 -> 그룹 구성원들에게 (groupId, empId-email)
+    @Transactional
     public void updateGroupMail(String email, Long groupId){
         MessageBody = groupService.findGroupById(groupId).getGroupName();
 
@@ -64,6 +67,7 @@ public class EmailService {
 
     // 회사, 팀, 그룹의 일정이 추가 시 속한 사원들에게 메일 전송 기능 구현
     // 전체 전송 (empId-email)
+    @Transactional
     public void allEmployeesMail(String email, Long scheduleId){
         MessageBody = scheduleService.getSchedule(scheduleId).getTitle();
 
@@ -81,6 +85,7 @@ public class EmailService {
     }
 
     // 부서 전송 (deptId, empId-email)
+    @Transactional
     public void deptEmplyeesMail(String email, Long scheduleId){
         MessageBody = scheduleService.getSchedule(scheduleId).getTitle();
 
@@ -98,6 +103,7 @@ public class EmailService {
     }
 
     // 그룹 전송 (groupId, empId-email)
+    @Transactional
     public void groupEmplyesMail(String email, Long scheduleId){
         MessageBody = scheduleService.getSchedule(scheduleId).getTitle();
 
@@ -116,6 +122,7 @@ public class EmailService {
 
     // 일정에 대한 미리 알림 메일 전송 기능 구현
     // 일정 하나 (empId-email, scheduleId, notifitionYn)
+    @Transactional
     public void scheduleNotifyMail(String email, Long scheduleId) {
         MessageBody = scheduleService.getSchedule(scheduleId).getTitle();
         LocalDateTime startTime = scheduleService.getSchedule(scheduleId).getStartTime()

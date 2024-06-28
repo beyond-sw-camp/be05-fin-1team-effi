@@ -2,10 +2,10 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
-      <h2>타임존</h2>
+      <h5>타임존</h5>
       <ul class="scrollable-list">
         <li
-          v-for="timezone in timezones"
+          v-for="timezone in availableTimezones"
           :key="timezone.timezoneId"
           @click="selectTimezone(timezone.timezoneId)"
           :class="{ selected: selectedTimezoneId === timezone.timezoneId }"
@@ -14,6 +14,13 @@
         </li>
       </ul>
       <button class="add-button" @click="addTimezone">추가하기</button>
+      <h5 class="my-timezones-header">나의 타임존</h5>
+      <ul class="scrollable-list">
+        <li v-for="timezone in myTimezones" :key="timezone.timezoneId" class="my-timezone-item">
+          {{ timezone.timezoneName }}
+          <button class="delete-button" @click="removeTimezone(timezone.timezoneId)">X</button>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -30,20 +37,36 @@ export default {
   },
   data() {
     return {
-      timezones: [],
+      availableTimezones: [],
+      myTimezones: [],
       selectedTimezoneId: null
     };
   },
   created() {
-    this.fetchFindTimezone();
+    this.fetchAvailableTimezones();
+    this.fetchMyTimezones();
   },
   methods: {
-    async fetchFindTimezone() {
+    async fetchAvailableTimezones() {
       try {
         const response = await axiosInstance.get('/api/mypage/timezones');
-        this.timezones = response.data;
+        this.availableTimezones = response.data;
       } catch (error) {
         console.error('타임존 검색 오류:', error.response ? error.response.data : error.message);
+      }
+    },
+    async fetchMyTimezones() {
+      const empId = sessionStorage.getItem('empNo');
+      try {
+        const response = await axiosInstance.get(`/api/timezone-emp/${empId}`);
+        const defaultTimezoneResponse = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
+        const defaultTimezone = defaultTimezoneResponse.data.data;
+
+        this.myTimezones = response.data.data.timezones.filter(
+          (timezone) => timezone.timezoneId !== defaultTimezone.timezoneId
+        );
+      } catch (error) {
+        console.error('나의 타임존 검색 오류:', error.response ? error.response.data : error.message);
       }
     },
     selectTimezone(timezoneId) {
@@ -56,16 +79,33 @@ export default {
       }
       const empId = sessionStorage.getItem('empNo');
       try {
-        await axiosInstance.post(`/api/timezone-emp/${empId}/add`, null, {
+        const response = await axiosInstance.post(`/api/timezone-emp/${empId}/add`, null, {
           params: {
             timezoneId: this.selectedTimezoneId
           }
         });
         alert('타임존이 추가되었습니다.');
-        this.$emit('close');
+        this.$emit('add-timezone', response.data.data); // 새로운 타임존을 부모 컴포넌트에 전달
+        this.fetchMyTimezones();
       } catch (error) {
         console.error('타임존 추가 오류:', error.response ? error.response.data : error.message);
         alert('타임존 추가에 실패했습니다.');
+      }
+    },
+    async removeTimezone(timezoneId) {
+      const empId = sessionStorage.getItem('empNo');
+      try {
+        await axiosInstance.delete(`/api/timezone-emp/${empId}/remove`, {
+          params: {
+            timezoneId: timezoneId
+          }
+        });
+        alert('타임존이 삭제되었습니다.');
+        this.$emit('remove-timezone', timezoneId); // 삭제된 타임존의 ID를 부모 컴포넌트에 전달
+        this.fetchMyTimezones();
+      } catch (error) {
+        console.error('타임존 삭제 오류:', error.response ? error.response.data : error.message);
+        alert('타임존 삭제에 실패했습니다.');
       }
     }
   }
@@ -83,7 +123,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
+
 
 .modal-container {
   background: white;
@@ -104,7 +146,7 @@ export default {
   right: 10px;
 }
 
-h2, p {
+h5, p {
   text-align: center; /* 텍스트 가운데 정렬 */
 }
 
@@ -115,9 +157,11 @@ ul {
 
 li {
   margin: 10px 0;
-  cursor: pointer;
   padding: 5px;
   border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 li.selected {
@@ -129,15 +173,33 @@ li.selected {
   overflow-y: auto; /* 세로 스크롤 활성화 */
 }
 
-.add-button {
+.add-button, .delete-button {
   background-color: #FBB584;
   border: none;
-  padding: 10px 20px;
+  padding: 10px;
   border-radius: 4px;
   cursor: pointer;
   color: white;
   font-weight: bold;
-  width: 100%;
   margin-top: 10px;
+}
+
+.add-button {
+  width: 100%;
+  margin-bottom: 20px; /* 추가하기 버튼과 나의 타임존 사이의 간격 설정 */
+}
+
+.my-timezones-header {
+  margin-top: 20px; /* 추가하기 버튼과 나의 타임존 사이의 간격 설정 */
+}
+
+.my-timezone-item {
+  font-size: 14px; /* 나의 타임존 글자 크기 조정 */
+}
+
+.delete-button {
+  background-color: #ff4d4d;
+  font-size: 10px; /* X 버튼 크기 조정 */
+  padding: 5px;
 }
 </style>

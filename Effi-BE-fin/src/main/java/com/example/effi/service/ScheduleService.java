@@ -1,14 +1,9 @@
 package com.example.effi.service;
 
 import com.example.effi.domain.DTO.*;
-import com.example.effi.domain.Entity.Category;
-import com.example.effi.domain.Entity.Participant;
-import com.example.effi.domain.Entity.Routine;
-import com.example.effi.domain.Entity.Schedule;
-import com.example.effi.repository.CategoryRepository;
-import com.example.effi.repository.ParticipantRepository;
-import com.example.effi.repository.RoutineRepository;
-import com.example.effi.repository.ScheduleRepository;
+import com.example.effi.domain.Entity.*;
+import com.example.effi.repository.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
@@ -36,17 +31,52 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final CategoryRepository categoryRepository;
     private final RoutineRepository routineRepository;
+
+    private final TagScheduleRepository tagScheduleRepository;
+
     private final ParticipantRepository participantRepository;
-    private final ParticipantService participantService;
-    private final EmployeeService employeeService;
+//    private final EmployeeService employeeService;
     private final CategoryService categoryService;
     private final TaskScheduler taskScheduler;
+
+    private final EmployeeService employeeService;
+    private final GroupService groupService;
+
+    
+    @Autowired
+    @Lazy
+    private ParticipantService participantService;
+    @Autowired
+    private DeptRepository deptRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @PostConstruct
+    public void init() {
+        // 지연 초기화
+    }
+
+    public void setParticipantService(ParticipantService participantService) {
+        this.participantService = participantService;
+    }
 
     @Autowired
     @Lazy
     private EmailService emailService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
+
+    // 여러개의 tagName 을 list 형식으로
+    private List<String> getTagNamesForSchedule(Long scheduleId) {
+        List<TagSchedule> tagSchedules = tagScheduleRepository.findAllBySchedule_ScheduleId(scheduleId);
+        List<String> tagNames = new ArrayList<>();
+        for (TagSchedule ts : tagSchedules) {
+            tagNames.add(ts.getTag().getTagName());
+        }
+        return tagNames;
+    }
+
 
     //scheduleId로 schedule 조회
     public ScheduleResponseDTO getSchedule(Long scheduleId) {
@@ -85,7 +115,7 @@ public class ScheduleService {
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : lst) {
             Participant dto = participantRepository.findByEmployee_IdAndSchedule_ScheduleId(empId, sch.getScheduleId());
-            if (dto != null && dto.getDeleteYn() == false)
+            if (dto != null && sch.getDeleteYn() == false)
                 res.add(new ScheduleResponseDTO(sch));
         }
         return res;
@@ -203,9 +233,36 @@ public class ScheduleService {
     }
 
     // update schedule
-    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId) {
+    public ScheduleResponseDTO updateSchedule(ScheduleRequestDTO scheduleRequestDTO, Long scheduleId, CategoryResponseDTO categoryResponseDTO) {
         Schedule sch = scheduleRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("Schedule not found"));
-        Category category = categoryRepository.findById(scheduleRequestDTO.getCategoryNo()).get();
+        Category category = null;
+        if (categoryResponseDTO.getGroupId() != null){
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(null)
+                    .group(groupRepository.findById(categoryResponseDTO.getGroupId()).orElse(null))
+                    .build();
+        }
+        else if (categoryResponseDTO.getDeptId() != null){
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(deptRepository.findByDeptId(categoryResponseDTO.getDeptId()))
+                    .group(null)
+                    .build();
+        }
+        else{
+            category = Category.builder()
+                    .categoryNo(categoryResponseDTO.getCategoryNo())
+                    .categoryId(categoryResponseDTO.getCategoryId())
+                    .categoryName(categoryResponseDTO.getCategoryName())
+                    .dept(null)
+                    .group(null)
+                    .build();
+        }
         if (scheduleRequestDTO.getRoutineId() != null) {
             Routine routine = routineRepository.findById(scheduleRequestDTO.getRoutineId()).orElse(null);
             sch.update(scheduleRequestDTO.getTitle(), scheduleRequestDTO.getContext(), scheduleRequestDTO.getStartTime(),
@@ -255,9 +312,18 @@ public class ScheduleService {
 
     // group나갔을때 그 그룹에 해당하는 스케줄 삭제
     public List<ScheduleResponseDTO> deleteGroupSchedule(Long groupId){
+        GroupDTO groupById = groupService.findGroupById(groupId);
+        if (groupById == null)
+            throw new IllegalArgumentException("Group not found");
+
         CategoryResponseDTO byGroupId = categoryService.findByGroupId(groupId);
+        if (byGroupId == null)
+            throw new IllegalArgumentException("Group not found");
+
         Long categoryNo = byGroupId.getCategoryNo();
         List<Schedule> allByCategortyCategoryNo = scheduleRepository.findAllByCategory_CategoryNo(categoryNo);
+        if (allByCategortyCategoryNo.size() == 0)
+            throw new IllegalArgumentException("Group not found");
 
         List<ScheduleResponseDTO> res = new ArrayList<>();
         for (Schedule sch : allByCategortyCategoryNo) {
@@ -317,5 +383,44 @@ public class ScheduleService {
             String email = employeeService.findById(participant.getEmpId()).getEmail();
             emailService.scheduleNotifyMail(email, scheduleId);
         }
+    }
+
+    //empid로 직원 정보 조회
+    public EmployeeDTO findById(Long empId) {
+        return employeeService.findById(empId);
+    }
+
+
+    //scheduleId로 schedule 조회
+    public SearchResponseDTO getScheduleForSearch(Long scheduleId) {
+        Schedule sch = scheduleRepository.findById(scheduleId).orElse(null);
+        List<String> tagNames = getTagNamesForSchedule(sch.getScheduleId());
+
+        if (sch == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found");
+        }
+        if (sch.getDeleteYn() == false)
+            return new SearchResponseDTO(sch, tagNames);
+        else
+            return null;
+    }
+
+    //empId로 내 schedule만 조회 -> return SearchResponseDTO
+    public List<SearchResponseDTO> getAllSchedulesForSearch() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long creatorEmpNo = Long.valueOf(authentication.getName());
+
+        Long empId = employeeService.findEmpIdByEmpNo(creatorEmpNo);
+        List<Participant> partiDTO = participantRepository.findAllByEmployee_Id(empId);
+        List<SearchResponseDTO> schedules = new ArrayList<>();
+
+        for (Participant p : partiDTO) {
+            Schedule schedule = p.getSchedule();
+            if (p.getSchedule().getDeleteYn() == false) {
+                List<String> tagNames = getTagNamesForSchedule(schedule.getScheduleId());
+                schedules.add(new SearchResponseDTO(p.getSchedule(), tagNames));
+            }
+        }
+        return schedules;
     }
 }

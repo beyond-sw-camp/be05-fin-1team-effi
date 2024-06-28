@@ -3,7 +3,7 @@
     <div class="modal-container">
       <button class="close-button" @click="$emit('close')">×</button>
       <div class="align-center">
-        <h2>새 그룹 만들기</h2>
+        <h5>새 그룹 만들기</h5>
         <p>그룹장 : {{ groupLeader }}</p>
       </div>
       <div class="input-group">
@@ -165,7 +165,7 @@ export default {
 }
 
 .modal-overlay {
-  position: absolute;
+  position:fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -174,7 +174,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10001;
+  z-index: 1000;
 }
 
 .modal-container {

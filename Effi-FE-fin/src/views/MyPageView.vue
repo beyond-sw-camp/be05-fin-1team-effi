@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <Navigation class="navigation" />
     <div class="content">
       <div class="profile-container" v-if="mypage">
         <div class="profile-row">
@@ -52,6 +51,7 @@
             </div>
           </div>
         </div>
+        <button class="stats-button" @click="viewTagStats">태그 통계보기</button>
       </div>
       <p v-if="message">{{ message }}</p>
     </div>
@@ -60,11 +60,19 @@
 
 <script>
 import axiosInstance from '@/services/axios';
-import Navigation from '@/components/LeftSidebar.vue';
+import { useRouter } from 'vue-router';
 
 export default {
-  components: {
-    Navigation
+  setup() {
+    const router = useRouter();
+
+    const viewTagStats = () => {
+      router.push('/tagstatistics');
+    };
+
+    return {
+      viewTagStats,
+    };
   },
   data() {
     return {
@@ -135,12 +143,9 @@ export default {
 .container {
   display: flex;
   margin-top: 60px;
+  margin-left: 80px;
   height: calc(100vh - 60px);
   width: 100%;
-}
-
-.navigation {
-  flex: 0 0 250px;
 }
 
 .content {
@@ -183,6 +188,15 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   margin-left: 10px;
+}
+
+.stats-button {
+  background-color: #99ccff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
 }
 
 @media (max-width: 768px) {

@@ -4,6 +4,7 @@ import com.example.effi.domain.DTO.TagResponseDTO;
 import com.example.effi.domain.Entity.Tag;
 import com.example.effi.repository.TagRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +48,7 @@ public class TagServiceTest {
         }
     }
 
+    @DisplayName("Tag 추가 - 성공")
     @Test
     void testAddTag() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
@@ -59,6 +61,7 @@ public class TagServiceTest {
         verify(tagRepository).findTagByTagName(anyString());
     }
 
+    @DisplayName("Tag 추가 - 실패")
     @Test
     void testAddTagFailure() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(sampleTag);
@@ -71,6 +74,7 @@ public class TagServiceTest {
         verify(tagRepository, never()).save(any(Tag.class));
     }
 
+    @DisplayName("Tag Id 조회 - 성공")
     @Test
     void testGetTagId() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(sampleTag);
@@ -80,6 +84,7 @@ public class TagServiceTest {
         assertThat(tagId).isEqualTo(1L);
     }
 
+    @DisplayName("Tag Id 조회 - 실패")
     @Test
     void testGetTagIdFailure() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
@@ -90,6 +95,7 @@ public class TagServiceTest {
         verify(tagRepository).findTagByTagName(anyString());
     }
 
+    @DisplayName("Tag Name 조회 - 성공")
     @Test
     void testGetTagName() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.of(sampleTag));
@@ -99,6 +105,7 @@ public class TagServiceTest {
         assertThat(tagName).isEqualTo("Sample Tag");
     }
 
+    @DisplayName("Tag Name 조회 - 실패")
     @Test
     void testGetTagNameFailure() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -110,6 +117,7 @@ public class TagServiceTest {
         verify(tagRepository).findById(anyLong());
     }
 
+    @DisplayName("Tag 조회 - 성공")
     @Test
     void testGetTag() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(sampleTag);
@@ -121,6 +129,7 @@ public class TagServiceTest {
         assertThat(tagResponseDTO.getTagName()).isEqualTo("Sample Tag");
     }
 
+    @DisplayName("Tag 조회 - 실패")
     @Test
     void testGetTagFailure() {
         when(tagRepository.findTagByTagName(anyString())).thenReturn(null);
@@ -132,6 +141,7 @@ public class TagServiceTest {
         verify(tagRepository).findTagByTagName(anyString());
     }
 
+    @DisplayName("전체 Tag 조회 - 성공")
     @Test
     void testGetAllTag() {
         Tag tag1 = new Tag("Tag 1");
@@ -150,6 +160,7 @@ public class TagServiceTest {
         assertThat(allTags.get(1).getTagName()).isEqualTo("Tag 2");
     }
 
+    @DisplayName("전체 Tag 조회 - 실패")
     @Test
     void testGetAllTagFailure() {
         when(tagRepository.findAll()).thenThrow(new RuntimeException("Failed to fetch tags"));

@@ -15,6 +15,12 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import moment from 'moment'; // moment를 직접 불러옵니다
 
+import Toast, { useToast } from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
+
+import { SnackbarService, Vue3Snackbar } from 'vue3-snackbar';
+import 'vue3-snackbar/styles';
+
 import App from './App.vue';
 import router from './router';
 import store from './stores';
@@ -29,9 +35,46 @@ app.use(vuetify);
 app.use(BootstrapVue3);
 app.use(store);
 
-// app.use(VueMoment); // vue-moment 제거
+app.use(SnackbarService);
+app.component("vue3-snackbar", Vue3Snackbar);
+
+app.use(Toast, {
+    // options
+    position: 'top-right',
+    timeout: 6000,
+    closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: 'button',
+    icon: true,
+    rtl: false,
+    maxToasts: 10,
+    transition: 'Vue-Toastification__bounce',
+    newestOnTop: true,
+    filterBeforeCreate: (toast, toasts) => {
+        if (toasts.filter(
+            t => t.content === toast.content
+        ).length !== 0) {
+            return false;
+        }
+        return toast;
+    },
+    filterBeforeClear: (toast, toasts) => {
+        if (toasts.filter(
+            t => t.content === toast.content
+        ).length !== 0) {
+            return false;
+        }
+        return toast;
+    },
+
+});
 
 app.config.globalProperties.$dayjs = dayjs; // dayjs를 전역 프로퍼티로 설정
 app.config.globalProperties.$moment = moment; // moment를 전역 프로퍼티로 설정
-
+app.config.globalProperties.$toast = useToast(); // Toast를 전역 프로퍼티로 설정
 app.mount('#app');

@@ -1,10 +1,11 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <button class="close-button" @click="closeModal">×</button>
-      <h2>{{ isEditMode ? '일정 수정하기' : '일정 추가하기' }}</h2>
+      <button class="close-button" @click="closeModal">✕</button>
+      <h2>일정 추가하기</h2>
       <div class="modal-body">
         <form @submit.prevent="submit">
+          <!-- Form Fields -->
           <div class="form-group">
             <label for="title">제목:</label>
             <input type="text" id="title" v-model="internalEvent.title" required>
@@ -29,7 +30,7 @@
             <label for="endTime">종료 시간:</label>
             <input type="time" id="endTime" v-model="internalEvent.endTime" required>
           </div>
-          <div class="form-group timezone-group">
+          <div class="form-group">
             <label for="timezone">타임존:</label>
             <div class="timezone-value">
               {{ internalEvent.timezoneName }}
@@ -37,6 +38,14 @@
           </div>
           <div class="form-group checkbox-group">
             <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat" @change="toggleRoutineModal"></label>
+          </div>
+          <div class="form-group">
+            <label for="category">카테고리</label>
+            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
+            <CategoryModal :show="showCategoryModal" :schedule-id="null" @close="showCategoryModal = false" @select="handleCategorySelect" />
+            <div v-if="internalEvent.categoryName" class="selected-category">
+              선택된 카테고리: {{ internalEvent.categoryName }}
+            </div>
           </div>
           <div class="form-group">
             <label for="participants">참여자</label>
@@ -60,19 +69,11 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="category">카테고리</label>
-            <button @click="showCategoryModal = true" type="button" id="category">카테고리 추가하기</button>
-            <CategoryModal :show="showCategoryModal" @close="showCategoryModal = false" @select="handleCategorySelect" />
-            <div v-if="internalEvent.categoryName" class="selected-category">
-              선택된 카테고리: {{ internalEvent.categoryName }}
-            </div>
-          </div>
-          <div class="form-group">
             <label for="tag">태그</label>
             <div>
-              <TagApp :schedule="internalEvent" @update-schedule="updateSchedule"/>
+              <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule"/>
               <div class="tag-list">
-                <span v-for="tag in internalEvent.tags" :key="tag" class="tag-item">{{ tag }}</span>
+                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
               </div>
             </div>
           </div>
@@ -88,31 +89,31 @@
             <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
-            <button type="submit">{{ isEditMode ? '수정' : '추가' }}</button>
+            <button type="submit" class="update-button">추가</button>
           </div>
         </form>
       </div>
       <RoutineModal
         v-if="showRoutineModal"
         :show="showRoutineModal"
-        @close="handleRoutineClose"
-        @confirm="handleRoutineConfirm"
+        @close-routine="handleRoutineClose"
+        @confirm-routine="handleRoutineConfirm"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import axiosInstance from '@/services/axios';
 import CategoryModal from './CategoryModal.vue';
-import TagApp from './TagAdd.vue';
+import TagAdd from './TagAdd.vue';
 import RoutineModal from './RoutineModal.vue';
 
 export default {
   components: {
     CategoryModal,
-    TagApp,
+    TagAdd,
     RoutineModal
   },
   props: {
@@ -120,27 +121,16 @@ export default {
       type: Boolean,
       required: true
     },
-    isEditMode: {
-      type: Boolean,
-      default: false
-    },
-    event: {
-      type: Object,
-      default: () => ({
-        title: '',
-        content: '',
-        startDate: '',
-        startTime: '',
-        endDate: '',
-        endTime: '',
-      })
+    initialDate: {
+      type: String,
+      default: ''
     }
   },
   setup(props, { emit }) {
     const internalEvent = ref({
       title: '',
       context: '',
-      startDate: '',
+      startDate: props.initialDate,
       startTime: '',
       endDate: '',
       endTime: '',
@@ -159,30 +149,28 @@ export default {
     const selectedEmployees = ref([]);
     const showCategoryModal = ref(false);
     const showRoutineModal = ref(false);
+    const tagColors = reactive({});
 
     onMounted(() => {
-      if (props.isEditMode) {
-        Object.assign(internalEvent.value, props.event);
+      const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
+      if (empId) {
+        fetchDefaultTimezone(empId);
       } else {
-        const empId = sessionStorage.getItem('empNo'); // 여기서 empNo를 가져옴
-        if (empId) {
-          fetchDefaultTimezone(empId);
-        } else {
-          console.error('empNo not found in sessionStorage');
-        }
+        console.error('empNo not found in sessionStorage');
       }
+    });
+
+    watch(() => props.initialDate, (newDate) => {
+      internalEvent.value.startDate = newDate;
     });
 
     const fetchDefaultTimezone = async (empId) => {
       try {
         const response = await axiosInstance.get(`/api/timezone-emp/${empId}/default`);
-        console.log('API response:', response.data); // 전체 응답 데이터 로깅
         const defaultTimezone = response.data.data;
         if (defaultTimezone) {
           internalEvent.value.timezoneId = defaultTimezone.timezoneId;
           internalEvent.value.timezoneName = defaultTimezone.timezoneName;
-          console.log('defaultTimezone ID:', internalEvent.value.timezoneId);
-          console.log('defaultTimezone Name:', internalEvent.value.timezoneName);
         } else {
           console.error('No default timezone found');
         }
@@ -197,7 +185,6 @@ export default {
 
     const submit = async () => {
       try {
-        // 시간 형식 수정
         const formattedEvent = {
           ...internalEvent.value,
           startTime: new Date(`${internalEvent.value.startDate}T${internalEvent.value.startTime}`),
@@ -205,42 +192,57 @@ export default {
           tags: internalEvent.value.tags.map(tag => tag.name)
         };
 
-        // 루틴 추가
+        // Log the formattedEvent to check its contents
+        console.log("Formatted Event: ", formattedEvent);
+
         if (internalEvent.value.repeat && !internalEvent.value.routineId) {
-          const routineResponse = await axios.post('http://localhost:8080/api/routine/add', {
+          const routineResponse = await axiosInstance.post('/api/routine/add', {
             routineStart: formattedEvent.startTime,
             routineEnd: formattedEvent.endTime,
             routineCycle: internalEvent.value.routineCycle
           });
           formattedEvent.routineId = routineResponse.data.routineId;
-        } else if (!internalEvent.value.repeat) {
+        } else if (!internalEvent.value.repeat && internalEvent.value.routineId) {
+          await axiosInstance.put(`/api/routine/delete/${internalEvent.value.routineId}`);
           formattedEvent.routineId = null;
         }
 
-        const apiUrl = props.isEditMode
-          ? `http://localhost:8080/api/schedule/update/${props.event.id}`
-          : `http://localhost:8080/api/schedule/add${formattedEvent.categoryNo === 2 ? `/dept/${formattedEvent.deptId}` : formattedEvent.categoryNo === 3 ? `/group/${formattedEvent.groupId}` : ''}`;
+        // // Fetch category details by categoryNo and update categoryId
+        const categoryResponse = await axiosInstance.get(`/api/category/find/${formattedEvent.categoryNo}`);
+        console.log('categoryResponse:', categoryResponse.data) // 카테고리 응답 확인
+        if (categoryResponse.data) {
+          formattedEvent.categoryNo = categoryResponse.data.categoryId;
+        }
 
-        console.log('Submitting to API:', apiUrl);
-        console.log('Formatted event data:', formattedEvent);
+        let apiUrl;
+        switch (formattedEvent.categoryNo) {
+          case 1:
+            apiUrl = `/api/schedule/add/company`;
+            break;
+          case 2:
+            apiUrl = `/api/schedule/add/dept/${formattedEvent.deptId}`;
+            break;
+          case 3:
+            apiUrl = `/api/schedule/add/group/${formattedEvent.groupId}`;
+            break;
+          case 4:
+            apiUrl = `/api/schedule/add`;
+            break;
+          default:
+            apiUrl = `/api/schedule/add`;
+        }
 
-        const response = await axios.post(apiUrl, formattedEvent);
-        console.log('Response from API:', response.data);
-
+        const response = await axiosInstance.post(apiUrl, formattedEvent);
         const scheduleId = response.data.scheduleId;
+        console.log("scheduleId: ", scheduleId);
 
-        // 태그 추가
         for (let tag of internalEvent.value.tags) {
-          await axios.post(`http://localhost:8080/api/tag/add/${scheduleId}`, tag);
+          await axiosInstance.post(`/api/tag/add/${scheduleId}`, { "tag": tag });
         }
 
-        // 참여자 추가
-        for (let employee of selectedEmployees.value) {
-          await axios.post(`http://localhost:8080/api/participant/add`, {
-            scheduleId,
-            empId: employee.empNo
-          });
-        }
+        // if (formattedEvent.categoryNo === 2) {
+        //   await fetchAndAddDeptMembers(scheduleId, formattedEvent.deptId);
+        // }
 
         alert('일정이 추가되었습니다.');
         closeModal();
@@ -262,14 +264,21 @@ export default {
 
       if (selection.selectedOption === 2) {
         internalEvent.value.deptId = selection.selectedDeptId;
+        console.log('selectedDeptId:', selection.selectedDeptId);
       } else if (selection.selectedOption === 3) {
         internalEvent.value.groupId = selection.selectedGroupId;
       }
+
       showCategoryModal.value = false;
     };
 
-    const updateSchedule = (tags) => {
+    const updateSchedule = ({ tags, tagColors: newTagColors }) => {
       internalEvent.value.tags = tags;
+      for (let tag in newTagColors) {
+        if (!tagColors[tag]) {
+          tagColors[tag] = newTagColors[tag];
+        }
+      }
     };
 
     const searchEmployees = async () => {
@@ -306,25 +315,41 @@ export default {
       selectedEmployees.value = selectedEmployees.value.filter(emp => emp.empNo !== empNo);
     };
 
+    // const fetchAndAddDeptMembers = async (scheduleId, deptId) => {
+    //   try {
+    //     console.log('fetchAndAddDeptMembers called');
+    //     const response = await axiosInstance.post(`/api/participant/add/dept/${deptId}`, null, {
+    //       params: {
+    //         scheduleId: scheduleId
+    //       }
+    //     });
+    //     console.log('fetchAndAddDeptMembers response:', response.data);
+    //   } catch (error) {
+    //     console.error('Error fetching and adding dept members:', error.response ? error.response.data : error.message);
+    //     alert('부서원 추가에 실패했습니다.');
+    //   }
+    // };
+
     const toggleRoutineModal = () => {
+      console.log('toggleRoutineModal called');
       showRoutineModal.value = internalEvent.value.repeat;
     };
 
     const handleRoutineClose = () => {
+      console.log('handleRoutineClose called');
       showRoutineModal.value = false;
     };
 
     const handleRoutineConfirm = (routineData) => {
       internalEvent.value.routineId = routineData.routineId;
       internalEvent.value.routineCycle = routineData.routineCycle;
-      showRoutineModal.value = false;
+      internalEvent.value.repeat = true;  // 루틴 설정을 완료했으므로 반복 체크를 true로 설정
     };
 
-    watch(() => props.event, (newEvent) => {
-      if (props.isEditMode) {
-        Object.assign(internalEvent.value, newEvent);
-      }
-    });
+    const getRandomColor = () => {
+      const colors = ['#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    };
 
     return {
       internalEvent,
@@ -342,7 +367,9 @@ export default {
       removeEmployee,
       toggleRoutineModal,
       handleRoutineClose,
-      handleRoutineConfirm
+      handleRoutineConfirm,
+      tagColors,
+      getRandomColor
     };
   }
 };
@@ -359,6 +386,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-container {
@@ -370,6 +398,7 @@ export default {
   width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  z-index: 1001;
 }
 
 .close-button {
@@ -401,7 +430,7 @@ input, select, textarea {
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
-  background-color: #FDDAC1; /* 입력 필드 배경색 */
+  background-color: #FDDAC1;
 }
 
 textarea {
@@ -430,7 +459,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .modal-footer button {
   padding: 10px 20px;
-  background-color: #FBB584; /* 수정하기 버튼 배경색 */
+  background-color: #FBB584;
   color: white;
   border: none;
   border-radius: 5px;
@@ -518,7 +547,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .checkbox-group label {
   margin-right: 10px;
-  white-space: nowrap; /* 줄바꿈 방지 */
+  white-space: nowrap;
 }
 
 .timezone-group {
@@ -528,13 +557,13 @@ button.update-button:hover, button#category:hover, button#group:hover {
 
 .timezone-value {
   margin-left: 10px;
-  white-space: nowrap; /* 줄바꿈 방지 */
+  white-space: nowrap;
 }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px; /* 태그 사이의 간격을 설정합니다 */
+  gap: 8px;
 }
 
 .tag-item {
@@ -544,7 +573,7 @@ button.update-button:hover, button#category:hover, button#group:hover {
   font-size: 14px;
   cursor: pointer;
   display: inline-block;
-  background-color: var(--tag-color, #888); /* 기본 태그 색상 */
+  background-color: var(--tag-color, #888);
 }
 
 h2 {

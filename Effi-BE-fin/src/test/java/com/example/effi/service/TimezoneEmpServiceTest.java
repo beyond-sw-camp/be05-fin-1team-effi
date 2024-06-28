@@ -61,7 +61,8 @@ class TimezoneEmpServiceTest {
         when(employeeRepository.findById(anyLong())).thenReturn(Optional.of(employee));
         when(timezoneRepository.findById(anyLong())).thenReturn(Optional.of(timezone));
         when(timezoneEmpRepository.countByEmployeeId(anyLong())).thenReturn(1L);
-        when(timezoneEmpRepository.save(any(TimezoneEmp.class))).thenReturn(TimezoneEmp.builder().timezone(timezone).employee(employee).build());
+        when(timezoneEmpRepository.save(any(TimezoneEmp.class))).thenReturn(TimezoneEmp.builder()
+                .timezone(timezone).employee(employee).build());
 
         assertDoesNotThrow(() -> timezoneEmpService.addTimezoneForEmployee(1L, 1L, true));
 
@@ -78,7 +79,8 @@ class TimezoneEmpServiceTest {
         when(employeeRepository.findById(anyLong())).thenReturn(Optional.of(employee));
         when(timezoneRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.addTimezoneForEmployee(1L, 1L, true));
+        assertThrows(IllegalArgumentException.class, ()
+                -> timezoneEmpService.addTimezoneForEmployee(1L, 1L, true));
 
         verify(employeeRepository, times(1)).findById(anyLong());
         verify(timezoneRepository, times(1)).findById(anyLong());
@@ -125,7 +127,8 @@ class TimezoneEmpServiceTest {
         when(timezoneEmpRepository.findByEmployeeIdAndDefaultTimezone(anyLong(), anyBoolean()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> timezoneEmpService.updateDefaultTimezoneForEmployee(1L, 1L));
+        assertThrows(IllegalArgumentException.class, ()
+                -> timezoneEmpService.updateDefaultTimezoneForEmployee(1L, 1L));
 
         verify(timezoneEmpRepository, times(1))
                 .findByEmployeeIdAndDefaultTimezone(anyLong(), anyBoolean());

@@ -1,34 +1,37 @@
 <template>
   <div class="container">
-    <Navigation class="navigation" />
     <div class="content">
       <div class="controls d-flex align-items-center mb-3 flex-wrap">
         <div class="timezone-container d-flex align-items-center me-auto mb-2 mb-md-0">
           <i class="bi bi-globe me-2"></i>
           <span>{{ timezoneName }}</span>
         </div>
-        <button @click="toggleStatusSort" class="btn btn-outline-primary me-3 mb-2 mb-md-0">status</button>
+        <div class="d-flex align-items-center me-3 mb-2 mb-md-0 nowrap">
+          <span class="me-2"><strong>상태</strong></span>
+          <select v-model="selectedStatus" class="form-select">
+            <option value="all">전체</option>
+            <option value="0">예정됨</option>
+            <option value="1">진행중</option>
+            <option value="2">완료됨</option>
+          </select>
+        </div>
         <SearchNavigator :currentPeriod="currentPeriod" :viewMode="viewMode" @change-period="changePeriod"
           @change-view-mode="changeViewMode" />
       </div>
-      <div v-if="sortedByStatus">
-        <div v-for="status in sortedStatuses" :key="status">
-          <h2 class="status-title">{{ statusLabels[status] }}</h2>
-          <SearchList :searches="sortedSearchesByStatus(status)" />
-        </div>
+      <div>
+        <SearchList :searches="filteredSearchesByStatus" @edit-schedule="showEditScheduleModal" />
       </div>
-      <div v-else>
-        <SearchList :searches="filteredSearches" />
-      </div>
+      <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedScheduleId" @close="showModal = false"
+        @update-schedule="handleScheduleUpdate" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import Navigation from '@/components/LeftSidebar.vue';
 import SearchNavigator from '../components/SearchNavigator.vue';
 import SearchList from '../components/SearchList.vue';
+import EditScheduleModal from '@/components/EditScheduleModal.vue';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
 import { useRoute } from 'vue-router';
 import axiosInstance from '@/services/axios';
@@ -36,20 +39,13 @@ import { useAuthStore } from '@/stores/auth';
 
 const searches = ref([]);
 const currentPeriod = ref(new Date());
-const sortedByStatus = ref(false);
 const viewMode = ref('week');
+const selectedStatus = ref('all'); // 선택된 상태
 const route = useRoute();
 const authStore = useAuthStore();
-const sortStatus = ref(0); // 정렬 상태 변수: 0 = 원래 상태, 1 = 오름차순, 2 = 내림차순
 const timezoneName = ref('');
-
-const statusLabels = {
-  '0': '예정됨',
-  '1': '진행중',
-  '2': '완료됨'
-};
-
-const allStatuses = ['0', '1', '2'];
+const showModal = ref(false);
+const selectedScheduleId = ref(null);
 
 const filteredSearches = computed(() => {
   let start, end;
@@ -62,20 +58,21 @@ const filteredSearches = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
+  } else if (viewMode.value === 'all') {
+    return [...searches.value].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
-  return searches.value.filter(schedule => {
+
+  return [...searches.value].filter(schedule => {
     const startTime = new Date(schedule.startTime);
     return startTime >= start && startTime <= end;
-  });
+  }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 });
 
-const sortedStatuses = computed(() => {
-  if (sortStatus.value === 1) {
-    return ['0', '1', '2']; // 예정됨, 진행중, 완료됨
-  } else if (sortStatus.value === 2) {
-    return ['2', '1', '0']; // 완료됨, 진행중, 예정됨
+const filteredSearchesByStatus = computed(() => {
+  if (selectedStatus.value === 'all') {
+    return filteredSearches.value;
   }
-  return allStatuses;
+  return filteredSearches.value.filter(schedule => schedule.status == selectedStatus.value);
 });
 
 const updateSearches = (newSearches) => {
@@ -98,6 +95,16 @@ const fetchTimezone = async () => {
   } catch (error) {
     console.error('Error fetching timezone:', error.response ? error.response.data : error.message);
   }
+};
+
+const showEditScheduleModal = (scheduleId) => {
+  selectedScheduleId.value = scheduleId;
+  showModal.value = true;
+};
+
+const handleScheduleUpdate = () => {
+  search(route.query.criterion, route.query.query); // 기존의 검색 조건으로 다시 검색하여 업데이트
+  showModal.value = false;
 };
 
 onMounted(() => {
@@ -138,10 +145,6 @@ watch(viewMode, (newVal) => {
   viewMode.value = newVal;
 });
 
-const sortedSearchesByStatus = (status) => {
-  return filteredSearches.value.filter(schedule => schedule.status == status);
-};
-
 const changePeriod = (newPeriod) => {
   currentPeriod.value = newPeriod;
 };
@@ -150,16 +153,13 @@ const changeViewMode = (mode) => {
   viewMode.value = mode;
 };
 
-const toggleStatusSort = () => {
-  sortStatus.value = (sortStatus.value + 1) % 3;
-  sortedByStatus.value = sortStatus.value !== 0;
-};
 </script>
 
 <style scoped>
 .container {
   display: flex;
   margin-top: 60px;
+  margin-left: 80px;
   height: calc(100vh - 60px);
   width: 100%;
 }
@@ -190,27 +190,8 @@ const toggleStatusSort = () => {
   /* 컨트롤을 줄바꿈할 수 있도록 수정 */
 }
 
-.status-sort {
-  padding: 5px 15px;
-  border: 1px solid #333;
-  border-radius: 5px;
-  background-color: #f4f4f4;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s, border-color 0.3s;
-  margin-right: 10px;
-}
-
-.status-sort:hover {
-  background-color: #e0e0e0;
-  border-color: #000;
-}
-
-.status-title {
-  text-align: center;
-  font-size: 1.2rem;
-  margin: 20px 0;
-  font-weight: bold;
+.nowrap {
+  white-space: nowrap;
 }
 
 .timezone-container {
