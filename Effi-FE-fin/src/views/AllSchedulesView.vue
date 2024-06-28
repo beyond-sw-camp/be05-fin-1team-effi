@@ -21,7 +21,6 @@
       <div>
         <AllSchedulesList :schedules="filteredSchedulesByStatus" @edit-schedule="showEditScheduleModal" />
       </div>
-      <!-- EditScheduleModal에 update-schedule 이벤트 핸들러 추가 -->
       <EditScheduleModal v-if="showModal" :show="showModal" :schedule-id="selectedScheduleId" @close="showModal = false"
         @update-schedule="handleScheduleUpdate" />
     </div>
@@ -97,13 +96,13 @@ const filteredSchedules = computed(() => {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
   } else if (viewMode.value === 'all') {
-    return allSchedules.value;
+    return [...allSchedules.value].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
 
-  return allSchedules.value.filter(schedule => {
+  return [...allSchedules.value].filter(schedule => {
     const startTime = new Date(schedule.startTime);
     return startTime >= start && startTime <= end;
-  });
+  }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 });
 
 const filteredSchedulesByStatus = computed(() => {
@@ -118,7 +117,6 @@ const showEditScheduleModal = (scheduleId) => {
   showModal.value = true;
 };
 
-// 일정 업데이트 핸들러 추가
 const handleScheduleUpdate = () => {
   fetchAllSchedules();
   showModal.value = false;

@@ -98,14 +98,14 @@ const filteredSchedules = computed(() => {
   } else if (viewMode.value === 'month') {
     start = startOfMonth(currentPeriod.value);
     end = endOfMonth(currentPeriod.value);
-  } else if(viewMode.value === 'all'){
-    return allSchedules.value;
+  } else if (viewMode.value === 'all') {
+    return [...allSchedules.value].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
 
-  return allSchedules.value.filter(schedule => {
+  return [...allSchedules.value].filter(schedule => {
     const startTime = new Date(schedule.startTime);
     return startTime >= start && startTime <= end;
-  });
+  }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 });
 
 const filteredSchedulesByStatus = computed(() => {
@@ -150,7 +150,7 @@ watch(allSchedules, (newVal) => {
 .container {
   display: flex;
   margin-top: 60px;
-  margin-left:80px;
+  margin-left: 80px;
   height: calc(100vh - 60px);
   width: 100%;
 }
