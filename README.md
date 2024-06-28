@@ -61,6 +61,9 @@
 <details>
     <summary>UI/UX 테스트</summary>
 
+[UI/UX 테스트.pdf](https://github.com/user-attachments/files/16029381/1team-fin.-.UX_UI.pdf)
+
+
 [Google 스프레드시트 링크](https://docs.google.com/spreadsheets/d/1gQcBxcgSCFihlm_j6VvEk0mBGkj9L0Vv-eDxfbsBDaU/edit?gid=1939439079#gid=1939439079)
 </details>
 
