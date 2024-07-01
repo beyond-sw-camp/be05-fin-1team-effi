@@ -3,7 +3,8 @@
     <table class="table table-bordered">
       <thead class="table-header">
         <tr>
-          <th class="date">날짜</th>
+          <th class="date">시작 날짜</th>
+          <th class="date">종료 날짜</th>
           <th class="category">카테고리</th>
           <th class="status">상태</th>
           <th class="title">일정</th>
@@ -14,6 +15,7 @@
         <tr v-for="schedule in paginatedSchedules" :key="schedule.scheduleId"
           @click="editSchedule(schedule.scheduleId)">
           <td>{{ formatDate(schedule.startTime) }}</td>
+          <td>{{ formatDate(schedule.endTime) }}</td>
           <td>
             <span :style="{ backgroundColor: getCategoryColor(schedule.categoryName) }" class="category-dot"></span>
             {{ schedule.categoryName }}
@@ -21,8 +23,8 @@
           <td><span :class="getStatusClass(schedule.status)">{{ getStatus(schedule.status) }}</span></td>
           <td>{{ schedule.title }}</td>
           <td>
-            <span v-for="tag in parseTags(schedule.tagNames)" :key="tag" :style="{ backgroundColor: randomColor() }"
-              class="badge me-1">#{{ tag }}</span>
+            <span v-for="(tag, index) in parseTags(schedule.tagNames)" :key="tag"
+              :style="{ backgroundColor: getTagColor(index) }" class="badge me-1">#{{ tag }}</span>
           </td>
         </tr>
       </tbody>
@@ -49,7 +51,8 @@ export default {
   data() {
     return {
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      tagColors: ['#ff9999', '#99ccff', '#99ff99', '#ffcc99', '#ff99ff']
     };
   },
   computed: {
@@ -90,10 +93,6 @@ export default {
           return 'badge bg-secondary';
       }
     },
-    randomColor() {
-      const colors = ['#ff9999', '#99ccff', '#99ff99', '#ffcc99', '#ff99ff'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    },
     getCategoryColor(categoryName) {
       switch (categoryName) {
         case '회사':
@@ -105,12 +104,15 @@ export default {
         case '개인':
           return '#FFB5C9';
         default:
-          return '#000000'; // 기본 색상 
+          return '#000000'; // 기본 색상
       }
     },
     parseTags(tagNames) {
       if (!tagNames) return [];
       return tagNames.map(tag => tag.replace(/.*:"(.*)".*/, '$1'));
+    },
+    getTagColor(index) {
+      return this.tagColors[index % this.tagColors.length];
     },
     editSchedule(scheduleId) {
       this.$emit('edit-schedule', scheduleId);

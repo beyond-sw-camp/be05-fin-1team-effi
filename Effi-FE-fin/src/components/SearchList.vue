@@ -3,7 +3,8 @@
     <table class="table table-bordered">
       <thead class="table-header">
         <tr>
-          <th class="date">날짜</th>
+          <th class="date">시작 날짜</th>
+          <th class="date">종료 날짜</th>
           <th class="category">카테고리</th>
           <th class="status">상태</th>
           <th class="title">일정</th>
@@ -13,6 +14,7 @@
       <tbody>
         <tr v-for="search in paginatedSearches" :key="search.scheduleId" @click="editSchedule(search.scheduleId)">
           <td>{{ formatDate(search.startTime) }}</td>
+          <td>{{ formatDate(search.endTime) }}</td>
           <td>
             <span :style="{ backgroundColor: getCategoryColor(search.categoryName) }" class="category-dot"></span>
             {{ search.categoryName }}
