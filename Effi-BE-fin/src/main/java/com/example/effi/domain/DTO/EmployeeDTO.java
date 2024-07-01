@@ -21,10 +21,11 @@ public class EmployeeDTO {
     private String password;
 
     private Long deptId;
+    private String deptName;
 
     @Builder(toBuilder = true)
     public EmployeeDTO(Long id, Long empNo, String company, String name, String email, String phoneNum,
-                    String extensionNum, String rank, String password, Long deptId) {
+                    String extensionNum, String rank, String password, Long deptId, String deptName) {
         this.id = id;
         this.empNo = empNo;
         this.company = company;
@@ -35,6 +36,7 @@ public class EmployeeDTO {
         this.rank = rank;
         this.password = password;
         this.deptId = deptId;
+        this.deptName = deptName;
     }
 
     public EmployeeDTO(Employee employee) {
@@ -48,6 +50,7 @@ public class EmployeeDTO {
         this.rank = employee.getRank();
         this.password = employee.getPassword();
         this.deptId = employee.getDept().getDeptId();
+        this.deptName = employee.getDept().getDeptName();
     }
 
     public Employee toEntity(Dept dept){

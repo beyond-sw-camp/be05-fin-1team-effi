@@ -222,6 +222,7 @@ public class GroupService {
                         .rank(employee.getRank())
                         .password(employee.getPassword())
                         .deptId(employee.getDept().getDeptId())
+                        .deptName(employee.getDept().getDeptName())
                         .build())
                 .collect(Collectors.toList());
     }
