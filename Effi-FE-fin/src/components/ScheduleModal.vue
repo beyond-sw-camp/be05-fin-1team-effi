@@ -295,10 +295,10 @@ export default {
       try {
         const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
         const employees = response.data;
-        for (let employee of employees) {
-          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
-          employee.deptName = deptResponse.data;
-        }
+        // for (let employee of employees) {
+        //    const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
+        //    employee.deptName = deptResponse.data;
+        //}
         searchResults.value = employees;
       } catch (error) {
         console.error('Error searching employees:', error.response ? error.response.data : error.message);
