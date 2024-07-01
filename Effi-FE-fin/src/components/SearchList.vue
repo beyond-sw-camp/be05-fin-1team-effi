@@ -22,7 +22,7 @@
           <td><span :class="getStatusClass(search.status)">{{ getStatus(search.status) }}</span></td>
           <td>{{ search.title }}</td>
           <td>
-            <span v-for="tag in search.tagNames" :key="tag" :style="{ backgroundColor: randomColor() }"
+            <span v-for="(tag, index) in search.tagNames" :key="tag" :style="{ backgroundColor: getTagColor(index) }"
               class="badge me-1">#{{ tag }}</span>
           </td>
         </tr>
@@ -30,7 +30,6 @@
     </table>
     <nav aria-label="Page navigation">
       <ul class="pagination justify-content-center">
-
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
           <button class="page-link" @click="changePage(currentPage - 1)"> &lt; </button>
         </li>
@@ -51,7 +50,8 @@ export default {
   data() {
     return {
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      tagColors: ['#ff9999', '#99ccff', '#99ff99', '#ffcc99', '#ff99ff']
     };
   },
   computed: {
@@ -92,10 +92,6 @@ export default {
           return 'badge bg-secondary';
       }
     },
-    randomColor() {
-      const colors = ['#ff9999', '#99ccff', '#99ff99', '#ffcc99', '#ff99ff'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    },
     getCategoryColor(categoryName) {
       switch (categoryName) {
         case '회사':
@@ -107,8 +103,11 @@ export default {
         case '개인':
           return '#FFB5C9';
         default:
-          return '#000000'; // 기본 색상 
+          return '#000000'; // 기본 색상
       }
+    },
+    getTagColor(index) {
+      return this.tagColors[index % this.tagColors.length];
     },
     editSchedule(scheduleId) {
       this.$emit('edit-schedule', scheduleId);
