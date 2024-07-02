@@ -32,12 +32,8 @@
   <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">
   <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
-  <img src="https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white">
-  <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white"> 
   <img src="https://img.shields.io/badge/slack-%4A154B.svg?style=for-the-badge&logo=slack&logoColor=white"> 
-  <img src="https://img.shields.io/badge/jenkins-D24939.svg?style=for-the-badge&logo=jenkins&logoColor=white"> 
   <img src="https://img.shields.io/badge/mariaDB-003545.svg?style=for-the-badge&logo=mariaDB&logoColor=white"> 
-  <img src="https://img.shields.io/badge/ngrok-1F1E37.svg?style=for-the-badge&logo=ngrok&logoColor=white"> 
   <img src="https://img.shields.io/badge/intellijidea-000000.svg?style=for-the-badge&logo=intellijidea&logoColor=white"> 
   <img src="https://img.shields.io/badge/visualstudiocode-007ACC.svg?style=for-the-badge&logo=visualstudiocode&logoColor=white"> 
   <img src="https://img.shields.io/badge/figma-F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white">
@@ -80,7 +76,8 @@
 <details>
     <summary>시스템 아키텍처</summary>
 
-![최종 시스템 아키텍처-최종 시트 drawio](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/121791324/6be8cd25-9ab5-41da-9934-57ae5d8214c6)
+![effi시스템아키텍쳐drawio](https://github.com/beyond-sw-camp/be05-fin-1team-effi/assets/74529390/626184f3-92f1-41c0-b85c-4a79f937af2b)
+
 </details>
 
 <details>
