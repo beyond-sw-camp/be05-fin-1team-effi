@@ -37,15 +37,12 @@
             </div>
           </div>
           <div class="form-group checkbox-group">
-            <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat"
-                @change="toggleRoutineModal"></label>
+            <label for="repeat">반복<input type="checkbox" id="repeat" v-model="internalEvent.repeat" @change="toggleRoutineModal"></label>
           </div>
           <div class="form-group">
             <label for="category">카테고리</label>
-            <button @click="showCategoryModal = true" type="button" class="category-btn" id="category">카테고리
-              추가하기</button>
-            <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false"
-              @select="handleCategorySelect" />
+            <button @click="openCategoryModal" type="button" class="category-btn" id="category">카테고리 추가하기</button>
+            <CategoryModal :show="showCategoryModal" :schedule-id="scheduleId" @close="showCategoryModal = false" @select="handleCategorySelect" />
             <div v-if="internalEvent.categoryName" class="selected-category">
               선택된 카테고리: {{ internalEvent.categoryName }}
             </div>
@@ -53,13 +50,11 @@
           <div class="form-group">
             <label for="participants">참여자</label>
             <div class="input-group">
-              <input type="text" id="participants" placeholder="추가할 사원을 검색하세요" v-model="searchQuery"
-                class="group-input" />
+              <input type="text" id="participants" placeholder="추가할 사원을 검색하세요" v-model="searchQuery" class="group-input" />
               <button type="button" class="search-button" @click="searchEmployees">🔍</button>
             </div>
             <ul v-if="searchResults.length" class="search-results">
-              <li v-for="employee in searchResults" :key="employee.id" class="search-result-item"
-                @click="selectEmployee(employee)">
+              <li v-for="employee in searchResults" :key="employee.id" class="search-result-item" @click="selectEmployee(employee)">
                 {{ employee.name }}/{{ employee.deptName }}/{{ employee.rank }}
               </li>
             </ul>
@@ -68,8 +63,7 @@
               <ul>
                 <li v-for="emp in selectedEmployees" :key="emp.empNo">
                   {{ emp.name }}
-                  <button v-if="emp.empNo !== loggedInEmpNo" @click.stop.prevent="removeEmployee(emp)"
-                    class="remove-button">×</button>
+                  <button v-if="emp.empNo !== loggedInEmpNo" @click.stop.prevent="removeEmployee(emp)" class="remove-button">×</button>
                 </li>
               </ul>
             </div>
@@ -79,8 +73,7 @@
             <div>
               <TagAdd :schedule="internalEvent" @update-schedule="updateSchedule" @remove-tag="removeTag" />
               <div class="tag-list">
-                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }"
-                  class="tag-item">{{ tag }}</span>
+                <span v-for="tag in internalEvent.tags" :key="tag" :style="{ backgroundColor: tagColors[tag] }" class="tag-item">{{ tag }}</span>
               </div>
             </div>
           </div>
@@ -93,8 +86,7 @@
             </select>
           </div>
           <div class="form-group checkbox-group">
-            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn"
-                v-model="internalEvent.notificationYn"></label>
+            <label for="notificationYn">1시간 전 메일 알림<input type="checkbox" id="notificationYn" v-model="internalEvent.notificationYn"></label>
           </div>
           <div class="modal-footer">
             <button type="submit" @click="updateSchedule" class="update-button">수정</button>
@@ -102,8 +94,7 @@
           </div>
         </form>
       </div>
-      <RoutineModal v-if="showRoutineModal" :show="showRoutineModal" @close-routine="handleRoutineClose"
-        @confirm-routine="handleRoutineConfirm"  />
+      <RoutineModal v-if="showRoutineModal" :show="showRoutineModal" @close-routine="handleRoutineClose" @confirm-routine="handleRoutineConfirm"  />
     </div>
   </div>
 </template>
@@ -182,6 +173,8 @@ export default {
         const startDateTime = new Date(schedule.startTime);
         const endDateTime = new Date(schedule.endTime);
 
+        const categoryResponse = await axiosInstance.get(`/api/category/find/${schedule.categoryNo}`);
+
         internalEvent.value = {
           ...internalEvent.value,
           ...schedule,
@@ -189,7 +182,8 @@ export default {
           startTime: startDateTime.toTimeString().split(' ')[0].slice(0, 5),
           endDate: new Date(endDateTime.getTime() - (endDateTime.getTimezoneOffset() * 60000)).toISOString().split('T')[0],
           endTime: endDateTime.toTimeString().split(' ')[0].slice(0, 5),
-          categoryNo: schedule.categoryNo ? schedule.categoryNo.toString() : '',
+          categoryNo: categoryResponse.data.categoryId,
+          categoryName: categoryResponse.data.categoryName,
           tags: schedule.tags ? schedule.tags.map(tag => tag.tagName) : [],
           routineId: schedule.routineId,
           routineCycle: schedule.routineCycle,
@@ -303,15 +297,15 @@ export default {
         }
 
         let apiUrl;
-        switch (parseInt(internalEvent.value.categoryNo)) {
+        switch (parseInt(categoryResponse.data.categoryNo)) {
           case 1:
             apiUrl = `/api/schedule/update/company/${props.scheduleId}`;
             break;
           case 2:
-            apiUrl = `/api/schedule/update/dept/${internalEvent.value.deptId}/${props.scheduleId}`;
+            apiUrl = `/api/schedule/update/dept/${formattedEvent.deptId}/${props.scheduleId}`;
             break;
           case 3:
-            apiUrl = `/api/schedule/update/group/${internalEvent.value.groupId}/${props.scheduleId}`;
+            apiUrl = `/api/schedule/update/group/${formattedEvent.groupId}/${props.scheduleId}`;
             break;
           case 4:
             apiUrl = `/api/schedule/update/${props.scheduleId}`;
@@ -395,10 +389,10 @@ export default {
       try {
         const response = await axiosInstance.get(`/api/groups/search?name=${searchQuery.value}`, config);
         const employees = response.data;
-        // for (let employee of employees) {
-        //   const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
-        //   employee.deptName = deptResponse.data;
-        // }
+        for (let employee of employees) {
+          const deptResponse = await axiosInstance.get(`/api/search/dept/${employee.deptId}`, config);
+          employee.deptName = deptResponse.data;
+        }
         searchResults.value = employees;
       } catch (error) {
         console.error('Error searching employees:', error.response ? error.response.data : error.message);
@@ -523,6 +517,11 @@ export default {
       }
     };
 
+    const openCategoryModal = async () => {
+      showCategoryModal.value = true;
+      await fetchScheduleDetails(props.scheduleId);
+    };
+
     return {
       internalEvent,
       showRoutineModal,
@@ -548,7 +547,8 @@ export default {
       deleteAllParticipants,
       deleteSchedule,
       getRandomColor,
-      removeTag
+      removeTag,
+      openCategoryModal
     };
   }
 };
