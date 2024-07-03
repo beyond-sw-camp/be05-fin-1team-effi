@@ -17,24 +17,14 @@
       </div>
     </div>
     <!-- DepartmentModal component for selecting departments -->
-    <DepartmentModal
-      v-if="showDepartmentModal"
-      :show="showDepartmentModal"
-      @close="closeModal('department')"
-      @select-dept="handleSelectDept"
-    />
+    <DepartmentModal v-if="showDepartmentModal" :show="showDepartmentModal" @close="closeModal('department')" @select-dept="handleSelectDept" />
     <!-- GroupModal component for selecting groups -->
-    <GroupModal
-      v-if="showGroupModal"
-      :show="showGroupModal"
-      @close="closeModal('group')"
-      @select-group="handleSelectGroup"
-    />
+    <GroupModal v-if="showGroupModal" :show="showGroupModal" @close="closeModal('group')" @select-group="handleSelectGroup" />
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import axiosInstance from 'axios';
 import DepartmentModal from './DeptModal.vue';
 import GroupModal from './GroupModal.vue';
 
@@ -77,10 +67,11 @@ export default {
       if (!this.scheduleId) return;
       
       try {
-        const response = await axios.get(`/api/schedule/find/${this.scheduleId}`);
+        const response = await axiosInstance.get(`/api/schedule/find/${this.scheduleId}`);
         const categoryNo = response.data.categoryNo;
-        this.selectedOption = categoryNo;
-        this.categoryName = this.getCategoryName(categoryNo);
+        const responseCategory = await axiosInstance.get(`/api/category/find/${categoryNo}`);
+        this.selectedOption = responseCategory.data.categoryId;
+        this.categoryName = responseCategory.data.categoryName;
       } catch (error) {
         console.error('Error fetching category:', error);
       }
@@ -188,4 +179,3 @@ li {
   cursor: pointer;
 }
 </style>
-
